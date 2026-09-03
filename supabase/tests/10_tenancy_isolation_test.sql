@@ -51,6 +51,12 @@ select public.invite_member((select v from w where k='a'), 'mum@example.com',   
 select public.invite_member((select v from w where k='a'), 'dad@example.com',   'family',      'groom');
 select public.invite_member((select v from w where k='a'), 'coord@example.com', 'coordinator', null);
 
+-- auth.users is not readable by `authenticated`, and an invitee cannot see
+-- their own invitation row until they are a member — which is precisely what
+-- accepting does. Both reads therefore happen as the service role, and only
+-- the accept itself is impersonated.
+select tests.become_service_role();
+
 do $$
 declare r record; t uuid;
 begin
@@ -58,8 +64,15 @@ begin
            from ids i join auth.users u on u.id = i.v
            where i.k in ('anil','brides_mum','grooms_dad','coordinator')
   loop
+    perform set_config('role', 'postgres', true);
+    perform set_config('request.jwt.claims', null, true);
+
     select token into t from wedding_invitations
       where wedding_id = (select v from w where k = 'a') and email = r.email;
+    if t is null then
+      raise exception 'fixture: no invitation token for %', r.email;
+    end if;
+
     perform set_config('role', 'authenticated', true);
     perform set_config('request.jwt.claims',
       json_build_object('sub', r.uid::text, 'role', 'authenticated')::text, true);

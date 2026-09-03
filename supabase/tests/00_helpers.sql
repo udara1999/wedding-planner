@@ -66,6 +66,18 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- The suite calls these helpers *while impersonating* — tests.login() switches
+-- the role, so every later tests.* call is made as `authenticated`, which has
+-- no usage on a schema created by postgres. Without this, the second login
+-- fails with `permission denied for schema tests`.
+--
+-- Safe to grant broadly: this schema exists only in the local and CI database.
+-- supabase/tests/ is never applied by `db push`, so it cannot reach production.
+-- ---------------------------------------------------------------------------
+grant usage on schema tests to public;
+grant execute on all functions in schema tests to public;
+
+-- ---------------------------------------------------------------------------
 -- pg_prove treats every .sql file in this directory as a test file and fails
 -- the entire run on any file without a TAP plan ("No plan found in TAP
 -- output"), so this one asserts its own installation.

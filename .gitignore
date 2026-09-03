@@ -34,3 +34,6 @@ supabase/.temp
 # generated
 # src/types/database.types.ts is committed; CI checks it matches the schema
 coverage
+
+# claude code — personal, machine-local overrides
+.claude/settings.local.json

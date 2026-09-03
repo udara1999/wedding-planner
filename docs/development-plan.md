@@ -260,6 +260,21 @@ Three options, in order of preference:
 
 Consequence for the UI: `vendors` contains `quoted_minor` / `negotiated_minor`. Coordinators need vendor **names, phones and arrival times** but not prices. So `vendors` gets an ops-facing companion view and the coordinator's vendor screen reads that, not the base table.
 
+> **Gap found while building 2.8 (2026-09-03).** Row denial does not cover money
+> columns that sit on a row a coordinator legitimately needs. `weddings` holds
+> `total_budget_minor`, `contingency_pct` and `guest_buffer_pct`, and its SELECT
+> policy is `app.is_member` — because the same row carries the couple's names,
+> the date and the venue, which the day-of pack needs. **A coordinator can
+> therefore read the total budget today.** `v_wedding_financials` guards itself
+> with `app.can_see_money`, so the view is not a second door, but the base
+> table is still open.
+>
+> The fix is option 3 applied narrowly: move those three columns to a
+> `wedding_budget_settings` table (one row per wedding) with a
+> `can_see_money` policy, and have the Setup screen (1.5) edit them there.
+> Not yet done — it touches 1.5 and `v_wedding_financials`, so it wants its
+> own ticket rather than being folded into 2.8.
+
 ### 4.7 RLS helpers
 
 ```sql

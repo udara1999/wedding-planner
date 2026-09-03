@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(86);
+select plan(94);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -593,6 +593,65 @@ select lives_ok(
       values ('receipts',
               (select v from w where k='a')::text || '/pay/receipt.pdf') $q$,
   'An owner can store a receipt under their own wedding folder');
+
+-- =============================================================================
+-- 16. v_wedding_financials (2.8) — 8 assertions
+-- =============================================================================
+-- Compared against the underlying sums rather than hardcoded totals: the point
+-- is that the view composes correctly, and earlier sections have already moved
+-- these numbers about.
+select tests.login((select v from ids where k = 'alice'));
+
+select is((select forecast_minor::bigint from v_wedding_financials
+             where wedding_id = (select v from w where k='a')),
+          (select sum(forecast_minor)::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a')),
+          'FORECAST FINAL COST is the sum of every line forecast');
+
+select is((select budgeted_minor::bigint from v_wedding_financials
+             where wedding_id = (select v from w where k='a')),
+          (select sum(budgeted_minor)::bigint from budget_lines
+             where wedding_id = (select v from w where k='a')),
+          'Budgeted is the sum of every line budget, applicable or not');
+
+select is((select paid_minor::bigint from v_wedding_financials
+             where wedding_id = (select v from w where k='a')),
+          (select sum(paid_minor)::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a')),
+          'Paid to date rolls up the payments');
+
+-- D34: over budget must read as a negative, not be clamped away.
+select is((select remaining_against_budget_minor::bigint from v_wedding_financials
+             where wedding_id = (select v from w where k='a')),
+          (select (w2.total_budget_minor - coalesce(sum(bl.forecast_minor), 0))::bigint
+             from weddings w2
+             left join v_budget_lines bl on bl.wedding_id = w2.id
+            where w2.id = (select v from w where k='a')
+            group by w2.total_budget_minor),
+          'Remaining against budget is total budget minus forecast, unclamped');
+
+-- H34's IFERROR: wedding C has no budget set and no lines seeded.
+select is((select budget_utilisation from v_wedding_financials
+             where wedding_id = (select v from w where k='c')),
+          0::numeric,
+          'A wedding with no budget set is nought per cent used, not an error');
+
+select is((select contributions_agreed_minor::bigint from v_wedding_financials
+             where wedding_id = (select v from w where k='a')),
+          (select sum(agreed_minor)::bigint from contributions
+             where wedding_id = (select v from w where k='a')),
+          'Contributions agreed matches the contribution rows');
+
+-- H39 is floored at zero: being fully funded is not a negative shortfall.
+select ok((select shortfall_minor from v_wedding_financials
+             where wedding_id = (select v from w where k='a')) >= 0,
+          'Shortfall never goes below zero');
+
+-- The view must not become the door §4.6 closes elsewhere.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from v_wedding_financials
+             where wedding_id = (select v from w where k='a')), 0,
+          'A coordinator gets no financial summary at all');
 
 select * from finish();
 rollback;

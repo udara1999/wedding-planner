@@ -66,6 +66,13 @@ export type Database = {
             foreignKeyName: "budget_categories_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -157,6 +164,13 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -215,6 +229,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "contributions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "contributions_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -310,6 +331,13 @@ export type Database = {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -399,6 +427,13 @@ export type Database = {
             foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -446,6 +481,13 @@ export type Database = {
             foreignKeyName: "wedding_invitations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_invitations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -474,6 +516,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wedding_lookups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "wedding_lookups_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -515,6 +564,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "wedding_members_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -580,6 +636,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "wedding_tasks_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -719,6 +782,13 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -764,6 +834,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_budget_by_category"
             referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
           },
           {
             foreignKeyName: "budget_lines_wedding_id_fkey"
@@ -866,10 +943,43 @@ export type Database = {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_wedding_financials: {
+        Row: {
+          actual_minor: number | null
+          budget_utilisation: number | null
+          budgeted_minor: number | null
+          contingency_pct: number | null
+          contributions_agreed_minor: number | null
+          contributions_received_minor: number | null
+          currency: string | null
+          expected_gifts_minor: number | null
+          forecast_minor: number | null
+          gifts_received_minor: number | null
+          guest_buffer_pct: number | null
+          negotiated_minor: number | null
+          net_cost_after_gifts_minor: number | null
+          outstanding_minor: number | null
+          paid_minor: number | null
+          quoted_minor: number | null
+          refundable_deposits_minor: number | null
+          remaining_against_budget_minor: number | null
+          shortfall_minor: number | null
+          total_budget_minor: number | null
+          wedding_id: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {

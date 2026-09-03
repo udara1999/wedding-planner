@@ -19,6 +19,7 @@ against an unchanged workbook produces a byte-identical file.
 Phase 1 extracts three sheets. Later phases add their own as the tables they
 write to are created:
     00 Lists      -> template.lookups   (the user-extensible lists only)
+    03 Budget     -> template.budget_categories + template.budget_lines
     07 Tasks      -> template.tasks
     08 Countdown  -> template.countdown_checks
 """
@@ -28,6 +29,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from decimal import Decimal
 import xml.etree.ElementTree as ET
 import zipfile
 from dataclasses import dataclass
@@ -41,6 +43,15 @@ WORKBOOK = "docs/Wedding PLanner.xlsx"
 # Postgres enums, not in a lookup table (plan §4.3). Only these are seeded as
 # user-extensible lookups.
 EXTENSIBLE_LISTS = {"Owner", "PayMethod", "Ownership"}
+
+# 03 Budget's "Applies?" column. The workbook's Applicability list also carries
+# "Completed", which conflates applicability with status — plan §4.3 warns about
+# exactly that — so it is not part of the enum and never appears in this sheet.
+APPLICABILITY = {
+    "required": "required",
+    "optional": "optional",
+    "not applicable": "not_applicable",
+}
 
 # Priorities the workbook uses, mapped to the task_priority enum.
 PRIORITY = {
@@ -132,6 +143,17 @@ def offset_from_formula(formula: str, date_name: str = "WeddingDate") -> int | N
     if re.fullmatch(rf"\s*{date_name}\s*", formula):
         return 0
     return None
+
+
+def to_minor(raw: str, decimals: int = 2) -> int:
+    """'432500.0' -> 43250000 minor units. Decimal, never float (plan R5)."""
+    if raw in ("", None):
+        return 0
+    return int((Decimal(raw) * (10 ** decimals)).to_integral_value())
+
+
+def slug(label: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", label.strip().lower()).strip("_")
 
 
 def q(value: str | None) -> str:
@@ -276,12 +298,85 @@ def extract_lookups(wb: Workbook, locale: str) -> list[str]:
     ]
 
 
+def extract_budget(wb: Workbook, locale: str) -> list[str]:
+    """03 Budget -> template.budget_categories + template.budget_lines."""
+    rows = wb.rows("03 Budget")
+    h = header_index(rows, "Line item")
+    col = columns(rows, h)
+    for n in ("ID", "Category", "Line item", "Budgeted", "Applies?"):
+        if n not in col:
+            raise SystemExit(f"03 Budget is missing column {n!r}")
+
+    categories: dict[str, tuple[str, int]] = {}
+    lines: list[str] = []
+    seen_codes: set[str] = set()
+
+    for r in rows[h + 1 :]:
+        def cell(name: str) -> str:
+            i = col.get(name, -1)
+            return r[i].value if 0 <= i < len(r) else ""
+
+        code, label, name = cell("ID"), cell("Category"), cell("Line item")
+        if not code or not name or not label:
+            continue
+        if code in seen_codes:
+            raise SystemExit(f"03 Budget has a duplicate line code: {code}")
+        seen_codes.add(code)
+
+        key = slug(label)
+        if key not in categories:
+            categories[key] = (label, len(categories) + 1)
+
+        applies = APPLICABILITY.get(cell("Applies?").strip().lower())
+        if applies is None:
+            # Blank means the couple has not decided; 'required' is the workbook's
+            # own default for an un-marked line.
+            applies = "required"
+
+        lines.append(
+            f"  ({q(locale)}, {q(code)}, {q(key)}, {q(name)}, "
+            f"{q(applies)}::applicability, {q(cell('Who pays'))}, "
+            f"{to_minor(cell('Budgeted'))}, {len(lines) + 1})"
+        )
+
+    if not lines:
+        raise SystemExit("03 Budget produced no rows")
+
+    cat_values = ",\n".join(
+        f"  ({q(locale)}, {q(key)}, {q(label)}, {order})"
+        for key, (label, order) in categories.items()
+    )
+    print(
+        f"-- 03 Budget: {len(categories)} categories, {len(lines)} lines",
+        file=sys.stderr,
+    )
+    return [
+        "insert into template.budget_categories (locale, key, label, sort_order)",
+        "values",
+        cat_values + ";",
+        "",
+        "insert into template.budget_lines",
+        "  (locale, code, category_key, name, applicability, payer, budgeted_minor, sort_order)",
+        "values",
+        ",\n".join(lines) + ";",
+        "",
+    ]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--workbook", default=WORKBOOK)
     ap.add_argument("--locale", default="poruwa")
     ap.add_argument("--label", default="Poruwa (Sinhala Buddhist)")
     ap.add_argument("--version", type=int, default=1)
+    ap.add_argument(
+        "--sections",
+        default="all",
+        help="Comma-separated: lookups,tasks,countdown,budget (default all). "
+             "Each phase emits only the sheets whose tables now exist — an "
+             "applied migration cannot be rewritten, so re-emitting content "
+             "already seeded would collide on its unique constraints.",
+    )
     args = ap.parse_args()
 
     wb = Workbook(args.workbook)
@@ -303,9 +398,23 @@ def main() -> int:
         "on conflict (code) do update set label = excluded.label, version = excluded.version;",
         "",
     ]
-    out += extract_lookups(wb, args.locale)
-    out += extract_tasks(wb, args.locale)
-    out += extract_countdown(wb, args.locale)
+    available = {
+        "lookups": extract_lookups,
+        "tasks": extract_tasks,
+        "countdown": extract_countdown,
+        "budget": extract_budget,
+    }
+    wanted = (
+        list(available)
+        if args.sections.strip() == "all"
+        else [s.strip() for s in args.sections.split(",") if s.strip()]
+    )
+    unknown = [s for s in wanted if s not in available]
+    if unknown:
+        raise SystemExit(f"unknown section(s): {unknown}; choose from {list(available)}")
+
+    for name in wanted:
+        out += available[name](wb, args.locale)
 
     sys.stdout.write("\n".join(out))
     return 0

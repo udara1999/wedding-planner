@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(54);
+select plan(62);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -370,6 +370,81 @@ select ok(app.can_see_money((select v from w where k='b')) is false,
           'can_see_money returns false, not null, for a non-member');
 select ok(app.can_write_ops((select v from w where k='b')) is false,
           'can_write_ops returns false, not null, for a non-member');
+
+-- =============================================================================
+-- 12. The money core and the golden fixture (2.1, 2.2, 2.9) — 8 assertions
+-- =============================================================================
+-- template.* is unreadable by `authenticated`, so counts against it are taken
+-- as the service role.
+select tests.become_service_role();
+
+select is((select count(*)::int from budget_lines
+             where wedding_id = (select v from w where k='a')),
+          (select count(*)::int from template.budget_lines where locale = 'poruwa'),
+          'Seeding copies every template budget line');
+
+-- ---------------------------------------------------------------------------
+-- The §4.2 golden fixture. Read as the owner, through the view, so this also
+-- proves the read path a UI would use.
+--
+-- 905,500 is every jewellery line's budget; 735,500 is the three applicable
+-- ones. The difference, 170,000, is the seven not-applicable lines. Both
+-- reconcile against the workbook, and the fixture only holds on a freshly
+-- seeded wedding: the real workbook has quotes and actuals on those three
+-- lines, which would move the forecast to 896,000.
+-- ---------------------------------------------------------------------------
+select tests.login((select v from ids where k = 'alice'));
+
+select is((select budgeted_minor::bigint from v_budget_by_category
+             where wedding_id = (select v from w where k='a')
+               and category_key = 'jewellery'),
+          90550000::bigint,
+          'Golden fixture: jewellery budgeted is 905,500');
+
+select is((select forecast_minor::bigint from v_budget_by_category
+             where wedding_id = (select v from w where k='a')
+               and category_key = 'jewellery'),
+          73550000::bigint,
+          'Golden fixture: jewellery forecast is 735,500');
+
+-- The precedence in the generated column, which is the whole reason it is
+-- generated rather than left to each caller.
+update budget_lines
+   set quoted_minor = 100, negotiated_minor = 200, actual_minor = 300
+ where wedding_id = (select v from w where k='a') and code = 'BG077';
+
+select is((select forecast_minor from budget_lines
+             where wedding_id = (select v from w where k='a') and code = 'BG077'),
+          300::bigint,
+          'forecast_minor prefers actual over negotiated and quoted');
+
+update budget_lines set actual_minor = 99999
+ where wedding_id = (select v from w where k='a') and code = 'BG078';
+
+select is((select forecast_minor from budget_lines
+             where wedding_id = (select v from w where k='a') and code = 'BG078'),
+          0::bigint,
+          'A not-applicable line forecasts zero even with an actual cost');
+
+-- ---------------------------------------------------------------------------
+-- Plan §4.6: a coordinator is a full member with day-of access who must never
+-- see a number. The second assertion is the one that matters — a view runs as
+-- its owner unless it is security_invoker, which would bypass RLS entirely.
+-- ---------------------------------------------------------------------------
+select tests.login((select v from ids where k = 'coordinator'));
+
+select is((select count(*)::int from budget_lines
+             where wedding_id = (select v from w where k='a')), 0,
+          'A coordinator cannot see a single budget line');
+
+select is((select count(*)::int from v_budget_by_category
+             where wedding_id = (select v from w where k='a')), 0,
+          'The category view does not hand a coordinator the budget');
+
+select tests.login((select v from ids where k = 'brides_mum'));
+select ok((select count(*)::int from budget_lines
+             where wedding_id = (select v from w where k='a')) > 0,
+          'Family can see money, unlike a coordinator');
 
 select * from finish();
 rollback;

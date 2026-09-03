@@ -39,6 +39,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_categories: {
+        Row: {
+          id: string
+          key: string
+          label: string
+          sort_order: number
+          wedding_id: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          label: string
+          sort_order?: number
+          wedding_id: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          label?: string
+          sort_order?: number
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_lines: {
+        Row: {
+          actual_minor: number
+          applicability: Database["public"]["Enums"]["applicability"]
+          budgeted_minor: number
+          category_id: string | null
+          code: string | null
+          created_at: string
+          forecast_minor: number | null
+          id: string
+          name: string
+          negotiated_minor: number
+          notes: string | null
+          payer: string | null
+          quoted_minor: number
+          refundable_deposit_minor: number
+          sort_order: number
+          source_template_id: number | null
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          actual_minor?: number
+          applicability?: Database["public"]["Enums"]["applicability"]
+          budgeted_minor?: number
+          category_id?: string | null
+          code?: string | null
+          created_at?: string
+          forecast_minor?: number | null
+          id?: string
+          name: string
+          negotiated_minor?: number
+          notes?: string | null
+          payer?: string | null
+          quoted_minor?: number
+          refundable_deposit_minor?: number
+          sort_order?: number
+          source_template_id?: number | null
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          actual_minor?: number
+          applicability?: Database["public"]["Enums"]["applicability"]
+          budgeted_minor?: number
+          category_id?: string | null
+          code?: string | null
+          created_at?: string
+          forecast_minor?: number | null
+          id?: string
+          name?: string
+          negotiated_minor?: number
+          notes?: string | null
+          payer?: string | null
+          quoted_minor?: number
+          refundable_deposit_minor?: number
+          sort_order?: number
+          source_template_id?: number | null
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_by_category"
+            referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -423,7 +546,29 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_budget_by_category: {
+        Row: {
+          budgeted_minor: number | null
+          category_id: string | null
+          category_key: string | null
+          category_label: string | null
+          forecast_minor: number | null
+          line_count: number | null
+          not_applicable_count: number | null
+          sort_order: number | null
+          variance_minor: number | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string }
@@ -466,6 +611,7 @@ export type Database = {
       }
     }
     Enums: {
+      applicability: "required" | "optional" | "not_applicable"
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
       task_priority: "critical" | "high" | "medium" | "low"
       task_status:
@@ -605,6 +751,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      applicability: ["required", "optional", "not_applicable"],
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
       task_priority: ["critical", "high", "medium", "low"],
       task_status: [

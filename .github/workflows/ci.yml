@@ -34,7 +34,23 @@ jobs:
 
       # Ticket 0.7 — the Phase 0 gate. A tenancy leak fails the build.
       - name: RLS isolation tests (pgTAP)
-        run: supabase test db
+        run: |
+          set -o pipefail
+          supabase test db 2>&1 | tee /tmp/pgtap.log
+
+      # The pgTAP output is the only description of *which* assertion failed,
+      # and reading a run log needs an authenticated token. Copying it into the
+      # job summary publishes it through the check-runs API instead, so a
+      # failure can be diagnosed without downloading anything.
+      - name: Publish pgTAP output to the job summary
+        if: always()
+        run: |
+          {
+            echo '### pgTAP output'
+            echo '```'
+            tail -c 8000 /tmp/pgtap.log 2>/dev/null || echo '(no output captured)'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check committed types match the schema
         run: |

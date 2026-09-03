@@ -11,6 +11,7 @@ import { DashboardPage } from './features/weddings/DashboardPage';
 import { SetupPage } from './features/weddings/SetupPage';
 import { MembersPage } from './features/weddings/MembersPage';
 import { BudgetPage } from './features/budget/BudgetPage';
+import { PaymentsPage } from './features/payments/PaymentsPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
 
@@ -139,6 +140,7 @@ export default function App() {
               <Route path="setup" element={<SetupPage />} />
               <Route path="members" element={<MembersPage />} />
               <Route path="budget" element={<BudgetPage />} />
+              <Route path="payments" element={<PaymentsPage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

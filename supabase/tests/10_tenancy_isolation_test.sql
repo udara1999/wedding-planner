@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(34);
+select plan(45);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -233,6 +233,73 @@ select tests.become_service_role();
 select is((select count(*)::int from wedding_invitations
              where email = 'revokeme@example.com'), 0,
           'The invitation is gone once a partner revokes it');
+
+-- =============================================================================
+-- 9. seed_wedding (ticket 1.4) — 10 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+select lives_ok(
+  $q$ select public.seed_wedding((select v from w where k='a')) $q$,
+  'An owner can seed their own wedding');
+
+select tests.become_service_role();
+
+-- Compared against the template rather than a hardcoded count, so adding
+-- content to the workbook does not break the test.
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='a')),
+          (select count(*)::int from template.tasks where locale = 'poruwa'),
+          'Seeding copies every template task');
+
+select is((select count(*)::int from wedding_countdown_checks
+             where wedding_id = (select v from w where k='a')),
+          (select count(*)::int from template.countdown_checks where locale = 'poruwa'),
+          'Seeding copies every countdown check');
+
+select is((select count(*)::int from wedding_lookups
+             where wedding_id = (select v from w where k='a')),
+          (select count(*)::int from template.lookups where locale = 'poruwa'),
+          'Seeding copies the extensible lookup values');
+
+select is((select template_version from weddings where id = (select v from w where k='a')),
+          (select version from template.locales where code = 'poruwa'),
+          'Seeding snapshots the template version onto the wedding');
+
+-- Wedding A is dated 2027-09-03; the first task sits at WeddingDate-360.
+select is((select due_date from wedding_tasks
+             where wedding_id = (select v from w where k='a') and offset_days = -360
+             order by seq limit 1),
+          '2027-09-03'::date - 360,
+          'A seeded due date is the wedding date plus the template offset');
+
+-- Idempotence: the AC that matters, since a couple may click twice.
+select tests.login((select v from ids where k = 'alice'));
+select lives_ok(
+  $q$ select public.seed_wedding((select v from w where k='a')) $q$,
+  'Seeding a second time is allowed');
+
+select tests.become_service_role();
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='a')),
+          (select count(*)::int from template.tasks where locale = 'poruwa'),
+          'Re-running seed_wedding does not duplicate anything');
+
+-- Seeding writes a whole plan, so it is owner-only, not merely can_write.
+select tests.login((select v from ids where k = 'coordinator'));
+select throws_ok(
+  $q$ select public.seed_wedding((select v from w where k='b')) $q$);
+
+select tests.become_service_role();
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='b')), 0,
+          'A non-owner cannot seed somebody else''s wedding');
+
+-- And the new tables are inside the tenancy boundary like everything else.
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='a')), 0,
+          'A stranger cannot read another wedding''s tasks');
 
 select * from finish();
 rollback;

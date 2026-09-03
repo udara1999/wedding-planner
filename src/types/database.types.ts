@@ -69,6 +69,65 @@ export type Database = {
         }
         Relationships: []
       }
+      wedding_countdown_checks: {
+        Row: {
+          check_text: string
+          created_at: string
+          done: boolean
+          due_date: string | null
+          due_date_overridden: boolean
+          id: number
+          notes: string | null
+          offset_days: number | null
+          owner: string | null
+          seq: number | null
+          source_template_id: number | null
+          updated_at: string
+          wedding_id: string
+          window_label: string | null
+        }
+        Insert: {
+          check_text: string
+          created_at?: string
+          done?: boolean
+          due_date?: string | null
+          due_date_overridden?: boolean
+          id?: never
+          notes?: string | null
+          offset_days?: number | null
+          owner?: string | null
+          seq?: number | null
+          source_template_id?: number | null
+          updated_at?: string
+          wedding_id: string
+          window_label?: string | null
+        }
+        Update: {
+          check_text?: string
+          created_at?: string
+          done?: boolean
+          due_date?: string | null
+          due_date_overridden?: boolean
+          id?: never
+          notes?: string | null
+          offset_days?: number | null
+          owner?: string | null
+          seq?: number | null
+          source_template_id?: number | null
+          updated_at?: string
+          wedding_id?: string
+          window_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wedding_invitations: {
         Row: {
           accepted_at: string | null
@@ -116,6 +175,38 @@ export type Database = {
           },
         ]
       }
+      wedding_lookups: {
+        Row: {
+          id: number
+          kind: string
+          sort_order: number
+          value: string
+          wedding_id: string
+        }
+        Insert: {
+          id?: never
+          kind: string
+          sort_order?: number
+          value: string
+          wedding_id: string
+        }
+        Update: {
+          id?: never
+          kind?: string
+          sort_order?: number
+          value?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_lookups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wedding_members: {
         Row: {
           accepted_at: string | null
@@ -150,6 +241,71 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_tasks: {
+        Row: {
+          category: string | null
+          completed_at: string | null
+          created_at: string
+          due_date: string | null
+          due_date_overridden: boolean
+          id: number
+          notes: string | null
+          offset_days: number | null
+          owner: string | null
+          priority: Database["public"]["Enums"]["task_priority"] | null
+          seq: number | null
+          source_template_id: number | null
+          status: Database["public"]["Enums"]["task_status"]
+          task: string
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          category?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          due_date_overridden?: boolean
+          id?: never
+          notes?: string | null
+          offset_days?: number | null
+          owner?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          seq?: number | null
+          source_template_id?: number | null
+          status?: Database["public"]["Enums"]["task_status"]
+          task: string
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          category?: string | null
+          completed_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          due_date_overridden?: boolean
+          id?: never
+          notes?: string | null
+          offset_days?: number | null
+          owner?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"] | null
+          seq?: number | null
+          source_template_id?: number | null
+          status?: Database["public"]["Enums"]["task_status"]
+          task?: string
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -304,10 +460,20 @@ export type Database = {
           wedding_date: string
         }[]
       }
+      seed_wedding: {
+        Args: { p_locale?: string; p_wedding_id: string }
+        Returns: number
+      }
     }
     Enums: {
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
       task_priority: "critical" | "high" | "medium" | "low"
+      task_status:
+        | "not_started"
+        | "in_progress"
+        | "waiting"
+        | "completed"
+        | "cancelled"
       wedding_side: "bride" | "groom" | "both"
     }
     CompositeTypes: {
@@ -441,6 +607,13 @@ export const Constants = {
     Enums: {
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
       task_priority: ["critical", "high", "medium", "low"],
+      task_status: [
+        "not_started",
+        "in_progress",
+        "waiting",
+        "completed",
+        "cancelled",
+      ],
       wedding_side: ["bride", "groom", "both"],
     },
   },

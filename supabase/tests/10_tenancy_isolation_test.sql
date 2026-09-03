@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(45);
+select plan(50);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -300,6 +300,58 @@ select tests.login((select v from ids where k = 'stranger'));
 select is((select count(*)::int from wedding_tasks
              where wedding_id = (select v from w where k='a')), 0,
           'A stranger cannot read another wedding''s tasks');
+
+-- =============================================================================
+-- 10. The date-offset engine (ticket 1.7) — 5 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- One task is deliberately moved off its template offset, to prove the engine
+-- leaves a considered decision alone.
+update wedding_tasks
+   set due_date = '2027-01-01', due_date_overridden = true
+ where wedding_id = (select v from w where k='a') and seq = 1;
+
+-- The nekath moves by a month.
+update weddings set wedding_date = '2027-10-03'
+ where id = (select v from w where k='a');
+
+select tests.become_service_role();
+
+-- Asserted over every row rather than a sample: a re-date that missed some
+-- rows is the failure mode that matters, and it would look fine in a sample.
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='a')
+               and not due_date_overridden
+               and due_date is distinct from '2027-10-03'::date + offset_days), 0,
+          'Moving the wedding date re-dates every non-overridden task');
+
+select is((select due_date from wedding_tasks
+             where wedding_id = (select v from w where k='a') and seq = 1),
+          '2027-01-01'::date,
+          'A task moved on purpose is not dragged back by a re-date');
+
+select is((select count(*)::int from wedding_countdown_checks
+             where wedding_id = (select v from w where k='a')
+               and not due_date_overridden
+               and due_date is distinct from '2027-10-03'::date + offset_days), 0,
+          'The countdown checklist re-dates with the wedding');
+
+select tests.login((select v from ids where k = 'alice'));
+update weddings set wedding_date = null where id = (select v from w where k='a');
+
+select tests.become_service_role();
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='a')
+               and not due_date_overridden
+               and due_date is not null), 0,
+          'Clearing the wedding date clears the dates derived from it');
+
+select is((select count(*)::int from wedding_tasks
+             where wedding_id = (select v from w where k='a')
+               and source_template_id is not null
+               and offset_days is null), 0,
+          'Re-dating never damages the offsets it dates from');
 
 select * from finish();
 rollback;

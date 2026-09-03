@@ -178,7 +178,7 @@ export function SetupPage() {
             </Field>
           </Two>
           <Two>
-            <Field label="Wedding date" hint="Changing this re-dates the whole plan (Phase 1.7).">
+            <Field label="Wedding date" hint="Changing this re-dates every task and countdown check, except any you moved yourself.">
               <Input type="date" disabled={!canEdit} {...form.register('wedding_date')} />
             </Field>
             <Field label="Ceremony / Poruwa time">

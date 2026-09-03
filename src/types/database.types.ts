@@ -162,6 +162,97 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          amount_due_minor: number
+          amount_paid_minor: number
+          budget_line_id: string | null
+          code: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          method: string | null
+          notes: string | null
+          paid_by: string | null
+          paid_on: string | null
+          raised_on: string
+          receipt_location: string | null
+          receipt_path: string | null
+          reference: string | null
+          refundable: boolean
+          stage: Database["public"]["Enums"]["payment_stage"] | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          amount_due_minor?: number
+          amount_paid_minor?: number
+          budget_line_id?: string | null
+          code?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          method?: string | null
+          notes?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          raised_on?: string
+          receipt_location?: string | null
+          receipt_path?: string | null
+          reference?: string | null
+          refundable?: boolean
+          stage?: Database["public"]["Enums"]["payment_stage"] | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          amount_due_minor?: number
+          amount_paid_minor?: number
+          budget_line_id?: string | null
+          code?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          method?: string | null
+          notes?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          raised_on?: string
+          receipt_location?: string | null
+          receipt_path?: string | null
+          reference?: string | null
+          refundable?: boolean
+          stage?: Database["public"]["Enums"]["payment_stage"] | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -555,6 +646,8 @@ export type Database = {
           forecast_minor: number | null
           line_count: number | null
           not_applicable_count: number | null
+          outstanding_minor: number | null
+          paid_minor: number | null
           sort_order: number | null
           variance_minor: number | null
           wedding_id: string | null
@@ -562,6 +655,153 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_budget_lines: {
+        Row: {
+          actual_minor: number | null
+          applicability: Database["public"]["Enums"]["applicability"] | null
+          budgeted_minor: number | null
+          category_id: string | null
+          code: string | null
+          created_at: string | null
+          forecast_minor: number | null
+          id: string | null
+          name: string | null
+          negotiated_minor: number | null
+          notes: string | null
+          outstanding_minor: number | null
+          paid_minor: number | null
+          payer: string | null
+          quoted_minor: number | null
+          refundable_deposit_minor: number | null
+          sort_order: number | null
+          source_template_id: number | null
+          status: Database["public"]["Enums"]["task_status"] | null
+          updated_at: string | null
+          variance_minor: number | null
+          vendor_id: string | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_by_category"
+            referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_payments: {
+        Row: {
+          amount_due_minor: number | null
+          amount_paid_minor: number | null
+          balance_minor: number | null
+          budget_line_id: string | null
+          code: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string | null
+          method: string | null
+          notes: string | null
+          paid_by: string | null
+          paid_on: string | null
+          raised_on: string | null
+          receipt_location: string | null
+          receipt_path: string | null
+          reference: string | null
+          refundable: boolean | null
+          stage: Database["public"]["Enums"]["payment_stage"] | null
+          status: Database["public"]["Enums"]["payment_status"] | null
+          updated_at: string | null
+          vendor_id: string | null
+          wedding_id: string | null
+        }
+        Insert: {
+          amount_due_minor?: number | null
+          amount_paid_minor?: number | null
+          balance_minor?: never
+          budget_line_id?: string | null
+          code?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string | null
+          method?: string | null
+          notes?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          raised_on?: string | null
+          receipt_location?: string | null
+          receipt_path?: string | null
+          reference?: string | null
+          refundable?: boolean | null
+          stage?: Database["public"]["Enums"]["payment_stage"] | null
+          status?: never
+          updated_at?: string | null
+          vendor_id?: string | null
+          wedding_id?: string | null
+        }
+        Update: {
+          amount_due_minor?: number | null
+          amount_paid_minor?: number | null
+          balance_minor?: never
+          budget_line_id?: string | null
+          code?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string | null
+          method?: string | null
+          notes?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          raised_on?: string | null
+          receipt_location?: string | null
+          receipt_path?: string | null
+          reference?: string | null
+          refundable?: boolean | null
+          stage?: Database["public"]["Enums"]["payment_stage"] | null
+          status?: never
+          updated_at?: string | null
+          vendor_id?: string | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_budget_line_id_fkey"
+            columns: ["budget_line_id"]
+            isOneToOne: false
+            referencedRelation: "v_budget_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -613,6 +853,21 @@ export type Database = {
     Enums: {
       applicability: "required" | "optional" | "not_applicable"
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
+      payment_stage:
+        | "booking_deposit"
+        | "advance"
+        | "progress_payment"
+        | "final_payment"
+        | "extra_overtime"
+        | "refundable_deposit"
+        | "refund_received"
+      payment_status:
+        | "draft"
+        | "paid"
+        | "overdue"
+        | "due"
+        | "due_soon"
+        | "not_due"
       task_priority: "critical" | "high" | "medium" | "low"
       task_status:
         | "not_started"
@@ -753,6 +1008,23 @@ export const Constants = {
     Enums: {
       applicability: ["required", "optional", "not_applicable"],
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
+      payment_stage: [
+        "booking_deposit",
+        "advance",
+        "progress_payment",
+        "final_payment",
+        "extra_overtime",
+        "refundable_deposit",
+        "refund_received",
+      ],
+      payment_status: [
+        "draft",
+        "paid",
+        "overdue",
+        "due",
+        "due_soon",
+        "not_due",
+      ],
       task_priority: ["critical", "high", "medium", "low"],
       task_status: [
         "not_started",

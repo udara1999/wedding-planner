@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(62);
+select plan(72);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -445,6 +445,61 @@ select tests.login((select v from ids where k = 'brides_mum'));
 select ok((select count(*)::int from budget_lines
              where wedding_id = (select v from w where k='a')) > 0,
           'Family can see money, unlike a coordinator');
+
+-- =============================================================================
+-- 13. payments and the six-state status (2.5, rest of 2.2) — 10 assertions
+-- =============================================================================
+-- Dates are written relative to current_date so the expected status does not
+-- depend on when the suite runs.
+select tests.login((select v from ids where k = 'alice'));
+
+insert into payments (wedding_id, budget_line_id, code, stage,
+                      amount_due_minor, due_date, amount_paid_minor)
+select (select v from w where k='a'), bl.id, x.code, 'final_payment',
+       x.due, x.due_date, x.paid
+  from (values
+        ('PY-DRAFT',    0::bigint,        null::date,             0::bigint),
+        ('PY-PAID',     10000::bigint,    current_date + 3,       10000::bigint),
+        ('PY-OVER',     10000::bigint,    current_date - 1,       0::bigint),
+        ('PY-DUE',      10000::bigint,    current_date + 3,       0::bigint),
+        ('PY-SOON',     10000::bigint,    current_date + 20,      0::bigint),
+        ('PY-NOTDUE',   10000::bigint,    current_date + 90,      0::bigint),
+        ('PY-NODATE',   10000::bigint,    null::date,             0::bigint),
+        ('PY-OVERPAID', 10000::bigint,    current_date + 3,       25000::bigint)
+       ) as x(code, due, due_date, paid)
+  cross join (select id from budget_lines
+               where wedding_id = (select v from w where k='a') and code = 'BG077') bl;
+
+select is((select status::text from v_payments where code = 'PY-DRAFT'), 'draft',
+          'A payment with nothing due is a draft');
+select is((select status::text from v_payments where code = 'PY-PAID'), 'paid',
+          'Paying the full amount makes it paid');
+select is((select status::text from v_payments where code = 'PY-OVER'), 'overdue',
+          'A due date in the past is overdue');
+select is((select status::text from v_payments where code = 'PY-DUE'), 'due',
+          'Within a week is due');
+select is((select status::text from v_payments where code = 'PY-SOON'), 'due_soon',
+          'Within a month is due soon');
+select is((select status::text from v_payments where code = 'PY-NOTDUE'), 'not_due',
+          'Beyond a month is not due yet');
+select is((select status::text from v_payments where code = 'PY-NODATE'), 'not_due',
+          'A payment with no due date is not due rather than overdue');
+
+-- Overpaying must not read as a negative balance owed.
+select is((select balance_minor from v_payments where code = 'PY-OVERPAID'), 0::bigint,
+          'An overpayment floors the balance at zero');
+
+-- v_budget_lines rolls the payments up onto the line.
+select is((select paid_minor::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a') and code = 'BG077'),
+          35000::bigint,
+          'v_budget_lines sums the payments made against a line');
+
+-- §4.6 again, through the new view: a coordinator sees no money anywhere.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from v_payments
+             where wedding_id = (select v from w where k='a')), 0,
+          'A coordinator cannot see a single payment');
 
 select * from finish();
 rollback;

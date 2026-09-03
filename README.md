@@ -2,7 +2,7 @@
 
 Multi-tenant wedding planning app. React + TypeScript on the front, Supabase (Postgres + RLS) on the back, no custom server.
 
-Requirements and the phased delivery plan live in **`Wedding Planner SaaS - Development Plan.md`**. This README covers getting it running.
+Requirements and the phased delivery plan live in **[`docs/development-plan.md`](docs/development-plan.md)**. This README covers getting it running.
 
 **Status: Phase 0 complete.** Auth, tenancy, the role model and the RLS test harness are in place. Domain modules start at Phase 1.
 
@@ -105,6 +105,8 @@ src/
 supabase/
   migrations/              schema, in order — never edit an applied migration
   tests/                   pgTAP RLS suite (the Phase 0 gate)
+docs/
+  development-plan.md      requirements, schema design, phased tickets, risks
 ```
 
 ### Migrations

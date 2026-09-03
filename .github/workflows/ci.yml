@@ -1,8 +1,13 @@
 name: CI
 
+# Manual only. Nothing runs on push or on a pull request — start a run from the
+# Actions tab, or with `gh workflow run ci.yml`.
+#
+# Note what this means: the RLS policy gate and the schema/types check only run
+# when someone asks for them. A migration can be committed, pushed and applied
+# without either being exercised.
 on:
-  push: { branches: [main] }
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   app:

@@ -62,10 +62,21 @@ npm run db:test        # RLS policy tests (needs the local stack running)
 ```
 
 `npm run db:test` is the important one. It is the Phase 0 gate described in the
-plan (§7.1): 28 assertions covering cross-tenant isolation and the full role
-matrix. **If it fails, stop and fix it before writing anything else** — in a
-Supabase app there is no server layer to catch an authorisation mistake, so a
-missing policy is a data breach rather than a bug.
+plan (§7.1): 54 assertions covering cross-tenant isolation, the full role
+matrix, seeding and the date-offset engine. **If it fails, stop and fix it
+before writing anything else** — in a Supabase app there is no server layer to
+catch an authorisation mistake, so a missing policy is a data breach rather
+than a bug.
+
+It has already earned that billing once: it caught a `security definer` guard
+that never fired, because `app.role_in()` returns NULL for a non-member and
+`not NULL` is NULL rather than true. Forty-two passing SELECT-visibility
+assertions could not see it.
+
+**CI does not run on push.** The workflow is `workflow_dispatch` only, so start
+it from the Actions tab (or `gh workflow run ci.yml`) — otherwise a migration
+can be committed and applied without the gate or the schema/types check ever
+running against it.
 
 ---
 

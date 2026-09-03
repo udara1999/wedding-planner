@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
 import { budgetKeys } from '../budget/api';
+import { RECEIPTS_BUCKET, buildReceiptPath } from './receipts';
 import type { PaymentRow, PaymentView } from '../../types/db';
 
 export const paymentKeys = {
@@ -53,6 +54,7 @@ export type PaymentInput = Partial<
     | 'reference'
     | 'refundable'
     | 'receipt_location'
+    | 'receipt_path'
     | 'paid_by'
     | 'notes'
   >
@@ -111,6 +113,67 @@ export function useDeletePayment(weddingId: string) {
       const rows = unwrap(res);
       if (rows.length === 0) throw new Error('That payment could not be deleted.');
       return id;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+/**
+ * A signed URL rather than a public one: the bucket is private, so an object
+ * key becoming known is not the same as the file becoming readable. Short
+ * lifetime, fetched on demand — never stored alongside the payment.
+ */
+export async function signedReceiptUrl(path: string, seconds = 60): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(RECEIPTS_BUCKET)
+    .createSignedUrl(path, seconds);
+  if (error) throw new Error(error.message);
+  return data.signedUrl;
+}
+
+export function useUploadReceipt(weddingId: string) {
+  const invalidate = useInvalidateMoney(weddingId);
+  return useMutation({
+    mutationFn: async ({ paymentId, file }: { paymentId: string; file: File }) => {
+      const path = buildReceiptPath(weddingId, paymentId, file.name);
+
+      const upload = await supabase.storage
+        .from(RECEIPTS_BUCKET)
+        .upload(path, file, { upsert: true });
+      // The storage policy checks app.can_write against the wedding id in the
+      // path, so a refusal surfaces here rather than as a filtered no-op.
+      if (upload.error) throw new Error(upload.error.message);
+
+      const res = await supabase
+        .from('payments')
+        .update({ receipt_path: path })
+        .eq('id', paymentId)
+        .select('id');
+      const rows = unwrap(res);
+      if (rows.length === 0) {
+        // The object is stored but unreferenced; say so rather than implying
+        // the receipt is attached.
+        throw new Error('The file uploaded but could not be linked to the payment.');
+      }
+      return path;
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useRemoveReceipt(weddingId: string) {
+  const invalidate = useInvalidateMoney(weddingId);
+  return useMutation({
+    mutationFn: async ({ paymentId, path }: { paymentId: string; path: string }) => {
+      const { error } = await supabase.storage.from(RECEIPTS_BUCKET).remove([path]);
+      if (error) throw new Error(error.message);
+      const res = await supabase
+        .from('payments')
+        .update({ receipt_path: null })
+        .eq('id', paymentId)
+        .select('id');
+      unwrap(res);
+      return paymentId;
     },
     onSuccess: invalidate,
   });

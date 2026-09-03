@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(80);
+select plan(86);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -556,6 +556,43 @@ select throws_ok(
                                  agreed_minor)
       values ((select v from w where k='a'),
               (select v from ids where k='grooms_dad'), 'Not mine', 500) $q$);
+
+-- =============================================================================
+-- 15. receipt storage (2.10) — 6 assertions
+-- =============================================================================
+select tests.become_service_role();
+
+select is(app.wedding_from_storage_path(
+            (select v from w where k='a')::text || '/pay/receipt.pdf'),
+          (select v from w where k='a'),
+          'The first path segment is read as the wedding id');
+
+-- The reason the helper swallows the cast error: a key that is not
+-- wedding-scoped must fail the membership test, not raise inside the policy.
+select ok(app.wedding_from_storage_path('receipt.pdf') is null,
+          'A key with no wedding folder yields null rather than an error');
+select ok(app.wedding_from_storage_path('not-a-uuid/x.pdf') is null,
+          'A key whose folder is not a uuid yields null rather than an error');
+
+select is((select count(*)::int from pg_policies
+             where schemaname = 'storage' and tablename = 'objects'
+               and policyname like 'receipts_%'), 4,
+          'All four receipt policies are installed on storage.objects');
+
+-- The boundary itself. An upload the caller may not make violates the WITH
+-- CHECK and raises, rather than being silently filtered like a SELECT.
+select tests.login((select v from ids where k = 'coordinator'));
+select throws_ok(
+  $q$ insert into storage.objects (bucket_id, name)
+      values ('receipts',
+              (select v from w where k='a')::text || '/pay/sneaky.pdf') $q$);
+
+select tests.login((select v from ids where k = 'alice'));
+select lives_ok(
+  $q$ insert into storage.objects (bucket_id, name)
+      values ('receipts',
+              (select v from w where k='a')::text || '/pay/receipt.pdf') $q$,
+  'An owner can store a receipt under their own wedding folder');
 
 select * from finish();
 rollback;

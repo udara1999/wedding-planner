@@ -12,6 +12,7 @@ import {
   type PaymentInput,
 } from './api';
 import { BudgetLinePicker } from './BudgetLinePicker';
+import { ReceiptField } from './ReceiptField';
 import { useBudgetLines } from '../budget/api';
 import { currencyDecimals, formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
 import type { MyWedding, PaymentStage, PaymentStatus, PaymentView } from '../../types/db';
@@ -125,6 +126,9 @@ export function PaymentsPage() {
     }
     return { due, paid, outstanding: Math.max(due - paid, 0) };
   }, [payments.data]);
+
+  const editingReceiptPath =
+    (payments.data ?? []).find((p) => p.id === editingId)?.receipt_path ?? null;
 
   function startEdit(p: PaymentView) {
     setEditingId(p.id ?? null);
@@ -363,6 +367,21 @@ export function PaymentsPage() {
               <Field label="Notes">
                 <Input disabled={!canEdit} {...form.register('notes')} />
               </Field>
+
+              {editingId ? (
+                <Field label="Receipt" hint="Stored privately; opened through a short-lived link.">
+                  <ReceiptField
+                    weddingId={wedding.id}
+                    paymentId={editingId}
+                    receiptPath={editingReceiptPath}
+                    canEdit={canEdit}
+                  />
+                </Field>
+              ) : (
+                <p className="text-xs text-stone-500">
+                  Save the payment first, then a receipt can be attached to it.
+                </p>
+              )}
 
               {canEdit && (
                 <Button type="submit" className="w-full" disabled={busy}>

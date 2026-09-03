@@ -517,6 +517,12 @@ In a Supabase app there is no server layer to catch an authorisation mistake. A 
 | **D5** | Realtime collaboration | Supabase Realtime / polling / none | **None in v1.** Two people rarely edit at once; revisit if beta shows conflicts. |
 | **D6** | Where the day-of pack renders | Print CSS / client PDF / Edge Function PDF | **Print CSS.** Zero dependencies, works offline, and the browser already paginates. |
 
+**Settled so far.** D2 — **Poruwa only** (2026-09-03). Template content (1.3) covers the
+Poruwa tradition alone for M1–M3; other traditions are content work to add later, and
+the `template` schema must not hard-code the assumption of a single tradition.
+
+D1 and D3–D6 remain open. None of them block Phase 1.
+
 ---
 
 ## 9. Immediate next steps

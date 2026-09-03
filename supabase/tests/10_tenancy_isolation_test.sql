@@ -189,11 +189,22 @@ select is((select tradition from weddings where id = (select v from w where k='a
           'poruwa',
           'A wedding created without a tradition defaults to poruwa');
 
+-- A second locale, so "stores an explicit tradition" means something other
+-- than the default. It has to exist first: weddings.tradition is a foreign key
+-- to template.locales (1.2), and only 'poruwa' is seeded. Rolled back with the
+-- rest of the transaction.
+select tests.become_service_role();
+insert into template.locales (code, label, language, tradition, version)
+values ('test-tradition', 'Fixture tradition', 'en', 'test-tradition', 1)
+on conflict (code) do nothing;
+
+select tests.login((select v from ids where k = 'alice'));
 insert into w values
-  ('c', public.create_wedding('Ama', 'Nuwan', '2028-01-01', 'LKR', 'Asia/Colombo', 'christian'));
+  ('c', public.create_wedding('Ama', 'Nuwan', '2028-01-01', 'LKR', 'Asia/Colombo',
+                              'test-tradition'));
 
 select is((select tradition from weddings where id = (select v from w where k='c')),
-          'christian',
+          'test-tradition',
           'create_wedding stores an explicit tradition');
 
 -- Revoke is governed by wedding_invitations_manage (app.can_write), the same

@@ -307,6 +307,7 @@ export type Database = {
     }
     Enums: {
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
+      task_priority: "critical" | "high" | "medium" | "low"
       wedding_side: "bride" | "groom" | "both"
     }
     CompositeTypes: {
@@ -439,6 +440,7 @@ export const Constants = {
   public: {
     Enums: {
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
+      task_priority: ["critical", "high", "medium", "low"],
       wedding_side: ["bride", "groom", "both"],
     },
   },

@@ -64,6 +64,14 @@ jobs:
           supabase gen types typescript --local > /tmp/generated.ts
           if ! diff -q /tmp/generated.ts src/types/database.types.ts; then
             echo "::error::src/types/database.types.ts is stale. Run: npm run types:gen"
-            diff -u src/types/database.types.ts /tmp/generated.ts | head -60
+            diff -u src/types/database.types.ts /tmp/generated.ts > /tmp/types.diff || true
+            head -60 /tmp/types.diff
+            # Surface the differing lines as annotations too: without Docker the
+            # file can only be generated with --linked, so a --local/--linked
+            # divergence is otherwise invisible outside an authenticated log.
+            grep -E '^[+-]' /tmp/types.diff \
+              | grep -vE '^(\+\+\+|---)' \
+              | head -8 \
+              | while IFS= read -r l; do echo "::error::types: ${l}"; done || true
             exit 1
           fi

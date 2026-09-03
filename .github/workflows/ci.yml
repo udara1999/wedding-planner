@@ -45,7 +45,7 @@ jobs:
       - name: Surface pgTAP failures as annotations
         if: failure()
         run: |
-          grep -E 'not ok|ERROR:|Bad plan|Parse errors|Failed [0-9]+/' /tmp/pgtap.log \
+          grep -E 'not ok|Failed tests|Failed test |got:|expected:|ERROR:|Bad plan|Parse errors|Failed [0-9]+/' /tmp/pgtap.log \
             | head -10 \
             | while IFS= read -r line; do echo "::error::${line}"; done || true
 

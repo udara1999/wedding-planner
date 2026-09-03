@@ -31,8 +31,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Pinned, not `latest`. The committed src/types/database.types.ts is
+      # generated output, and the generator's format changes between releases:
+      # 2.116.0 emits an __InternalSupabase/PostgrestVersion block and formats
+      # the helper types differently from what `latest` resolved to here, so the
+      # diff below failed on formatting while the schema matched perfectly.
+      #
+      # Keep this in step with the CLI used by `npm run types:gen` locally
+      # (currently 2.116.0). If they drift, this check fails for no real reason.
       - uses: supabase/setup-cli@v1
-        with: { version: latest }
+        with: { version: 2.116.0 }
 
       - name: Start Supabase
         run: supabase start

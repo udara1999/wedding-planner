@@ -150,3 +150,29 @@ export function useRevokeInvitation(weddingId: string) {
     },
   });
 }
+
+/**
+ * Copy the template into this wedding: budget categories and lines, tasks,
+ * countdown checks and the editable lookup lists.
+ *
+ * Idempotent server-side (every insert is ON CONFLICT DO NOTHING), so running
+ * it twice adds nothing and cannot overwrite edits already made. Owner-only, by
+ * the RPC's own guard.
+ */
+export function useSeedWedding() {
+  const qc = useQueryClient();
+  return useMutation({
+    // The id is the mutation's argument, not the hook's: a caller that has just
+    // created a wedding has the id in hand before any re-render, and a hook
+    // parameter would still be holding the previous value.
+    mutationFn: async (weddingId: string): Promise<number> => {
+      const res = await supabase.rpc('seed_wedding', { p_wedding_id: weddingId });
+      return unwrap(res) as number;
+    },
+    onSuccess: () => {
+      // Touches nearly everything, so invalidate broadly rather than trying to
+      // enumerate what a seed affects.
+      void qc.invalidateQueries();
+    },
+  });
+}

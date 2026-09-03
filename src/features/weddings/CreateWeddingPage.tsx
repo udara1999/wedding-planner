@@ -2,7 +2,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCreateWedding } from './api';
+import { useCreateWedding, useSeedWedding } from './api';
 import {
   Button,
   Card,
@@ -32,6 +32,7 @@ type FormValues = z.infer<typeof schema>;
 export function CreateWeddingPage() {
   const navigate = useNavigate();
   const create = useCreateWedding();
+  const seed = useSeedWedding();
 
   const {
     register,
@@ -44,6 +45,16 @@ export function CreateWeddingPage() {
 
   async function onSubmit(values: FormValues) {
     const id = await create.mutateAsync(values);
+
+    // A wedding with no plan in it is not much use: seed the template before
+    // landing on it. Deliberately not folded into create_wedding, which would
+    // seed every wedding a test creates too. If it fails the wedding still
+    // exists, and the Budget screen offers to set it up.
+    try {
+      await seed.mutateAsync(id);
+    } catch {
+      // Reported on the Budget screen rather than blocking the redirect.
+    }
     navigate(`/w/${id}`);
   }
 

@@ -11,8 +11,10 @@ import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { BudgetLineForm } from './BudgetLineForm';
 import { EMPTY_FILTERS, matchesFilters, summarise, type BudgetFilters } from './filters';
 import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
+import { useSeedWedding } from '../weddings/api';
 import type { Applicability, BudgetLineRow, MyWedding } from '../../types/db';
 import {
+  Button,
   Card,
   CardBody,
   CardHeader,
@@ -37,6 +39,7 @@ export function BudgetPage() {
   const byCategory = useBudgetByCategory(wedding.id);
   const payers = usePayerOptions(wedding.id);
   const update = useUpdateBudgetLine(wedding.id);
+  const seed = useSeedWedding();
 
   const [filters, setFilters] = useState<BudgetFilters>(EMPTY_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -61,6 +64,45 @@ export function BudgetPage() {
     return (
       <div className="p-8">
         <ErrorState error={lines.error} onRetry={() => void lines.refetch()} />
+      </div>
+    );
+  }
+
+  // No lines at all means the template was never copied in — quite different
+  // from filters that happen to exclude everything, so it gets its own screen
+  // with the action that fixes it.
+  if ((lines.data ?? []).length === 0) {
+    const isOwner = wedding.role === 'owner';
+    return (
+      <div className="mx-auto max-w-2xl px-6 py-12">
+        <Card>
+          <CardHeader>
+            <CardTitle>This wedding has no plan in it yet</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            <p className="text-sm text-stone-600">
+              The budget, tasks, countdown checklist and the editable dropdown lists all come
+              from the template. Copying it in is safe to repeat: it never overwrites anything
+              you have already changed.
+            </p>
+            {isOwner ? (
+              <>
+                <Button disabled={seed.isPending} onClick={() => seed.mutate(wedding.id)}>
+                  {seed.isPending ? 'Setting up…' : 'Set up the plan from the template'}
+                </Button>
+                {seed.error && (
+                  <p className="text-xs text-red-700">
+                    {seed.error instanceof Error ? seed.error.message : 'Could not set it up'}
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                Only the owner can set the plan up. Ask them to open this page once.
+              </p>
+            )}
+          </CardBody>
+        </Card>
       </div>
     );
   }

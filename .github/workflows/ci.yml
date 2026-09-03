@@ -38,10 +38,17 @@ jobs:
           set -o pipefail
           supabase test db 2>&1 | tee /tmp/pgtap.log
 
-      # The pgTAP output is the only description of *which* assertion failed,
-      # and reading a run log needs an authenticated token. Copying it into the
-      # job summary publishes it through the check-runs API instead, so a
-      # failure can be diagnosed without downloading anything.
+      # Reading a run log needs an authenticated token, and a job summary is not
+      # exposed by the API. Annotations are, so the salient pgTAP lines are
+      # emitted as ::error:: to make a red gate diagnosable from the outside.
+      # (GitHub keeps at most 10 annotations per step.)
+      - name: Surface pgTAP failures as annotations
+        if: failure()
+        run: |
+          grep -E 'not ok|ERROR:|Bad plan|Parse errors|Failed [0-9]+/' /tmp/pgtap.log \
+            | head -10 \
+            | while IFS= read -r line; do echo "::error::${line}"; done || true
+
       - name: Publish pgTAP output to the job summary
         if: always()
         run: |

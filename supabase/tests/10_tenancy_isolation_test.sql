@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(28);
+select plan(34);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -166,6 +166,49 @@ select ok(NOT app.can_see_guest_side((select v from w where k='a'), 'groom'),
 select tests.login((select v from ids where k = 'grooms_dad'));
 select ok(app.can_see_guest_side((select v from w where k='a'), 'groom'),
           'Groom-side family can see groom-side guests');
+
+-- =============================================================================
+-- 8. Tradition (1.1) and invitation revoke (1.6) — 6 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+select is((select tradition from weddings where id = (select v from w where k='a')),
+          'poruwa',
+          'A wedding created without a tradition defaults to poruwa');
+
+insert into w values
+  ('c', public.create_wedding('Ama', 'Nuwan', '2028-01-01', 'LKR', 'Asia/Colombo', 'christian'));
+
+select is((select tradition from weddings where id = (select v from w where k='c')),
+          'christian',
+          'create_wedding stores an explicit tradition');
+
+-- Revoke is governed by wedding_invitations_manage (app.can_write), the same
+-- permission as sending the invitation. A fresh pending row to revoke:
+insert into wedding_invitations (wedding_id, email, role, side, invited_by)
+values ((select v from w where k='a'), 'revokeme@example.com', 'viewer', null,
+        (select v from ids where k='alice'));
+
+select tests.login((select v from ids where k = 'coordinator'));
+select lives_ok(
+  $q$ delete from wedding_invitations where email = 'revokeme@example.com' $q$,
+  'A coordinator''s revoke is filtered by RLS rather than raising');
+
+select tests.become_service_role();
+select is((select count(*)::int from wedding_invitations
+             where email = 'revokeme@example.com'), 1,
+          'The invitation survives a coordinator trying to revoke it');
+
+select tests.login((select v from ids where k = 'anil'));
+select lives_ok(
+  $q$ delete from wedding_invitations
+       where email = 'revokeme@example.com' and accepted_at is null $q$,
+  'A partner can revoke a pending invitation');
+
+select tests.become_service_role();
+select is((select count(*)::int from wedding_invitations
+             where email = 'revokeme@example.com'), 0,
+          'The invitation is gone once a partner revokes it');
 
 select * from finish();
 rollback;

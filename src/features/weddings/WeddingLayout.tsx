@@ -2,7 +2,7 @@ import { NavLink, Outlet, useParams, Link } from 'react-router-dom';
 import { useMyWeddings } from './api';
 import { useAuth } from '../auth/AuthProvider';
 import { Badge, ErrorState, Spinner } from '../../components/ui';
-import type { MemberRole } from '../../types/database.types';
+import type { MemberRole } from '../../types/db';
 
 /**
  * Navigation is derived from the caller's role, mirroring the RLS policies.

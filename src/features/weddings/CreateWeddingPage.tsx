@@ -3,7 +3,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateWedding } from './api';
-import { Button, Card, CardBody, CardHeader, CardTitle, Field, Input } from '../../components/ui';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  Field,
+  Input,
+  Select,
+} from '../../components/ui';
+import { TRADITIONS } from './traditions';
 
 const schema = z.object({
   brideName: z.string().min(1, "The bride's name is required"),
@@ -14,6 +24,7 @@ const schema = z.object({
     .refine((v) => !Number.isNaN(Date.parse(v)), 'Not a valid date'),
   currency: z.string().length(3),
   timezone: z.string().min(1),
+  tradition: z.string().min(1, 'Pick a tradition'),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -28,7 +39,7 @@ export function CreateWeddingPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { currency: 'LKR', timezone: 'Asia/Colombo' },
+    defaultValues: { currency: 'LKR', timezone: 'Asia/Colombo', tradition: 'poruwa' },
   });
 
   async function onSubmit(values: FormValues) {
@@ -63,6 +74,20 @@ export function CreateWeddingPage() {
               hint="Everything else is dated from this. You can change it later and the whole plan re-dates."
             >
               <Input type="date" {...register('weddingDate')} />
+            </Field>
+
+            <Field
+              label="Tradition"
+              error={errors.tradition?.message}
+              hint="Chooses which checklists, tasks and timeline the plan is seeded from."
+            >
+              <Select {...register('tradition')}>
+                {TRADITIONS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
 
             <div className="grid grid-cols-2 gap-3">

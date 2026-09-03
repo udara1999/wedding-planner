@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
-import type { MemberRole, MyWedding, WeddingRow, WeddingSide } from '../../types/database.types';
+import type { MemberRole, MyWedding, WeddingRow, WeddingSide } from '../../types/db';
 
 export const weddingKeys = {
   all: ['weddings'] as const,
   detail: (id: string) => ['weddings', id] as const,
   members: (id: string) => ['weddings', id, 'members'] as const,
+  invitations: (id: string) => ['weddings', id, 'invitations'] as const,
 };
 
 /** Every wedding the signed-in user can see, with their role in each. */
@@ -36,6 +37,7 @@ export interface CreateWeddingInput {
   weddingDate: string | null;
   currency: string;
   timezone: string;
+  tradition: string;
 }
 
 export function useCreateWedding() {
@@ -45,9 +47,10 @@ export function useCreateWedding() {
       const res = await supabase.rpc('create_wedding', {
         p_bride_name: input.brideName,
         p_groom_name: input.groomName,
-        p_wedding_date: input.weddingDate,
+        p_wedding_date: input.weddingDate ?? undefined,
         p_currency: input.currency,
         p_timezone: input.timezone,
+        p_tradition: input.tradition,
       });
       return unwrap(res) as string;
     },
@@ -95,10 +98,55 @@ export function useInviteMember(weddingId: string) {
         p_wedding_id: weddingId,
         p_email: input.email,
         p_role: input.role,
-        p_side: input.side,
+        p_side: input.side ?? undefined,
       });
       return unwrap(res) as string; // invitation token
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: weddingKeys.members(weddingId) }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: weddingKeys.members(weddingId) });
+      void qc.invalidateQueries({ queryKey: weddingKeys.invitations(weddingId) });
+    },
+  });
+}
+
+/** Invitations sent but not yet accepted — the only ones that can be revoked. */
+export function useInvitations(weddingId: string) {
+  return useQuery({
+    queryKey: weddingKeys.invitations(weddingId),
+    queryFn: async () => {
+      const res = await supabase
+        .from('wedding_invitations')
+        .select('id, email, role, side, created_at, expires_at')
+        .eq('wedding_id', weddingId)
+        .is('accepted_at', null)
+        .order('created_at', { ascending: false });
+      return unwrap(res);
+    },
+  });
+}
+
+export function useRevokeInvitation(weddingId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (invitationId: string) => {
+      const res = await supabase
+        .from('wedding_invitations')
+        .delete()
+        .eq('id', invitationId)
+        .is('accepted_at', null)
+        .select('id');
+      const rows = unwrap(res);
+      // A delete the caller is not allowed to make is filtered by RLS, not
+      // refused: the statement succeeds and touches nothing. Zero rows back
+      // therefore means "not permitted", and must not look like success.
+      if (rows.length === 0) {
+        throw new Error('That invitation could not be revoked — it may already have been accepted.');
+      }
+      return invitationId;
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: weddingKeys.invitations(weddingId) });
+      void qc.invalidateQueries({ queryKey: weddingKeys.members(weddingId) });
+    },
   });
 }

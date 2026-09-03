@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
-import type { MyWedding } from '../../types/database.types';
+import type { MyWedding } from '../../types/db';
 import { Card, CardBody, EmptyState } from '../../components/ui';
 
 /**

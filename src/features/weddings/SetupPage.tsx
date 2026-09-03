@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useUpdateWedding, useWedding } from './api';
-import type { MyWedding } from '../../types/database.types';
+import type { MyWedding } from '../../types/db';
 import {
   Button,
   Card,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { MemberRole } from '../../types/database.types';
+import type { MemberRole } from '../../types/db';
 
 /**
  * Mirror of the NAV table in WeddingLayout.tsx. Kept here so a change to the

@@ -3,8 +3,8 @@ import { useOutletContext } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useInviteMember, useMembers } from './api';
-import type { MemberRole, MyWedding, WeddingSide } from '../../types/database.types';
+import { useInvitations, useInviteMember, useMembers, useRevokeInvitation } from './api';
+import type { MemberRole, MyWedding, WeddingSide } from '../../types/db';
 import {
   Badge,
   Button,
@@ -15,6 +15,7 @@ import {
   ErrorState,
   Field,
   Input,
+  Select,
   Spinner,
 } from '../../components/ui';
 
@@ -42,6 +43,8 @@ export function MembersPage() {
   const { wedding } = useOutletContext<{ wedding: MyWedding }>();
   const { data, isLoading, error, refetch } = useMembers(wedding.id);
   const invite = useInviteMember(wedding.id);
+  const invitations = useInvitations(wedding.id);
+  const revoke = useRevokeInvitation(wedding.id);
   const [link, setLink] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
@@ -80,15 +83,12 @@ export function MembersPage() {
             </Field>
 
             <Field label="Access level" error={form.formState.errors.role?.message}>
-              <select
-                className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm"
-                {...form.register('role')}
-              >
+              <Select {...form.register('role')}>
                 <option value="partner">Partner</option>
                 <option value="family">Family member</option>
                 <option value="coordinator">Coordinator</option>
                 <option value="viewer">Viewer</option>
-              </select>
+              </Select>
             </Field>
 
             <p className="rounded-md bg-stone-50 px-3 py-2 text-xs text-stone-600">
@@ -97,15 +97,12 @@ export function MembersPage() {
 
             {role === 'family' && (
               <Field label="Side of the family" error={form.formState.errors.side?.message}>
-                <select
-                  className="h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm"
-                  {...form.register('side')}
-                >
+                <Select {...form.register('side')}>
                   <option value="">Choose…</option>
                   <option value="bride">Bride&apos;s side</option>
                   <option value="groom">Groom&apos;s side</option>
                   <option value="both">Both</option>
-                </select>
+                </Select>
               </Field>
             )}
 
@@ -139,6 +136,51 @@ export function MembersPage() {
                 Emailing this automatically arrives in Phase 4.10.
               </p>
             </div>
+          )}
+        </CardBody>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Pending invitations</CardTitle>
+        </CardHeader>
+        <CardBody>
+          {invitations.isLoading && <Spinner />}
+          {invitations.error && (
+            <ErrorState error={invitations.error} onRetry={() => void invitations.refetch()} />
+          )}
+          {invitations.data?.length === 0 && (
+            <p className="text-sm text-stone-500">Nobody is waiting to accept an invitation.</p>
+          )}
+          {invitations.data && invitations.data.length > 0 && (
+            <ul className="divide-y divide-stone-100">
+              {invitations.data.map((inv) => (
+                <li key={inv.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-stone-800">{inv.email}</p>
+                    <p className="text-xs text-stone-400">
+                      {inv.side ? `${inv.role} · ${inv.side} side` : inv.role}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Badge tone="warn">pending</Badge>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      disabled={revoke.isPending}
+                      onClick={() => revoke.mutate(inv.id)}
+                    >
+                      Revoke
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          {revoke.error && (
+            <p className="mt-3 text-xs text-red-700">
+              {revoke.error instanceof Error ? revoke.error.message : 'Could not revoke'}
+            </p>
           )}
         </CardBody>
       </Card>

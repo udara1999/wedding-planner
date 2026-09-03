@@ -45,6 +45,22 @@ export const Input = ({ className, ...props }: React.InputHTMLAttributes<HTMLInp
   />
 );
 
+/* ------------------------------------------------------------------ Select */
+export const Select = ({
+  className,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement>) => (
+  <select
+    className={cn(
+      'h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm text-stone-900',
+      'focus:border-wine-600 focus:ring-1 focus:ring-wine-600 focus:outline-none',
+      'disabled:bg-stone-50 disabled:text-stone-500',
+      className,
+    )}
+    {...props}
+  />
+);
+
 /* ------------------------------------------------------------------- Field */
 export function Field({
   label,

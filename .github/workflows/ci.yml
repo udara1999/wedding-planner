@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  app:
+    name: Lint · types · build · unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - name: Build (type-checks via tsc -b)
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder-anon-key-not-a-real-key
+      - run: npm run test
+
+  database:
+    name: Migrations · RLS policy tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+
+      - name: Start Supabase
+        run: supabase start
+
+      # Ticket 0.7 — the Phase 0 gate. A tenancy leak fails the build.
+      - name: RLS isolation tests (pgTAP)
+        run: supabase test db
+
+      - name: Check committed types match the schema
+        run: |
+          supabase gen types typescript --local > /tmp/generated.ts
+          if ! diff -q /tmp/generated.ts src/types/database.types.ts; then
+            echo "::error::src/types/database.types.ts is stale. Run: npm run types:gen"
+            diff -u src/types/database.types.ts /tmp/generated.ts | head -60
+            exit 1
+          fi

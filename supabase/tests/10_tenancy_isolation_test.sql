@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(50);
+select plan(54);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -352,6 +352,24 @@ select is((select count(*)::int from wedding_tasks
                and source_template_id is not null
                and offset_days is null), 0,
           'Re-dating never damages the offsets it dates from');
+
+-- =============================================================================
+-- 11. Membership helpers return false, not NULL (regression) — 4 assertions
+-- =============================================================================
+-- A NULL here is safe inside an RLS USING clause but silently disables any
+-- procedural guard written as `if not app.is_owner(...)`, which is how a
+-- coordinator came to seed a wedding they were not a member of. `is false`
+-- rather than `= false`, so a NULL fails these assertions.
+select tests.login((select v from ids where k = 'coordinator'));
+
+select ok(app.is_owner((select v from w where k='b')) is false,
+          'is_owner returns false, not null, for a non-member');
+select ok(app.can_write((select v from w where k='b')) is false,
+          'can_write returns false, not null, for a non-member');
+select ok(app.can_see_money((select v from w where k='b')) is false,
+          'can_see_money returns false, not null, for a non-member');
+select ok(app.can_write_ops((select v from w where k='b')) is false,
+          'can_write_ops returns false, not null, for a non-member');
 
 select * from finish();
 rollback;

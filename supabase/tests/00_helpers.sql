@@ -5,6 +5,9 @@
 -- locally lets a pgTAP test act as any user without going through the API.
 -- =============================================================================
 
+-- pgtap is needed for this file's own plan (below); 10_* creates it too, harmlessly.
+create extension if not exists pgtap;
+
 create schema if not exists tests;
 
 create or replace function tests.create_user(p_email text)
@@ -61,3 +64,15 @@ begin
   return n;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- pg_prove treats every .sql file in this directory as a test file and fails
+-- the entire run on any file without a TAP plan ("No plan found in TAP
+-- output"), so this one asserts its own installation.
+--
+-- Deliberately NOT wrapped in begin/rollback: these helpers must still exist
+-- when the next file opens its own session.
+-- ---------------------------------------------------------------------------
+select plan(1);
+select has_schema('tests');
+select * from finish();

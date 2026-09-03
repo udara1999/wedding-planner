@@ -18,7 +18,13 @@ select plan(28);
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
 
+-- These fixtures are created by the service role but read back while the suite
+-- impersonates `authenticated` and `anon`, which inherit no privileges on another
+-- role's temp tables. Without these grants the first insert as a real user dies
+-- with `permission denied for table w`. The transaction is rolled back, so
+-- granting to public here exposes nothing.
 create temporary table ids (k text primary key, v uuid);
+grant select on ids to public;
 insert into ids values
   ('alice',       tests.create_user('alice@example.com')),    -- owner of wedding A
   ('anil',        tests.create_user('anil@example.com')),     -- partner, A
@@ -28,6 +34,7 @@ insert into ids values
   ('stranger',    tests.create_user('stranger@example.com')); -- owner of wedding B
 
 create temporary table w (k text primary key, v uuid);
+grant select, insert on w to public;
 
 select tests.login((select v from ids where k = 'alice'));
 insert into w values

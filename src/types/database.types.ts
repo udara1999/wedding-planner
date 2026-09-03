@@ -162,6 +162,68 @@ export type Database = {
           },
         ]
       }
+      contributions: {
+        Row: {
+          agreed_minor: number
+          agreed_on: string | null
+          code: string | null
+          contributor_name: string
+          contributor_user_id: string | null
+          created_at: string
+          id: string
+          last_received_on: string | null
+          notes: string | null
+          purpose: string | null
+          received_minor: number
+          relationship: string | null
+          still_to_come_minor: number | null
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          agreed_minor?: number
+          agreed_on?: string | null
+          code?: string | null
+          contributor_name: string
+          contributor_user_id?: string | null
+          created_at?: string
+          id?: string
+          last_received_on?: string | null
+          notes?: string | null
+          purpose?: string | null
+          received_minor?: number
+          relationship?: string | null
+          still_to_come_minor?: number | null
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          agreed_minor?: number
+          agreed_on?: string | null
+          code?: string | null
+          contributor_name?: string
+          contributor_user_id?: string | null
+          created_at?: string
+          id?: string
+          last_received_on?: string | null
+          notes?: string | null
+          purpose?: string | null
+          received_minor?: number
+          relationship?: string | null
+          still_to_come_minor?: number | null
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contributions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_due_minor: number

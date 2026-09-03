@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(72);
+select plan(80);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -500,6 +500,62 @@ select tests.login((select v from ids where k = 'coordinator'));
 select is((select count(*)::int from v_payments
              where wedding_id = (select v from w where k='a')), 0,
           'A coordinator cannot see a single payment');
+
+-- =============================================================================
+-- 14. contributions: family may touch only their own row (2.7) — 8 assertions
+-- =============================================================================
+select tests.become_service_role();
+
+insert into contributions (wedding_id, code, contributor_user_id, contributor_name,
+                           agreed_minor, received_minor)
+values
+  ((select v from w where k='a'), 'C-MUM', (select v from ids where k='brides_mum'),
+   'Bride''s family', 50000, 20000),
+  ((select v from w where k='a'), 'C-DAD', (select v from ids where k='grooms_dad'),
+   'Groom''s family', 70000, 70000);
+
+select is((select still_to_come_minor from contributions where code = 'C-MUM'),
+          30000::bigint,
+          'still_to_come_minor is agreed minus received');
+
+select is((select still_to_come_minor from contributions where code = 'C-DAD'),
+          0::bigint,
+          'A fully received contribution has nothing still to come');
+
+select tests.login((select v from ids where k = 'alice'));
+select is((select count(*)::int from contributions
+             where wedding_id = (select v from w where k='a')), 2,
+          'The couple see every contribution');
+
+select tests.login((select v from ids where k = 'brides_mum'));
+select is((select count(*)::int from contributions
+             where wedding_id = (select v from w where k='a')), 1,
+          'A family member sees only their own contribution');
+
+-- Writing her own row is allowed.
+select lives_ok(
+  $q$ update contributions set received_minor = 30000 where code = 'C-MUM' $q$,
+  'A family member can update their own contribution');
+
+-- Someone else's row is filtered, not refused, so the proof is that the value
+-- did not move.
+select lives_ok(
+  $q$ update contributions set agreed_minor = 1 where code = 'C-DAD' $q$,
+  'Updating another family member''s row is filtered rather than an error');
+
+select tests.become_service_role();
+select is((select agreed_minor from contributions where code = 'C-DAD'), 70000::bigint,
+          'Another family member''s contribution is untouched');
+
+-- The WITH CHECK: attributing a new row to somebody else is a hard failure,
+-- not a filtered one, because the row would otherwise be readable by its
+-- supposed owner and invisible to its author.
+select tests.login((select v from ids where k = 'brides_mum'));
+select throws_ok(
+  $q$ insert into contributions (wedding_id, contributor_user_id, contributor_name,
+                                 agreed_minor)
+      values ((select v from w where k='a'),
+              (select v from ids where k='grooms_dad'), 'Not mine', 500) $q$);
 
 select * from finish();
 rollback;

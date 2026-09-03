@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './features/auth/AuthProvider';
 import { SignInPage } from './features/auth/SignInPage';
+import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
 import { WeddingListPage } from './features/weddings/WeddingListPage';
 import { CreateWeddingPage } from './features/weddings/CreateWeddingPage';
 import { WeddingLayout } from './features/weddings/WeddingLayout';
@@ -39,7 +40,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Landing point for magic links and OAuth redirects. */
+/** Landing point for the emailed sign-up confirmation link. */
 function AuthCallback() {
   const { session, loading } = useAuth();
   if (loading) {
@@ -105,6 +106,7 @@ export default function App() {
           <Routes>
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/reset" element={<ResetPasswordPage />} />
             <Route path="/invite" element={<AcceptInvitePage />} />
 
             <Route

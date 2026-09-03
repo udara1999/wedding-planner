@@ -6,12 +6,20 @@ interface AuthState {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signInWithEmail: (email: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  /** Resolves with whether a confirmation email was sent — no session until the link is opened. */
+  signUp: (email: string, password: string) => Promise<{ needsEmailConfirmation: boolean }>;
+  resendConfirmation: (email: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
+
+/** Where emailed links come back to. Absolute, because GoTrue redirects the browser. */
+const confirmRedirect = () => `${window.location.origin}/auth/callback`;
+const recoveryRedirect = () => `${window.location.origin}/auth/reset`;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -41,18 +49,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       user: session?.user ?? null,
       loading,
-      async signInWithEmail(email) {
-        const { error } = await supabase.auth.signInWithOtp({
+      async signIn(email, password) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw new Error(error.message);
+      },
+      async signUp(email, password) {
+        const { data, error } = await supabase.auth.signUp({
           email,
-          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+          password,
+          options: { emailRedirectTo: confirmRedirect() },
+        });
+        if (error) throw new Error(error.message);
+        // With confirmations on, GoTrue withholds the session until the link is opened.
+        return { needsEmailConfirmation: data.session === null };
+      },
+      async resendConfirmation(email) {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email,
+          options: { emailRedirectTo: confirmRedirect() },
         });
         if (error) throw new Error(error.message);
       },
-      async signInWithGoogle() {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo: `${window.location.origin}/auth/callback` },
+      async sendPasswordReset(email) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: recoveryRedirect(),
         });
+        if (error) throw new Error(error.message);
+      },
+      async updatePassword(password) {
+        const { error } = await supabase.auth.updateUser({ password });
         if (error) throw new Error(error.message);
       },
       async signOut() {

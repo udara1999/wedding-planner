@@ -86,7 +86,7 @@ template.vendor_questions → stays global, referenced not copied
 │  Supabase                                               │
 │  ├── Postgres      tables · views · generated cols      │
 │  ├── RLS           every table, no exceptions           │
-│  ├── Auth          email magic link + Google            │
+│  ├── Auth          email + password, confirmed by email │
 │  ├── Storage       contracts, quotes, receipts          │
 │  └── Edge Functions  only where a secret is needed:     │
 │        · send-rsvp-invite (Resend)                      │
@@ -317,7 +317,7 @@ Estimates assume one experienced full-stack developer and **exclude** template c
 | 0.1 | Repo + tooling | Vite/React/TS, ESLint, Prettier, Vitest run green in CI |
 | 0.2 | Supabase project + CLI migrations | `supabase db reset` rebuilds from checked-in SQL; no dashboard edits |
 | 0.3 | Type generation in CI | Schema change without regenerating types fails the build |
-| 0.4 | Auth shell | Magic-link + Google sign-in; protected routes; sign-out |
+| 0.4 | Auth shell | Email + password sign-in, sign-up confirmed by email, password reset; protected routes; sign-out |
 | 0.5 | `profiles` + trigger | Row auto-created on `auth.users` insert |
 | 0.6 | Tenancy tables + RLS helpers | `weddings`, `wedding_members`, `app.role_in`, `can_write`, `can_see_money` |
 | 0.7 | **pgTAP RLS harness** | A test proves user B cannot read user A's wedding. CI fails if it can. |

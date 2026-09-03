@@ -48,8 +48,9 @@ Then take the URL and anon key from _Project Settings → API_.
 npm run dev            # http://localhost:5173
 ```
 
-With a local stack, magic-link emails are captured by Inbucket at
-<http://localhost:54324> rather than actually sent — open the link from there.
+Sign-up confirmation and password-reset emails are not really sent against a local
+stack — Inbucket captures them at <http://localhost:54324>. Open the link from there
+to confirm a new account.
 
 ---
 

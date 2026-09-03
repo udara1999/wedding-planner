@@ -149,7 +149,7 @@ export function SetupPage() {
   }
 
   return (
-    <div className="max-w-3xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-6 py-8">
       <header className="mb-6">
         <h1 className="text-xl font-semibold text-stone-900">Setup</h1>
         <p className="mt-0.5 text-sm text-stone-500">
@@ -164,7 +164,10 @@ export function SetupPage() {
         </div>
       )}
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid items-start gap-5 lg:grid-cols-2"
+      >
         <Section title="The couple &amp; the day">
           <Two>
             <Field label="Bride's name">
@@ -204,61 +207,6 @@ export function SetupPage() {
             </Field>
           </Two>
         </Section>
-
-        <Section title="Tradition &amp; locale">
-          <Field
-            label="Tradition"
-            error={form.formState.errors.tradition?.message}
-            hint="Which template the plan is seeded from."
-          >
-            <Select disabled={!canEdit} {...form.register('tradition')}>
-              {TRADITIONS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Two>
-            <Field label="Currency" error={form.formState.errors.currency?.message}>
-              <Input maxLength={3} disabled={!canEdit} {...form.register('currency')} />
-            </Field>
-            <Field
-              label="Timezone"
-              error={form.formState.errors.timezone?.message}
-              hint="Every time on this page is read in this zone."
-            >
-              <Input disabled={!canEdit} {...form.register('timezone')} />
-            </Field>
-          </Two>
-        </Section>
-
-        <Section title="Budget control">
-          <Field
-            label="Total budget"
-            error={form.formState.errors.total_budget_minor?.message}
-            hint="The ceiling every forecast is measured against."
-          >
-            <Input inputMode="decimal" disabled={!canEdit} {...form.register('total_budget_minor')} />
-          </Field>
-          <Two>
-            <Field
-              label="Contingency %"
-              error={form.formState.errors.contingency_pct?.message}
-              hint="Held back for overruns. Max 50."
-            >
-              <Input inputMode="decimal" disabled={!canEdit} {...form.register('contingency_pct')} />
-            </Field>
-            <Field
-              label="Guest buffer %"
-              error={form.formState.errors.guest_buffer_pct?.message}
-              hint="Extra head count catered for. Max 50."
-            >
-              <Input inputMode="decimal" disabled={!canEdit} {...form.register('guest_buffer_pct')} />
-            </Field>
-          </Two>
-        </Section>
-
         <Section title="Venue">
           <Two>
             <Field label="Venue name">
@@ -288,7 +236,58 @@ export function SetupPage() {
             <Input disabled={!canEdit} {...form.register('venue_contact_phone')} />
           </Field>
         </Section>
-
+        <Section title="Tradition &amp; locale">
+          <Field
+            label="Tradition"
+            error={form.formState.errors.tradition?.message}
+            hint="Which template the plan is seeded from."
+          >
+            <Select disabled={!canEdit} {...form.register('tradition')}>
+              {TRADITIONS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Two>
+            <Field label="Currency" error={form.formState.errors.currency?.message}>
+              <Input maxLength={3} disabled={!canEdit} {...form.register('currency')} />
+            </Field>
+            <Field
+              label="Timezone"
+              error={form.formState.errors.timezone?.message}
+              hint="Every time on this page is read in this zone."
+            >
+              <Input disabled={!canEdit} {...form.register('timezone')} />
+            </Field>
+          </Two>
+        </Section>
+        <Section title="Budget control">
+          <Field
+            label="Total budget"
+            error={form.formState.errors.total_budget_minor?.message}
+            hint="The ceiling every forecast is measured against."
+          >
+            <Input inputMode="decimal" disabled={!canEdit} {...form.register('total_budget_minor')} />
+          </Field>
+          <Two>
+            <Field
+              label="Contingency %"
+              error={form.formState.errors.contingency_pct?.message}
+              hint="Held back for overruns. Max 50."
+            >
+              <Input inputMode="decimal" disabled={!canEdit} {...form.register('contingency_pct')} />
+            </Field>
+            <Field
+              label="Guest buffer %"
+              error={form.formState.errors.guest_buffer_pct?.message}
+              hint="Extra head count catered for. Max 50."
+            >
+              <Input inputMode="decimal" disabled={!canEdit} {...form.register('guest_buffer_pct')} />
+            </Field>
+          </Two>
+        </Section>
         <Section title="Style &amp; key people">
           <Two>
             <Field label="Theme">
@@ -317,7 +316,7 @@ export function SetupPage() {
         </Section>
 
         {canEdit && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 lg:col-span-2">
             <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
               {update.isPending ? 'Saving…' : 'Save changes'}
             </Button>

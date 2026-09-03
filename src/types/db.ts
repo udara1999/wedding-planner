@@ -19,5 +19,14 @@ export type ProfileRow = Tables<'profiles'>;
 export type WeddingMemberRow = Tables<'wedding_members'>;
 export type WeddingInvitationRow = Tables<'wedding_invitations'>;
 
+export type Applicability = Enums<'applicability'>;
+export type TaskStatus = Enums<'task_status'>;
+
+export type BudgetCategoryRow = Tables<'budget_categories'>;
+export type BudgetLineRow = Tables<'budget_lines'>;
+
 /** One row of the `my_weddings()` RPC — a wedding plus the caller's role in it. */
 export type MyWedding = Database['public']['Functions']['my_weddings']['Returns'][number];
+
+/** Per-category budget totals. A view, so every field is nullable in the types. */
+export type BudgetByCategory = Database['public']['Views']['v_budget_by_category']['Row'];

@@ -40,7 +40,7 @@ npx supabase link --project-ref <your-project-ref>
 npx supabase db push
 ```
 
-Then take the URL and anon key from *Project Settings → API*.
+Then take the URL and anon key from _Project Settings → API_.
 
 ### 3. Run
 
@@ -70,19 +70,19 @@ missing policy is a data breach rather than a bug.
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Vite dev server |
-| `npm run build` | Type-check (`tsc -b`) then production build |
-| `npm run test` | Vitest unit tests |
-| `npm run lint` | oxlint |
-| `npm run format` | Prettier over `src/` and `supabase/` |
-| `npm run verify` | lint + build + test — what CI runs |
-| `npm run db:start` | Start the local Supabase stack |
-| `npm run db:reset` | Rebuild the local database from migrations |
-| `npm run db:test` | Run the pgTAP RLS suite |
-| `npm run db:push` | Push migrations to the linked hosted project |
-| `npm run types:gen` | Regenerate `src/types/database.types.ts` |
+| Command             | What it does                                 |
+| ------------------- | -------------------------------------------- |
+| `npm run dev`       | Vite dev server                              |
+| `npm run build`     | Type-check (`tsc -b`) then production build  |
+| `npm run test`      | Vitest unit tests                            |
+| `npm run lint`      | oxlint                                       |
+| `npm run format`    | Prettier over `src/` and `supabase/`         |
+| `npm run verify`    | lint + build + test — what CI runs           |
+| `npm run db:start`  | Start the local Supabase stack               |
+| `npm run db:reset`  | Rebuild the local database from migrations   |
+| `npm run db:test`   | Run the pgTAP RLS suite                      |
+| `npm run db:push`   | Push migrations to the linked hosted project |
+| `npm run types:gen` | Regenerate `src/types/database.types.ts`     |
 
 **After every migration, run `npm run types:gen`.** CI compares the committed
 types against the schema and fails if they have drifted.
@@ -109,13 +109,13 @@ supabase/
 
 ### Migrations
 
-| File | Contents |
-|---|---|
-| `…0100_init_extensions_and_enums.sql` | pgcrypto, citext, `app` schema, `member_role`, `wedding_side` |
-| `…0200_profiles.sql` | `profiles` + auto-create trigger on signup |
-| `…0300_weddings_and_members.sql` | `weddings`, `wedding_members`, `wedding_invitations` |
-| `…0400_rls_helpers.sql` | `app.role_in`, `can_write`, `can_see_money`, `can_see_ops`, … |
-| `…0500_policies_and_rpcs.sql` | Policies + `create_wedding`, `invite_member`, `accept_invitation`, `my_weddings` |
+| File                                  | Contents                                                                         |
+| ------------------------------------- | -------------------------------------------------------------------------------- |
+| `…0100_init_extensions_and_enums.sql` | pgcrypto, citext, `app` schema, `member_role`, `wedding_side`                    |
+| `…0200_profiles.sql`                  | `profiles` + auto-create trigger on signup                                       |
+| `…0300_weddings_and_members.sql`      | `weddings`, `wedding_members`, `wedding_invitations`                             |
+| `…0400_rls_helpers.sql`               | `app.role_in`, `can_write`, `can_see_money`, `can_see_ops`, …                    |
+| `…0500_policies_and_rpcs.sql`         | Policies + `create_wedding`, `invite_member`, `accept_invitation`, `my_weddings` |
 
 ---
 
@@ -140,7 +140,7 @@ cycle. `search_path` is pinned so a caller cannot shadow the table. Do not
 **Coordinators cannot see money, and column grants won't do it.** Supabase runs
 every signed-in user as the single Postgres role `authenticated`, so
 column-level `GRANT`s cannot vary per user. Money is therefore hidden by
-denying the *rows* — financial tables get no SELECT policy for that role. Any
+denying the _rows_ — financial tables get no SELECT policy for that role. Any
 screen that mixes money and operations needs an ops-facing view.
 
 **Every new table needs `wedding_id`, an index on it, RLS enabled, a policy,

@@ -4,7 +4,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useUpdateWedding, useWedding } from './api';
+import { TRADITIONS } from './traditions';
 import type { MyWedding } from '../../types/db';
+import type { WeddingRow } from '../../types/db';
+import {
+  currencyDecimals,
+  formatMinorAsMajor,
+  formatRateAsPercent,
+  parseMajorToMinor,
+  parsePercentAsRate,
+} from '../../lib/units';
 import {
   Button,
   Card,
@@ -14,12 +23,25 @@ import {
   ErrorState,
   Field,
   Input,
+  Select,
   Spinner,
 } from '../../components/ui';
 
 const nullableText = z.string().trim().max(200).optional().nullable();
 
-const schema = z.object({
+/**
+ * Money and percentages are held as strings here because that is what the user
+ * types; they are converted at both boundaries (see toFormValues / onSubmit).
+ * Validating them needs `currency`, so it happens at the object level.
+ */
+const schema = z
+  .object({
+  tradition: z.string().min(1, 'Pick a tradition'),
+  currency: z.string().trim().length(3, 'Use a 3-letter code, e.g. LKR'),
+  timezone: z.string().trim().min(1, 'A timezone is required for every schedule'),
+  total_budget_minor: z.string(),
+  contingency_pct: z.string(),
+  guest_buffer_pct: z.string(),
   bride_name: nullableText,
   groom_name: nullableText,
   wedding_date: z.string().optional().nullable(),
@@ -40,9 +62,41 @@ const schema = z.object({
   coordinator_phone: nullableText,
   emergency_contact_name: nullableText,
   emergency_contact_phone: nullableText,
-});
+  })
+  .superRefine((values, ctx) => {
+    const decimals = currencyDecimals(values.currency);
+    const check = (key: 'total_budget_minor' | 'contingency_pct' | 'guest_buffer_pct') => {
+      try {
+        if (key === 'total_budget_minor') parseMajorToMinor(values[key], decimals);
+        else parsePercentAsRate(values[key]);
+      } catch (e) {
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: e instanceof Error ? e.message : 'Not a valid number',
+        });
+      }
+    };
+    check('total_budget_minor');
+    check('contingency_pct');
+    check('guest_buffer_pct');
+  });
 
 type FormValues = z.infer<typeof schema>;
+
+/** Row -> form. The inverse lives in onSubmit; keep the two in step. */
+function toFormValues(row: WeddingRow): FormValues {
+  const decimals = currencyDecimals(row.currency);
+  return {
+    ...(row as unknown as FormValues),
+    tradition: row.tradition ?? 'poruwa',
+    currency: row.currency ?? 'LKR',
+    timezone: row.timezone ?? 'Asia/Colombo',
+    total_budget_minor: formatMinorAsMajor(row.total_budget_minor, decimals),
+    contingency_pct: formatRateAsPercent(row.contingency_pct),
+    guest_buffer_pct: formatRateAsPercent(row.guest_buffer_pct),
+  };
+}
 
 export function SetupPage() {
   const { wedding } = useOutletContext<{ wedding: MyWedding }>();
@@ -53,7 +107,7 @@ export function SetupPage() {
   const form = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
-    if (data) form.reset(data as unknown as FormValues);
+    if (data) form.reset(toFormValues(data));
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading)
@@ -70,10 +124,28 @@ export function SetupPage() {
     );
 
   async function onSubmit(values: FormValues) {
+    const {
+      total_budget_minor,
+      contingency_pct,
+      guest_buffer_pct,
+      currency,
+      ...rest
+    } = values;
+    const decimals = currencyDecimals(currency);
+
+    // Blank text means "not set"; blank money means zero, because these three
+    // columns are NOT NULL with a default rather than nullable.
     const clean = Object.fromEntries(
-      Object.entries(values).map(([k, v]) => [k, v === '' ? null : v]),
+      Object.entries(rest).map(([k, v]) => [k, v === '' ? null : v]),
     );
-    await update.mutateAsync(clean);
+
+    await update.mutateAsync({
+      ...clean,
+      currency: currency.toUpperCase(),
+      total_budget_minor: parseMajorToMinor(total_budget_minor, decimals) ?? 0,
+      contingency_pct: parsePercentAsRate(contingency_pct) ?? 0,
+      guest_buffer_pct: parsePercentAsRate(guest_buffer_pct) ?? 0,
+    });
   }
 
   return (
@@ -118,9 +190,73 @@ export function SetupPage() {
               <Input type="time" disabled={!canEdit} {...form.register('reception_time')} />
             </Field>
           </Two>
-          <Field label="Expected finish">
-            <Input type="time" disabled={!canEdit} {...form.register('expected_finish')} />
+          <Two>
+            <Field label="Expected finish">
+              <Input type="time" disabled={!canEdit} {...form.register('expected_finish')} />
+            </Field>
+            <Field label="Days to go" hint="Derived from the wedding date, never stored.">
+              <Input
+                readOnly
+                disabled
+                value={wedding.days_to_go ?? ''}
+                aria-label="Days to go"
+              />
+            </Field>
+          </Two>
+        </Section>
+
+        <Section title="Tradition &amp; locale">
+          <Field
+            label="Tradition"
+            error={form.formState.errors.tradition?.message}
+            hint="Which template the plan is seeded from."
+          >
+            <Select disabled={!canEdit} {...form.register('tradition')}>
+              {TRADITIONS.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </Select>
           </Field>
+          <Two>
+            <Field label="Currency" error={form.formState.errors.currency?.message}>
+              <Input maxLength={3} disabled={!canEdit} {...form.register('currency')} />
+            </Field>
+            <Field
+              label="Timezone"
+              error={form.formState.errors.timezone?.message}
+              hint="Every time on this page is read in this zone."
+            >
+              <Input disabled={!canEdit} {...form.register('timezone')} />
+            </Field>
+          </Two>
+        </Section>
+
+        <Section title="Budget control">
+          <Field
+            label="Total budget"
+            error={form.formState.errors.total_budget_minor?.message}
+            hint="The ceiling every forecast is measured against."
+          >
+            <Input inputMode="decimal" disabled={!canEdit} {...form.register('total_budget_minor')} />
+          </Field>
+          <Two>
+            <Field
+              label="Contingency %"
+              error={form.formState.errors.contingency_pct?.message}
+              hint="Held back for overruns. Max 50."
+            >
+              <Input inputMode="decimal" disabled={!canEdit} {...form.register('contingency_pct')} />
+            </Field>
+            <Field
+              label="Guest buffer %"
+              error={form.formState.errors.guest_buffer_pct?.message}
+              hint="Extra head count catered for. Max 50."
+            >
+              <Input inputMode="decimal" disabled={!canEdit} {...form.register('guest_buffer_pct')} />
+            </Field>
+          </Two>
         </Section>
 
         <Section title="Venue">

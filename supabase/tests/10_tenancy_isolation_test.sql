@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(128);
+select plan(139);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -934,6 +934,76 @@ select tests.become_service_role();
 select is((select count(*)::int from information_schema.role_table_grants
              where table_name = 'guests' and grantee = 'anon'), 0,
           'anon has no grant of any kind on the guests table');
+
+-- =============================================================================
+-- 23. Public RSVP as a genuinely anonymous caller (4.5) — 10 assertions
+-- =============================================================================
+-- These run as `anon`, which is the whole point: the plan calls this the one
+-- genuinely risky surface, so it is exercised as the actual attacker role
+-- rather than as a logged-in user pretending.
+select tests.become_service_role();
+
+create temporary table tok (k text primary key, v uuid);
+grant select on tok to public;
+insert into tok
+select 'household', rsvp_token from guests
+ where wedding_id = (select v from w where k='a')
+   and household_name = 'Bride side household';
+
+select tests.logout();
+
+-- 1. The read path.
+select is((select count(*)::int from public.rsvp_lookup((select v from tok where k='household'))),
+          1,
+          'A valid token returns exactly one household');
+
+select is((select household_name from public.rsvp_lookup((select v from tok where k='household'))),
+          'Bride side household',
+          'The lookup returns the right household');
+
+-- 2. An unknown token is silent, not an error: a distinguishable failure is an
+--    oracle for anyone guessing.
+select is((select count(*)::int from public.rsvp_lookup(gen_random_uuid())), 0,
+          'An unknown token returns no rows rather than raising');
+
+-- 3. anon cannot reach the tables behind those functions.
+select throws_ok($q$ select count(*) from guests $q$);
+select throws_ok($q$ select count(*) from rsvp_submissions $q$);
+
+-- 4. The write path, within what the household was invited for (4 adults + 1
+--    child).
+select lives_ok(
+  $q$ select public.rsvp_submit((select v from tok where k='household'),
+                                3, 1, 'no pork', true, false, 'see you there') $q$,
+  'A household can reply through the public function');
+
+select tests.become_service_role();
+select is((select rsvp_status::text from guests
+             where rsvp_token = (select v from tok where k='household')),
+          'accepted',
+          'Replying with people coming marks the household accepted');
+
+select is((select count(*)::int from rsvp_submissions
+             where guest_id = (select id from guests
+                                where rsvp_token = (select v from tok where k='household'))),
+          1,
+          'Every accepted submission is recorded for audit');
+
+-- 5. The control §4.5 names: a public form cannot invent guests.
+select tests.logout();
+select throws_ok(
+  $q$ select public.rsvp_submit((select v from tok where k='household'), 40, 0) $q$);
+
+-- 6. Nobody coming is a decline, not a silent nothing.
+select lives_ok(
+  $q$ select public.rsvp_submit((select v from tok where k='household'), 0, 0) $q$,
+  'A household can decline by replying with nobody attending');
+
+select tests.become_service_role();
+select is((select rsvp_status::text from guests
+             where rsvp_token = (select v from tok where k='household')),
+          'declined',
+          'Replying with nobody coming marks the household declined');
 
 select * from finish();
 rollback;

@@ -575,6 +575,70 @@ export type Database = {
         }
         Relationships: []
       }
+      rsvp_submissions: {
+        Row: {
+          adults_attending: number
+          children_attending: number
+          client_hint: string | null
+          dietary: string | null
+          guest_id: string
+          id: string
+          message: string | null
+          needs_room: boolean
+          needs_transport: boolean
+          submitted_at: string
+          wedding_id: string
+        }
+        Insert: {
+          adults_attending: number
+          children_attending: number
+          client_hint?: string | null
+          dietary?: string | null
+          guest_id: string
+          id?: string
+          message?: string | null
+          needs_room?: boolean
+          needs_transport?: boolean
+          submitted_at?: string
+          wedding_id: string
+        }
+        Update: {
+          adults_attending?: number
+          children_attending?: number
+          client_hint?: string | null
+          dietary?: string | null
+          guest_id?: string
+          id?: string
+          message?: string | null
+          needs_room?: boolean
+          needs_transport?: boolean
+          submitted_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsvp_submissions_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rsvp_submissions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "rsvp_submissions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_answers: {
         Row: {
           answer: string | null
@@ -1791,6 +1855,34 @@ export type Database = {
       record_vendor_from_option: {
         Args: { p_option_id: string }
         Returns: string
+      }
+      rsvp_lookup: {
+        Args: { p_token: string }
+        Returns: {
+          adults_attending: number
+          adults_invited: number
+          children_attending: number
+          children_invited: number
+          dietary: string
+          household_name: string
+          needs_room: boolean
+          needs_transport: boolean
+          rsvp_status: string
+          wedding_date: string
+          wedding_display: string
+        }[]
+      }
+      rsvp_submit: {
+        Args: {
+          p_adults: number
+          p_children: number
+          p_dietary?: string
+          p_message?: string
+          p_needs_room?: boolean
+          p_needs_transport?: boolean
+          p_token: string
+        }
+        Returns: undefined
       }
       seed_wedding: {
         Args: { p_locale?: string; p_wedding_id: string }

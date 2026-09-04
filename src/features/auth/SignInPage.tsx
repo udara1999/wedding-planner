@@ -1,7 +1,7 @@
 import { useHead } from '../../lib/head';
 import { useState } from 'react';
 import { Heart } from 'lucide-react';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from './AuthProvider';
@@ -34,7 +34,16 @@ export function SignInPage() {
   useHead({ title: 'Sign in', index: false });
   const { session, loading } = useAuth();
   const [params] = useSearchParams();
-  const [mode, setMode] = useState<Mode>('signin');
+
+  /**
+   * The landing page's "Start free" form hands the address over in router
+   * state rather than in the query string — an email in a URL ends up in
+   * history, in server logs and in whatever referrer the next page sends.
+   * Arriving with one means the visitor was creating an account, not signing
+   * in, so that is the form they get.
+   */
+  const handedOver = (useLocation().state as { email?: string } | null)?.email;
+  const [mode, setMode] = useState<Mode>(handedOver ? 'signup' : 'signin');
 
   if (loading) {
     return (
@@ -51,7 +60,8 @@ export function SignInPage() {
     return <Navigate to={next?.startsWith('/') ? next : '/'} replace />;
   }
 
-  if (mode === 'signup') return <SignUpForm onDone={() => setMode('signin')} />;
+  if (mode === 'signup')
+    return <SignUpForm defaultEmail={handedOver} onDone={() => setMode('signin')} />;
   if (mode === 'forgot') return <ForgotPasswordForm onDone={() => setMode('signin')} />;
   return (
     <SignInForm onForgot={() => setMode('forgot')} onCreateAccount={() => setMode('signup')} />
@@ -187,7 +197,7 @@ function SignInForm({
   );
 }
 
-function SignUpForm({ onDone }: { onDone: () => void }) {
+function SignUpForm({ defaultEmail, onDone }: { defaultEmail?: string; onDone: () => void }) {
   const { signUp } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [confirmSentTo, setConfirmSentTo] = useState<string | null>(null);
@@ -196,7 +206,10 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpValues>({ resolver: zodResolver(signUpSchema) });
+  } = useForm<SignUpValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { email: defaultEmail ?? '' },
+  });
 
   async function onSubmit(values: SignUpValues) {
     setError(null);

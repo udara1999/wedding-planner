@@ -40,6 +40,11 @@
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
+  /* Display serif, for the landing page's headlines only. The app itself
+     stays entirely on Inter: a wedding budget is a working document, and a
+     serif in a table reads as a wedding invitation rather than a total. */
+  --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
+
   /* Softer and larger than Tailwind's defaults: rounded corners and diffuse
      shadows are most of what separates "modern" from "administrative". */
   --radius-lg: 0.625rem;
@@ -126,4 +131,112 @@ body {
 
 .print-only {
   display: none;
+}
+
+/* =============================================================================
+   Landing page motion
+   =============================================================================
+   Only the marketing page uses these. They live here rather than inline
+   because keyframes cannot be expressed as a utility, and they are prefixed
+   mh- so it stays obvious that nothing in the app proper depends on them.
+
+   Every one of them is decorative. The reduced-motion rule at the bottom is
+   the reason that is acceptable: someone who has asked their system to stop
+   animating things gets a still page, not a slower one.
+   ========================================================================== */
+@keyframes mh-float-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(30px, -40px, 0) scale(1.08);
+  }
+}
+@keyframes mh-float-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-40px, 30px, 0) scale(1.12);
+  }
+}
+@keyframes mh-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mh-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes mh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes mh-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes mh-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(171 69 87 / 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgb(171 69 87 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(171 69 87 / 0);
+  }
+}
+@keyframes mh-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* The landing page is the one place in the app that scrolls to an anchor.
+   The rule has to sit on the element that actually scrolls — the document, not
+   the page wrapper — so it is scoped with :has() rather than applied globally
+   and inherited by every screen in the app. */
+html:has(.mh-page) {
+  scroll-behavior: smooth;
+}
+
+/* Clear the sticky header, which is 66px tall, or every anchor lands with its
+   heading hidden underneath it. */
+.mh-page section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mh-page *,
+  .mh-page *::before,
+  .mh-page *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html:has(.mh-page) {
+    scroll-behavior: auto;
+  }
 }

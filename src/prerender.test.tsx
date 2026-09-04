@@ -60,14 +60,39 @@ describe('landing page prerender', () => {
   it('renders the page a crawler needs to see', () => {
     const markup = render();
 
-    expect(markup).toContain('<h1');
-    expect(markup).toContain('Plan a Sri Lankan wedding without twenty-seven spreadsheet tabs');
-    // Six feature cards under one h2, plus the FAQ and closing sections: a
-    // heading tree, not a wall.
-    expect(markup.match(/<h2/g)).toHaveLength(3);
-    expect(markup.match(/<h3/g)).toHaveLength(6);
+    expect(markup).toContain('Your journey to the perfect');
+
+    // Exactly one h1, and it is the hero. The product tour renders a picture
+    // of four app screens whose titles are h1s in the app itself; if those
+    // ever come through as real headings the page grows five h1s and its
+    // outline stops meaning anything. See landing/appmock.tsx.
+    expect(markup.match(/<h1/g)).toHaveLength(1);
+    // One h2 per section, one h3 per card, and nothing skipping a level.
+    expect(markup.match(/<h2/g)?.length ?? 0).toBeGreaterThanOrEqual(8);
+    expect(markup.match(/<h3/g)?.length ?? 0).toBeGreaterThanOrEqual(12);
+
     // Enough prose to be a page rather than a splash screen.
-    expect(renderedText().length).toBeGreaterThan(2000);
+    expect(renderedText().length).toBeGreaterThan(4000);
+  });
+
+  it('states the template figures the migrations actually seed', () => {
+    const text = renderedText();
+    // Checked against supabase/migrations: these are what template/ seeds, and
+    // two of them (56 timeline events, 82 procurement items) differ from the
+    // workbook's original numbers, which is exactly the sort of thing that
+    // drifts back in during a copy edit.
+    for (const claim of [
+      '194 budget lines',
+      '227 vendor questions',
+      '93 planning tasks',
+      '56 timeline events',
+      '82 procurement items',
+      '62 shot-list items',
+      '24 ceremony steps',
+      '17 legal requirements',
+    ]) {
+      expect(text, `marquee no longer claims: ${claim}`).toContain(claim);
+    }
   });
 
   it('has somewhere to inject, matching what scripts/prerender.mjs looks for', () => {
@@ -79,7 +104,7 @@ describe('landing page prerender', () => {
     const text = renderedText();
     const faq = faqFromJsonLd();
 
-    expect(faq).toHaveLength(4);
+    expect(faq).toHaveLength(5);
 
     for (const { question, answer } of faq) {
       expect(text, `question missing from the page: ${question}`).toContain(question);

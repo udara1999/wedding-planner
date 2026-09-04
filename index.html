@@ -16,10 +16,10 @@
          Slack and iMessage all read the raw HTML and stop. A title set in a
          useEffect is invisible to every one of them.
          ================================================================== -->
-    <title>MangalaHub — Sri Lankan wedding planner, poruwa to reception</title>
+    <title>MangalaHub — Sri Lankan wedding planner for your Mangala day</title>
     <meta
       name="description"
-      content="Plan a Sri Lankan wedding in one place: a poruwa checklist, a budget that tracks quoted against actual, guest lists with RSVP links, vendor comparisons, and a day-of pack you can print and run without a signal."
+      content="Every rupee, every vendor, every guest and every hour of the day itself, in one place your whole family can use. A poruwa running order, a budget kept in cents, RSVP links per household, and a day-of pack that prints."
     />
     <link rel="canonical" href="%SITE_URL%/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -29,11 +29,11 @@
     <meta property="og:site_name" content="MangalaHub" />
     <meta
       property="og:title"
-      content="MangalaHub — Sri Lankan wedding planner, poruwa to reception"
+      content="MangalaHub — Sri Lankan wedding planner for your Mangala day"
     />
     <meta
       property="og:description"
-      content="A poruwa checklist, a budget that tracks quoted against actual, RSVP links for every household, and a day-of pack that works with no signal."
+      content="Your journey to the perfect Mangala day: a poruwa running order, a budget that tracks quoted against actual, RSVP links for every household, and a day-of pack that works with no signal."
     />
     <meta property="og:url" content="%SITE_URL%/" />
     <meta property="og:image" content="%SITE_URL%/icons/og-image.png" />
@@ -45,11 +45,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="MangalaHub — Sri Lankan wedding planner, poruwa to reception"
+      content="MangalaHub — Sri Lankan wedding planner for your Mangala day"
     />
     <meta
       name="twitter:description"
-      content="A poruwa checklist, a budget that tracks quoted against actual, RSVP links for every household, and a day-of pack that works with no signal."
+      content="Your journey to the perfect Mangala day: a poruwa running order, a budget that tracks quoted against actual, RSVP links for every household, and a day-of pack that works with no signal."
     />
     <meta name="twitter:image" content="%SITE_URL%/icons/og-image.png" />
 
@@ -64,6 +64,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MangalaHub" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+
+    <!-- Cormorant Garamond carries every display heading and Inter the body.
+         --font-sans in index.css has named Inter since the beginning but
+         nothing ever loaded it, so the app was falling back to the system UI
+         font. The preconnects matter more than usual here: the landing page's
+         first paint is a serif headline. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Supabase is the only third party and every screen needs it, so the
          connection is warmed rather than waited for. -->
@@ -107,34 +119,42 @@
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "Does it cover a poruwa ceremony?",
+                "name": "Is it only for Sri Lankan weddings?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes. It starts with the full poruwa running order — 24 components from the Hewisi drummers to the coconut being split — with durations that add up, and each one can be switched off if you are not having it. The registration checklist follows the Sri Lankan registrar's requirements, and every item is marked to confirm with your own registrar rather than stated as fact."
+                  "text": "No. The Buddhist Poruwa template is the most complete one because that is where the content came from, but Christian, Hindu, Muslim and generic templates use the same engine. The tradition is data, not code."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How do guests reply?",
+                "name": "Can I bring my existing spreadsheet in?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Each household gets a private link with no login. They see who is invited, how many places are reserved, and answer on their phone. You can send it on WhatsApp with one tap. Replies update your headcount, your seating and the number you give the caterer."
+                  "text": "Guests import from CSV today. For the budget, most couples find the template already covers what their sheet had, and renaming lines is quicker than mapping columns."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What happens on the day if there is no signal?",
+                "name": "What if we change the wedding date?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "You print the day-of pack beforehand: the running order, when each vendor arrives, who to phone, the seating plan and what is in the bags. The app also installs to your phone and keeps a copy of the pack readable offline, but the printed version is the one to rely on."
+                  "text": "Every task, appointment and countdown item is stored as an offset from the wedding day rather than as a fixed date. Change the date in Setup and the whole plan moves with it. Anything you dated by hand stays where you put it."
                 }
               },
               {
                 "@type": "Question",
-                "name": "Can I get my data out?",
+                "name": "Can our coordinator really not see the money?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Yes, in one click, as a spreadsheet with the same sheets a wedding workbook has — budget, payments, guests, timeline. It is built in your browser, so nothing is uploaded to produce it."
+                  "text": "Correct. Financial tables return no rows at all for the coordinator role \u2014 not blurred, not hidden in the interface, simply not sent. Screens that mix money with operations use a separate operations-facing view."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How many guests can it handle?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Guests are grouped by household, and each household gets one RSVP link. A thousand-guest list is a few hundred links, which is well within what the RSVP endpoint is rate-limited for."
                 }
               }
             ]

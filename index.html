@@ -142,27 +142,56 @@
         ]
       }
     </script>
+    <!-- ====================================================================
+         The prerendered landing page, and when NOT to show it
+         ====================================================================
+         #root below holds the landing page, rendered at build time. That is
+         the right content for exactly one case: a visitor's first arrival at
+         "/". But this same index.html is served for every URL in the app by
+         the SPA fallback, and to people who are already signed in — so on
+         /w/<id>/budget, or for a signed-in couple opening "/", the
+         prerendered hero is the wrong page and must not paint at all.
+
+         Both halves are inline and in the head deliberately. The script runs
+         while the head is still parsing, long before #root exists, and the
+         rule has to be here rather than in index.css because in development
+         that stylesheet is injected by JavaScript — by which time the bundle
+         has already run and the moment has passed.
+
+         src/main.tsx removes the attribute once it has cleared the markup. -->
+    <style>
+      [data-hide-prerender] #root {
+        visibility: hidden;
+      }
+    </style>
+    <script>
+      (function () {
+        var signedIn = false;
+        try {
+          // Supabase persists its session under sb-<project-ref>-auth-token.
+          for (var i = 0; i < localStorage.length; i += 1) {
+            var key = localStorage.key(i);
+            if (key && key.indexOf('sb-') === 0 && key.indexOf('-auth-token') > 0) {
+              signedIn = true;
+            }
+          }
+        } catch (e) {
+          // A private window denies localStorage. Briefly showing the landing
+          // page is the harmless side of this decision, so nothing to do.
+        }
+        if (signedIn || location.pathname !== '/') {
+          document.documentElement.setAttribute('data-hide-prerender', '');
+        }
+      })();
+    </script>
   </head>
   <body>
-    <!-- The app replaces this on mount.
+    <!-- The landing page is rendered here at build time by
+         scripts/prerender.mjs, from the same component the app renders, so the
+         two cannot drift. In development this is empty and React fills it.
 
-         It exists because #root was empty, which means every crawler and share
-         scraper that does not run JavaScript saw a blank page. React wipes it
-         when it renders, so users never see it for more than a frame — and it
-         is deliberately just the hero, kept short so it stays in step with
-         src/features/marketing/LandingPage.tsx rather than drifting into a
-         second copy of the whole page. -->
-    <div id="root">
-      <main>
-        <h1>Plan a Sri Lankan wedding without twenty-seven spreadsheet tabs</h1>
-        <p>
-          A poruwa checklist that knows the running order, a budget that tracks what you were quoted
-          against what you actually paid, RSVP links for every household, and a day-of pack you can
-          print and hand to your coordinator.
-        </p>
-        <p><a href="/signin">Sign in or create an account</a></p>
-      </main>
-    </div>
+         Not hydrated: see src/main.tsx for why. -->
+    <div id="root"><!--prerender--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -15,6 +15,11 @@ function seoAssets(): Plugin {
     name: 'seo-assets',
     apply: 'build',
 
+    // Client build only. The SSR build (src/prerender.tsx) exists to produce
+    // one string of markup; robots.txt and a sitemap in dist-ssr/ would be two
+    // copies of the same files, one of which never gets deployed.
+    applyToEnvironment: (environment) => environment.name === 'client',
+
     // %SITE_URL% in index.html, so the canonical and og:url are absolute
     // without a domain hard-coded into the repository.
     transformIndexHtml(html) {
@@ -38,6 +43,11 @@ function seoAssets(): Plugin {
 export default defineConfig({
   plugins: [react(), seoAssets()],
   server: { port: 5173 },
+
+  // The SSR build is a means to an end: scripts/prerender.mjs imports it,
+  // reads one string out of it, and dist-ssr/ is then throwaway. Copying
+  // public/ into it would duplicate every icon and the service worker.
+  environments: { ssr: { build: { copyPublicDir: false } } },
   test: {
     environment: 'jsdom',
     globals: true,

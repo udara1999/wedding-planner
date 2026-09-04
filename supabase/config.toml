@@ -44,3 +44,11 @@ port = 54324
 # asking a guest to sign in. It is one barrier among several, not the barrier.
 [functions.rsvp]
 verify_jwt = true
+
+# Ticket 4.10. Sends invitations by email through Resend.
+#
+# verify_jwt ON, and no service role key inside: the function reads and writes
+# as the caller, so row-level security decides which households it can see and
+# mark. That is what stops it being a mail relay.
+[functions.invite]
+verify_jwt = true

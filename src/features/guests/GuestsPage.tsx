@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { FileUp, Plus, Search, UsersRound } from 'lucide-react';
+import { FileUp, Plus, Search, Send, UsersRound } from 'lucide-react';
 import {
   useCreateGuest,
   useDeleteGuest,
@@ -12,6 +12,7 @@ import {
 import { countGuests } from './counts';
 import { GuestDetail } from './GuestDetail';
 import { ImportGuestsModal } from './import/ImportGuestsModal';
+import { InvitesModal } from '../invites/InvitesModal';
 import type { MyWedding, WeddingSide } from '../../types/db';
 import {
   Badge,
@@ -62,6 +63,7 @@ export function GuestsPage() {
   const [sideFilter, setSideFilter] = useState<WeddingSide | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [inviting, setInviting] = useState(false);
 
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -125,6 +127,15 @@ export function GuestsPage() {
               >
                 Import
               </Button>
+              {/* Ticket 4.10. Sending the invitations is a guest-list job, so
+                  it lives here rather than on a screen of its own. */}
+              <Button
+                variant="secondary"
+                icon={<Send className="size-4" />}
+                onClick={() => setInviting(true)}
+              >
+                Invitations
+              </Button>
               <Button
                 icon={<Plus className="size-4" />}
                 loading={create.isPending}
@@ -147,6 +158,8 @@ export function GuestsPage() {
         open={importing}
         onClose={() => setImporting(false)}
       />
+
+      <InvitesModal weddingId={wedding.id} open={inviting} onClose={() => setInviting(false)} />
 
       {/* Ticket 4.4. Households and heads side by side, because they answer
           different questions and are easy to confuse. */}

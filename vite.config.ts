@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig, type Plugin } from 'vitest/config';
+import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { robotsTxt, sitemapXml } from './src/lib/seo.ts';
 
@@ -7,10 +8,21 @@ import { robotsTxt, sitemapXml } from './src/lib/seo.ts';
  * Absolute URLs are required for canonical, og:url and a sitemap — a relative
  * canonical is ignored and a relative og:url breaks every share preview. There
  * is no correct default, so it comes from the environment.
+ *
+ * Read with loadEnv rather than process.env, because Vite does NOT put .env
+ * into process.env — it only exposes it to application code as
+ * import.meta.env. Reading process.env here meant VITE_SITE_URL had to be
+ * passed on the command line every single time, and a plain `npm run build`
+ * silently produced a dist with http://localhost:5173 as its canonical.
+ * loadEnv still lets a real environment variable win over the .env file, so
+ * `VITE_SITE_URL=... npm run build` continues to override it.
  */
-const SITE_URL = (process.env.VITE_SITE_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
+function siteUrl(mode: string): string {
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  return (env.VITE_SITE_URL || 'http://localhost:5173').replace(/\/+$/, '');
+}
 
-function seoAssets(): Plugin {
+function seoAssets(SITE_URL: string): Plugin {
   return {
     name: 'seo-assets',
     apply: 'build',
@@ -40,8 +52,8 @@ function seoAssets(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), seoAssets()],
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), seoAssets(siteUrl(mode))],
   server: { port: 5173 },
 
   // The SSR build is a means to an end: scripts/prerender.mjs imports it,
@@ -53,4 +65,4 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
   },
-});
+}));

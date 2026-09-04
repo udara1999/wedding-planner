@@ -213,7 +213,18 @@ export function RolesSection() {
             data-reveal
             className="relative aspect-4/3 overflow-hidden rounded-3xl shadow-[0_4px_8px_-2px_rgb(28_25_23/0.08),0_24px_56px_-20px_rgb(28_25_23/0.28)]"
           >
-            <Photo alt="A family planning a wedding together" />
+            {/* Pre-cropped to 4:3, which is this frame, so the browser
+                discards nothing. Loaded lazily on purpose — it is below the
+                fold, unlike the hero. */}
+            <Photo
+              src="/roles.jpg"
+              // The brand lockup and tagline are rendered into the picture, so
+              // they belong in the alt text: text that exists only as pixels
+              // is text a screen reader cannot reach.
+              alt="MangalaHub Wedding Planning — Your Dream Wedding, Perfectly Planned. Four planners at a styled table working through a portfolio, colour swatches and a laptop."
+              width={1200}
+              height={900}
+            />
           </div>
           <div>
             <Eyebrow>Who it's for</Eyebrow>

@@ -413,56 +413,6 @@ export function InlineError({ error }: { error: unknown }) {
 }
 
 /* ==========================================================================
-   Drawer
-   ==========================================================================
-   A right-hand panel for editing one record while its list stays visible.
-   Preferred over a third column: the list keeps its width, and the form gets
-   room instead of being squeezed into a narrow rail.
-   ========================================================================== */
-export function Drawer({
-  open,
-  onClose,
-  title,
-  subtitle,
-  children,
-  footer,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
-      <button
-        aria-label="Close"
-        className="absolute inset-0 bg-stone-900/25 backdrop-blur-[1px]"
-        onClick={onClose}
-      />
-      <div className="relative flex h-full w-full max-w-lg flex-col bg-white shadow-pop">
-        <div className="flex items-start justify-between gap-3 border-b border-stone-100 px-5 py-4">
-          <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold tracking-tight text-stone-900">
-              {title}
-            </h2>
-            {subtitle && <p className="mt-0.5 truncate text-xs text-stone-500">{subtitle}</p>}
-          </div>
-          <IconButton label="Close" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </IconButton>
-        </div>
-        {/* The panel scrolls, not the page behind it. */}
-        <div className="scroll-subtle min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="border-t border-stone-100 px-5 py-3">{footer}</div>}
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
    Modal
    ==========================================================================
    A wide centred panel for a record with several distinct panels to it — a

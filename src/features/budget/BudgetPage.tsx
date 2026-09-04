@@ -21,11 +21,11 @@ import {
   Button,
   Card,
   CardBody,
-  Drawer,
   EmptyState,
   ErrorState,
   InlineError,
   Input,
+  Modal,
   Page,
   PageHeader,
   Select,
@@ -319,7 +319,7 @@ export function BudgetPage() {
         </Card>
       </div>
 
-      <Drawer
+      <Modal
         open={Boolean(editing) || creating}
         onClose={() => {
           setEditing(null);
@@ -346,7 +346,7 @@ export function BudgetPage() {
             setCreating(false);
           }}
         />
-      </Drawer>
+      </Modal>
     </Page>
   );
 }

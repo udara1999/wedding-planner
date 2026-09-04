@@ -13,7 +13,15 @@ import {
   parseMajorToMinor,
 } from '../../lib/units';
 import type { Applicability, BudgetCategoryRow, BudgetLineRow, TaskStatus } from '../../types/db';
-import { Button, Field, InlineError, Input, Select, Textarea } from '../../components/ui';
+import {
+  Button,
+  Field,
+  InlineError,
+  Input,
+  Section,
+  Select,
+  Textarea,
+} from '../../components/ui';
 
 const STATUSES: { value: TaskStatus; label: string }[] = [
   { value: 'not_started', label: 'Not started' },
@@ -163,122 +171,148 @@ export function BudgetLineForm({
   const error = create.error ?? update.error ?? remove.error;
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <Field label="Line item" error={form.formState.errors.name?.message}>
-        <Input
-          disabled={!canEdit}
-          placeholder="Bridal necklace set"
-          {...form.register('name')}
-        />
-      </Field>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      {/* Two columns: what the line IS on the left, what it costs on the
+          right. In one column the five money fields pushed everything else out
+          of sight. */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="space-y-4">
+          <Section title="The line">
+            <Field label="Line item" error={form.formState.errors.name?.message}>
+              <Input
+                disabled={!canEdit}
+                placeholder="Bridal necklace set"
+                {...form.register('name')}
+              />
+            </Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Category" error={form.formState.errors.category_id?.message}>
-          {/* Locked after creation: moving a line between categories silently
-              rewrites two category totals, which deserves its own action. */}
-          <Select disabled={!canEdit || Boolean(line)} {...form.register('category_id')}>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <Field
-          label="Code"
-          hint={line ? undefined : 'Optional. Yours to choose for a line you add.'}
-        >
-          <Input disabled={!canEdit || Boolean(line)} placeholder="BG200" {...form.register('code')} />
-        </Field>
-      </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Category" error={form.formState.errors.category_id?.message}>
+                {/* Locked after creation: moving a line between categories
+                    silently rewrites two category totals. */}
+                <Select disabled={!canEdit || Boolean(line)} {...form.register('category_id')}>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field
+                label="Code"
+                hint={line ? undefined : 'Optional. Yours to choose for a line you add.'}
+              >
+                <Input
+                  disabled={!canEdit || Boolean(line)}
+                  placeholder="BG200"
+                  {...form.register('code')}
+                />
+              </Field>
+            </div>
 
-      <Field label="Applies?" hint="A not-applicable line keeps its budget but forecasts nothing.">
-        <div className="pt-0.5">
-          <ApplicabilitySwitch
-            value={applicability}
-            disabled={!canEdit}
-            onChange={setApplicability}
-          />
+            <Field
+              label="Applies?"
+              hint="A not-applicable line keeps its budget but forecasts nothing."
+            >
+              <div className="pt-0.5">
+                <ApplicabilitySwitch
+                  value={applicability}
+                  disabled={!canEdit}
+                  onChange={setApplicability}
+                />
+              </div>
+            </Field>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Who pays">
+                <Select disabled={!canEdit} {...form.register('payer')}>
+                  <option value="">Not decided</option>
+                  {payerOptions.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              {line && (
+                <Field label="Status">
+                  <Select disabled={!canEdit} {...form.register('status')}>
+                    {STATUSES.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </Select>
+                </Field>
+              )}
+            </div>
+          </Section>
+
+          {line && (
+            <Section title="Notes">
+              <Textarea disabled={!canEdit} rows={3} {...form.register('notes')} />
+            </Section>
+          )}
         </div>
-      </Field>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Who pays">
-          <Select disabled={!canEdit} {...form.register('payer')}>
-            <option value="">Not decided</option>
-            {payerOptions.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        {line && (
-          <Field label="Status">
-            <Select disabled={!canEdit} {...form.register('status')}>
-              {STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-        )}
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        {(line ? MONEY_FIELDS : MONEY_FIELDS.slice(0, 1)).map(([key, label, hint]) => (
-          <Field
-            key={key}
-            label={`${label} (${currency})`}
-            hint={hint}
-            error={form.formState.errors[key]?.message}
+        <div className="space-y-4">
+          <Section
+            title="Amounts"
+            description={
+              line
+                ? 'Actual wins over negotiated, which wins over quoted, which wins over budgeted.'
+                : 'Start with what you plan to spend; the rest can come later.'
+            }
           >
-            <Input
-              inputMode="decimal"
-              placeholder="0.00"
-              disabled={!canEdit}
-              {...form.register(key)}
-            />
-          </Field>
-        ))}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(line ? MONEY_FIELDS : MONEY_FIELDS.slice(0, 1)).map(([key, label, hint]) => (
+                <Field
+                  key={key}
+                  label={`${label} (${currency})`}
+                  hint={hint}
+                  error={form.formState.errors[key]?.message}
+                >
+                  <Input
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    disabled={!canEdit}
+                    {...form.register(key)}
+                  />
+                </Field>
+              ))}
+            </div>
+
+            {line && (
+              <div className="rounded-lg bg-stone-50 px-3 py-2.5 text-xs text-stone-600">
+                Forecast now{' '}
+                <strong className="tabular text-stone-900">
+                  {formatMinorAsMajor(line.forecast_minor, decimals)} {currency}
+                </strong>
+                {applicability === 'not_applicable'
+                  ? ' — zero while this line is not applicable.'
+                  : ' — worked out by the database, not typed.'}
+              </div>
+            )}
+          </Section>
+
+          {line && (
+            <Section title="Payments against this line">
+              <LinePayments
+                weddingId={weddingId}
+                budgetLineId={line.id}
+                forecastMinor={line.forecast_minor}
+                currency={currency}
+                decimals={decimals}
+              />
+            </Section>
+          )}
+        </div>
       </div>
-
-      {line && (
-        <div className="rounded-lg bg-stone-50 px-3 py-2.5 text-xs text-stone-600">
-          Forecast now{' '}
-          <strong className="tabular text-stone-900">
-            {formatMinorAsMajor(line.forecast_minor, decimals)} {currency}
-          </strong>
-          {applicability === 'not_applicable'
-            ? ' — zero while this line is not applicable.'
-            : ' — actual, else negotiated, else quoted, else budgeted. Worked out by the database.'}
-        </div>
-      )}
-
-      {line && (
-        <div>
-          <p className="mb-1.5 text-[13px] font-medium text-stone-700">Payments against this line</p>
-          <LinePayments
-            weddingId={weddingId}
-            budgetLineId={line.id}
-            forecastMinor={line.forecast_minor}
-            currency={currency}
-            decimals={decimals}
-          />
-        </div>
-      )}
-
-      {line && (
-        <Field label="Notes" error={form.formState.errors.notes?.message}>
-          <Textarea disabled={!canEdit} rows={2} {...form.register('notes')} />
-        </Field>
-      )}
 
       <InlineError error={error} />
 
       {canEdit && (
-        <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="sticky bottom-0 -mx-6 mt-6 flex items-center justify-between gap-3 border-t border-stone-100 bg-white/95 px-6 py-3 backdrop-blur">
           <Button type="submit" loading={busy}>
             {line ? 'Save changes' : 'Add line'}
           </Button>

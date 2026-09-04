@@ -122,6 +122,13 @@ export type Database = {
             foreignKeyName: "accommodations_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "accommodations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -245,6 +252,13 @@ export type Database = {
             foreignKeyName: "attire_items_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "attire_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -362,6 +376,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -568,6 +589,13 @@ export type Database = {
             foreignKeyName: "budget_lines_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -676,6 +704,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "cake_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -805,6 +840,13 @@ export type Database = {
             foreignKeyName: "ceremony_steps_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -913,6 +955,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -1030,6 +1079,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "contacts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -1237,6 +1293,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "decor_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -1615,6 +1678,13 @@ export type Database = {
             foreignKeyName: "jewellery_items_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -1750,6 +1820,13 @@ export type Database = {
             foreignKeyName: "legal_requirements_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -1852,6 +1929,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "lessons_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -1972,6 +2056,13 @@ export type Database = {
             foreignKeyName: "menu_items_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "menu_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -2083,6 +2174,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "music_cues_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -2229,6 +2327,13 @@ export type Database = {
             foreignKeyName: "payments_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -2358,6 +2463,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -2533,6 +2645,108 @@ export type Database = {
           },
           {
             foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risks: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          area: string | null
+          created_at: string
+          id: string
+          if_it_happens: string | null
+          impact: number
+          likelihood: number
+          name: string
+          notes: string | null
+          owner: string | null
+          prevent_by: string | null
+          prevention_done: boolean
+          score: number | null
+          seq: number | null
+          sort_order: number
+          source_template_id: number | null
+          updated_at: string
+          wedding_id: string
+          who_to_call: string | null
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          area?: string | null
+          created_at?: string
+          id?: string
+          if_it_happens?: string | null
+          impact?: number
+          likelihood?: number
+          name: string
+          notes?: string | null
+          owner?: string | null
+          prevent_by?: string | null
+          prevention_done?: boolean
+          score?: number | null
+          seq?: number | null
+          sort_order?: number
+          source_template_id?: number | null
+          updated_at?: string
+          wedding_id: string
+          who_to_call?: string | null
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          area?: string | null
+          created_at?: string
+          id?: string
+          if_it_happens?: string | null
+          impact?: number
+          likelihood?: number
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          prevent_by?: string | null
+          prevention_done?: boolean
+          score?: number | null
+          seq?: number | null
+          sort_order?: number
+          source_template_id?: number | null
+          updated_at?: string
+          wedding_id?: string
+          who_to_call?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_alerts"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -2791,6 +3005,13 @@ export type Database = {
             foreignKeyName: "shot_list_items_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -2831,6 +3052,133 @@ export type Database = {
           },
           {
             foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeline_events: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          created_at: string
+          done: boolean
+          duration_minutes: number | null
+          ends_at: string | null
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          phase: string | null
+          seq: number | null
+          sort_order: number
+          source_template_id: number | null
+          starts_at: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+          who: string | null
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          created_at?: string
+          done?: boolean
+          duration_minutes?: number | null
+          ends_at?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          phase?: string | null
+          seq?: number | null
+          sort_order?: number
+          source_template_id?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+          who?: string | null
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          created_at?: string
+          done?: boolean
+          duration_minutes?: number | null
+          ends_at?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          phase?: string | null
+          seq?: number | null
+          sort_order?: number
+          source_template_id?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+          who?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_alerts"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -2914,6 +3262,13 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -3090,6 +3445,13 @@ export type Database = {
             foreignKeyName: "vendor_attachments_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -3175,6 +3537,13 @@ export type Database = {
             columns: ["recorded_vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -3314,6 +3683,100 @@ export type Database = {
           },
           {
             foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_schedule: {
+        Row: {
+          checked_in_at: string | null
+          checked_out_at: string | null
+          day_notes: string | null
+          updated_at: string
+          vendor_id: string
+          wedding_id: string
+          where_in_venue: string | null
+        }
+        Insert: {
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          day_notes?: string | null
+          updated_at?: string
+          vendor_id: string
+          wedding_id: string
+          where_in_venue?: string | null
+        }
+        Update: {
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          day_notes?: string | null
+          updated_at?: string
+          vendor_id?: string
+          wedding_id?: string
+          where_in_venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_schedule_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_alerts"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -3832,6 +4295,13 @@ export type Database = {
             foreignKeyName: "wedding_party_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -4209,6 +4679,13 @@ export type Database = {
             foreignKeyName: "budget_lines_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -4316,6 +4793,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_contact_sheet: {
+        Row: {
+          backup_phone: string | null
+          group_label: string | null
+          name: string | null
+          no_number: boolean | null
+          phone: string | null
+          role: string | null
+          sort_order: number | null
+          source: string | null
+          source_id: string | null
+          wedding_id: string | null
+          whatsapp: string | null
+        }
+        Relationships: []
       }
       v_gift_summary: {
         Row: {
@@ -4557,6 +5050,13 @@ export type Database = {
             foreignKeyName: "payments_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -4722,6 +5222,56 @@ export type Database = {
           },
         ]
       }
+      v_timeline_conflicts: {
+        Row: {
+          clash_on: string | null
+          clashes_with_id: string | null
+          clashes_with_name: string | null
+          clashes_with_starts: string | null
+          contested: string | null
+          event_id: string | null
+          event_name: string | null
+          event_starts: string | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_alerts"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_vendor_categories: {
         Row: {
           category_key: string | null
@@ -4757,6 +5307,13 @@ export type Database = {
             columns: ["recorded_vendor_id"]
             isOneToOne: false
             referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_schedule"
             referencedColumns: ["vendor_id"]
           },
           {
@@ -4898,6 +5455,64 @@ export type Database = {
           why_it_matters?: string | null
         }
         Relationships: []
+      }
+      v_vendor_schedule: {
+        Row: {
+          arrival_time: string | null
+          category: string | null
+          checked_in: boolean | null
+          checked_in_at: string | null
+          checked_out: boolean | null
+          checked_out_at: string | null
+          contact_name: string | null
+          day_notes: string | null
+          finish_time: string | null
+          key_deliverables: string | null
+          name: string | null
+          no_phone: boolean | null
+          phone: string | null
+          setup_done_by: string | null
+          vendor_id: string | null
+          wedding_id: string | null
+          where_in_venue: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_alerts"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_vendors_ops: {
         Row: {

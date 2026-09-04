@@ -22,6 +22,13 @@ import { TasksPage } from './features/tasks/TasksPage';
 import { CountdownPage } from './features/countdown/CountdownPage';
 import { ResponsibilitiesPage } from './features/responsibilities/ResponsibilitiesPage';
 import { ChecklistModulePage } from './features/checklists/ChecklistModule';
+import {
+  ContactSheetPage,
+  RisksPage,
+  TimelinePage,
+  VendorSchedulePage,
+} from './features/dayof/DayOfPages';
+import { PackPage } from './features/dayof/PackPage';
 import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
@@ -169,6 +176,13 @@ export default function App() {
                   Seventeen <Route> entries would be seventeen places to forget
                   the eighteenth. */}
               <Route path="m/:slug" element={<ChecklistModulePage />} />
+              <Route path="timeline" element={<TimelinePage />} />
+              <Route path="schedule" element={<VendorSchedulePage />} />
+              <Route path="contacts" element={<ContactSheetPage />} />
+              <Route path="risks" element={<RisksPage />} />
+              {/* Ticket 8.6. Inside the wedding shell so it has the wedding,
+                  but it lays itself out for paper. */}
+              <Route path="pack" element={<PackPage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

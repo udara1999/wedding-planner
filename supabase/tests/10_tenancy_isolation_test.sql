@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(212);
+select plan(229);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1713,6 +1713,150 @@ select is((select active from v_alerts
               and code = 'procurement_unpacked'),
           true,
           'Inside 14 days the same unpacked item becomes an active warning');
+
+-- =============================================================================
+-- Phase 8: the coordinator, end to end (8.5) and the day-of tables — 17 assertions
+-- =============================================================================
+-- Ticket 8.5 is one line — "pgTAP: coordinator reads timeline, cannot read
+-- budget" — and it is the most important line in the phase. The coordinator is
+-- the only role that gains WRITE access in Phase 8, and plan §4.6 chose row
+-- denial over column grants precisely because Postgres cannot grant a column
+-- per user. If that decision has a hole in it, this is where it shows.
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- Seeded content arrives with the plan.
+select is((select count(*)::int from timeline_events
+            where wedding_id = (select v from w where k='a')),
+          56,
+          'Seeding brings in all 56 timeline events');
+
+select is((select count(*)::int from risks
+            where wedding_id = (select v from w where k='a')),
+          24,
+          'And all 24 contingencies');
+
+-- 8.1 end times are computed, never typed. A hand-maintained end column is how
+-- a timeline claims an event finishes before it starts.
+insert into timeline_events (wedding_id, name, phase, starts_at, duration_minutes)
+values ((select v from w where k='a'), 'ZZ Conflict A', 'Reception', '19:00', 60);
+
+select is((select ends_at from timeline_events
+            where wedding_id = (select v from w where k='a') and name = 'ZZ Conflict A'),
+          '20:00'::time,
+          'The end time is computed from the start and the duration');
+
+-- 8.4's score is likelihood times impact, and it moves when either does.
+insert into risks (wedding_id, name, likelihood, impact)
+values ((select v from w where k='a'), 'ZZ Scored risk', 3, 3);
+
+select is((select score from risks
+            where wedding_id = (select v from w where k='a') and name = 'ZZ Scored risk'),
+          9,
+          'A risk scores likelihood times impact');
+
+update risks set likelihood = 1
+ where wedding_id = (select v from w where k='a') and name = 'ZZ Scored risk';
+
+select is((select score from risks
+            where wedding_id = (select v from w where k='a') and name = 'ZZ Scored risk'),
+          3,
+          'And the score follows when the likelihood changes');
+
+-- ------------------------------------------------------- 8.1 conflicts
+-- Overlapping in time is NOT a conflict — a wedding is many things at once.
+-- Two events at the same time in different rooms with different people must
+-- not be reported, or the feature reports everything and means nothing.
+insert into timeline_events (wedding_id, name, phase, starts_at, duration_minutes, location, who)
+values ((select v from w where k='a'), 'ZZ Elsewhere', 'Reception', '19:30', 30,
+        'Garden', 'Ushers');
+
+select is((select count(*)::int from v_timeline_conflicts
+            where wedding_id = (select v from w where k='a')
+              and (event_name = 'ZZ Elsewhere' or clashes_with_name = 'ZZ Elsewhere')),
+          0,
+          'Overlapping events in different places with different people do not clash');
+
+-- Same room at the same time does clash.
+insert into timeline_events (wedding_id, name, phase, starts_at, duration_minutes, location)
+values ((select v from w where k='a'), 'ZZ Conflict B', 'Reception', '19:30', 30, 'Ballroom');
+
+update timeline_events set location = 'Ballroom'
+ where wedding_id = (select v from w where k='a') and name = 'ZZ Conflict A';
+
+select is((select count(*)::int from v_timeline_conflicts
+            where wedding_id = (select v from w where k='a')
+              and event_name = 'ZZ Conflict A' and clashes_with_name = 'ZZ Conflict B'),
+          1,
+          'Two events needing the same room at the same time clash, once');
+
+-- Back to back is not a clash: intervals are half-open.
+update timeline_events set starts_at = '20:00'
+ where wedding_id = (select v from w where k='a') and name = 'ZZ Conflict B';
+
+select is((select count(*)::int from v_timeline_conflicts
+            where wedding_id = (select v from w where k='a')
+              and event_name = 'ZZ Conflict A' and clashes_with_name = 'ZZ Conflict B'),
+          0,
+          'An event starting exactly when another ends does not clash');
+
+-- =============================================================================
+-- 8.5 THE COORDINATOR BOUNDARY
+-- =============================================================================
+select tests.login((select v from ids where k = 'coordinator'));
+
+-- What they must be able to do.
+select ok((select count(*)::int from timeline_events
+            where wedding_id = (select v from w where k='a')) > 0,
+          'A coordinator can read the timeline');
+
+select lives_ok(
+  $q$ update timeline_events set done = true
+       where wedding_id = (select v from w where k='a') and name = 'ZZ Conflict A' $q$,
+  'A coordinator can tick a timeline event off — they are the one running it');
+
+select lives_ok(
+  $q$ insert into vendor_schedule (wedding_id, vendor_id, checked_in_at)
+      select (select v from w where k='a'), id, now()
+        from vendors where wedding_id = (select v from w where k='a') limit 1 $q$,
+  'A coordinator can check a vendor in');
+
+select lives_ok(
+  $q$ update risks set prevention_done = true
+       where wedding_id = (select v from w where k='a') and name = 'ZZ Scored risk' $q$,
+  'A coordinator can tick a prevention off');
+
+select ok((select count(*)::int from v_vendor_schedule
+            where wedding_id = (select v from w where k='a')) > 0,
+          'And can read the arrival board, which carries the phone numbers');
+
+-- What they must NOT be able to do. §4.6 chose row denial over column grants,
+-- so these are the assertions that decision rests on.
+select is((select count(*)::int from budget_lines
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'A coordinator cannot read a single budget line');
+
+select is((select count(*)::int from v_payments
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'Nor any payment');
+
+select is((select count(*)::int from v_wedding_financials
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'Nor the money block, which is what v_wedding_financials filters on');
+
+-- The vendor arrival board is the sharpest case: it must carry the phone
+-- number and the arrival time while carrying no price. It reads v_vendors_ops
+-- for exactly this reason, and a later hand adding a price column to that view
+-- would break the guarantee silently.
+select is((select count(*)::int from information_schema.columns
+            where table_name = 'v_vendor_schedule'
+              and column_name in ('quoted_minor', 'negotiated_minor', 'deposit_paid_minor',
+                                  'cost_minor', 'vendor_price_minor')),
+          0,
+          'The arrival board exposes no price column of any kind');
 
 select * from finish();
 rollback;

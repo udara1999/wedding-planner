@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
-import type { Database, VendorOptionRow } from '../../types/db';
+import type { Database, VendorAnswerRow, VendorOptionRow } from '../../types/db';
 
 export type VendorCategory = Database['public']['Views']['v_vendor_categories']['Row'];
 export type VendorQuestion = Database['public']['Views']['v_vendor_questions']['Row'];
@@ -137,5 +137,65 @@ export function useDeleteVendorOption(weddingId: string, categoryKey: string | n
       return id;
     },
     onSuccess: invalidate,
+  });
+}
+
+/**
+ * Answers for every option in a category, keyed `optionId:questionId`.
+ *
+ * One query for the whole grid rather than one per cell: a venue comparison is
+ * ~40 questions across however many options, and a request per cell would be
+ * hundreds of round trips for one screen.
+ */
+export function useVendorAnswers(weddingId: string, optionIds: string[]) {
+  const key = [...optionIds].sort().join(',');
+  return useQuery({
+    queryKey: ['vendors', weddingId, 'answers', key] as const,
+    enabled: optionIds.length > 0,
+    queryFn: async (): Promise<Map<string, VendorAnswerRow>> => {
+      const res = await supabase
+        .from('vendor_answers')
+        .select('*')
+        .eq('wedding_id', weddingId)
+        .in('option_id', optionIds);
+      const rows = unwrap(res);
+      return new Map(rows.map((r) => [`${r.option_id}:${r.question_id}`, r]));
+    },
+  });
+}
+
+export function useSaveVendorAnswer(weddingId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      optionId,
+      questionId,
+      answer,
+    }: {
+      optionId: string;
+      questionId: number;
+      answer: string;
+    }) => {
+      // Upsert on the composite primary key: a cell is written the first time
+      // it is filled and updated afterwards, without the caller tracking which.
+      const res = await supabase
+        .from('vendor_answers')
+        .upsert(
+          {
+            wedding_id: weddingId,
+            option_id: optionId,
+            question_id: questionId,
+            answer: answer.trim() === '' ? null : answer,
+          },
+          { onConflict: 'option_id,question_id' },
+        )
+        .select('option_id');
+      const rows = unwrap(res);
+      if (rows.length === 0) throw new Error('That answer could not be saved.');
+      return rows[0];
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'answers'] });
+    },
   });
 }

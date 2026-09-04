@@ -10,6 +10,7 @@ import {
   useVendorQuestions,
 } from './api';
 import { VendorOptionCard } from './VendorOptionCard';
+import { ComparisonGrid } from './ComparisonGrid';
 import { useWedding } from '../weddings/api';
 import { currencyDecimals } from '../../lib/units';
 import type { MyWedding } from '../../types/db';
@@ -223,10 +224,20 @@ export function ComparePage() {
           )}
 
           {rows.length > 0 && (
-            <p className="flex items-center gap-1.5 text-xs text-stone-400">
-              <Trash2 className="size-3.5" />
-              Removing an option also removes its answers. The comparison grid arrives with 3.4.
-            </p>
+            <>
+              <p className="flex items-center gap-1.5 text-xs text-stone-400">
+                <Trash2 className="size-3.5" />
+                Removing an option also removes its answers.
+              </p>
+
+              <ComparisonGrid
+                weddingId={wedding.id}
+                options={rows}
+                questions={questions.data ?? []}
+                loading={questions.isLoading}
+                canEdit={canEdit}
+              />
+            </>
           )}
         </div>
       </div>

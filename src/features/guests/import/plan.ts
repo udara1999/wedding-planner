@@ -14,6 +14,7 @@
  *      means.
  */
 
+import { parseMajorToMinor } from '../../../lib/units';
 import type { Tables } from '../../../types/database.types';
 
 type GuestRow = Tables<'guests'>;
@@ -36,9 +37,12 @@ export type ImportField =
   | 'country'
   | 'invitation_type'
   | 'notes'
-  | 'group';
+  | 'group'
+  | 'expected_gift_minor'
+  | 'gift_received_minor'
+  | 'gift_description';
 
-type Kind = 'text' | 'count' | 'side' | 'boolean' | 'email' | 'group';
+type Kind = 'text' | 'count' | 'money' | 'side' | 'boolean' | 'email' | 'group';
 
 interface FieldSpec {
   field: ImportField;
@@ -116,6 +120,26 @@ export const IMPORT_FIELDS: FieldSpec[] = [
     kind: 'text',
     aliases: ['notes', 'note', 'comments', 'remarks'],
   },
+  // The workbook's own headers, so its 09 Guests sheet imports without
+  // anyone remapping three columns by hand.
+  {
+    field: 'expected_gift_minor',
+    label: 'Expected gift',
+    kind: 'money',
+    aliases: ['expectedcashgift', 'expectedgift', 'giftexpected', 'expected'],
+  },
+  {
+    field: 'gift_received_minor',
+    label: 'Gift received',
+    kind: 'money',
+    aliases: ['cashgiftreceived', 'giftreceived', 'received', 'giftamount'],
+  },
+  {
+    field: 'gift_description',
+    label: 'Gift description',
+    kind: 'text',
+    aliases: ['giftdescription', 'whatthegiftwas', 'gift'],
+  },
 ];
 
 const SPEC = new Map(IMPORT_FIELDS.map((f) => [f.field, f]));
@@ -172,10 +196,24 @@ const FALSE_WORDS = new Set(['no', 'n', 'false', '0', '']);
 
 type ParsedValue = string | number | boolean | null;
 
-function parseCell(spec: FieldSpec, raw: string): { value: ParsedValue } | { error: string } {
+function parseCell(
+  spec: FieldSpec,
+  raw: string,
+  decimals: number,
+): { value: ParsedValue } | { error: string } {
   const text = raw.trim();
 
   switch (spec.kind) {
+    case 'money': {
+      // The same decimal-string parse the forms use (plan R5: never float),
+      // so an imported amount and a typed one cannot land a cent apart.
+      try {
+        return { value: parseMajorToMinor(text, decimals) ?? 0 };
+      } catch (e) {
+        const why = e instanceof Error ? e.message : 'not a number';
+        return { error: `${spec.label} is not a valid amount: ${why}` };
+      }
+    }
     case 'count': {
       // Grouping separators survive a copy out of a spreadsheet.
       const cleaned = text.replace(/[\s,_]/g, '');
@@ -232,6 +270,9 @@ export type ExistingGuest = Pick<
   | 'invitation_type'
   | 'notes'
   | 'group_id'
+  | 'expected_gift_minor'
+  | 'gift_received_minor'
+  | 'gift_description'
 >;
 
 export type ImportValues = Partial<Omit<ExistingGuest, 'id'>>;
@@ -268,8 +309,10 @@ export function buildImportPlan(input: {
   mapping: (ImportField | null)[];
   existing: ExistingGuest[];
   groups: { id: string; name: string }[];
+  /** Minor units per major unit for the wedding's currency. LKR is 2. */
+  decimals?: number;
 }): ImportPlan {
-  const { grid, mapping, existing, groups } = input;
+  const { grid, mapping, existing, groups, decimals = 2 } = input;
   const empty: ImportPlan = {
     rows: [],
     summary: { create: 0, update: 0, skip: 0, error: 0 },
@@ -318,7 +361,7 @@ export function buildImportPlan(input: {
       // out of the payload entirely rather than being set to null.
       if (raw === '') continue;
 
-      const parsed = parseCell(spec, raw);
+      const parsed = parseCell(spec, raw, decimals);
       if ('error' in parsed) {
         errors.push(parsed.error);
         continue;

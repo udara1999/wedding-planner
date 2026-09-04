@@ -20,6 +20,9 @@ function guest(over: Partial<ExistingGuest> & { household_name: string }): Exist
     invitation_type: null,
     notes: null,
     group_id: null,
+    expected_gift_minor: 0,
+    gift_received_minor: 0,
+    gift_description: null,
     ...over,
     household_name: over.household_name,
   };
@@ -110,6 +113,49 @@ describe('buildImportPlan — creating', () => {
     // overwrite a count someone had already entered by hand.
     const result = plan(['Name', 'Adults'], [['A', '']]);
     expect('adults_invited' in result.rows[0].values).toBe(false);
+  });
+});
+
+describe('buildImportPlan — money', () => {
+  it('reads a gift amount into minor units', () => {
+    const result = plan(['Name', 'Expected cash gift'], [['A', '10000']]);
+    expect(result.rows[0].values.expected_gift_minor).toBe(1000000);
+  });
+
+  it('strips grouping and reads decimals', () => {
+    const result = plan(['Name', 'Expected cash gift'], [['A', '1,250.50']]);
+    expect(result.rows[0].values.expected_gift_minor).toBe(125050);
+  });
+
+  it('honours the currency\u2019s decimals', () => {
+    // LKR has two; a zero-decimal currency must not multiply by a hundred.
+    const result = buildImportPlan({
+      grid: [
+        ['Name', 'Expected cash gift'],
+        ['A', '10000'],
+      ],
+      mapping: ['household_name', 'expected_gift_minor'] as (ImportField | null)[],
+      existing: [],
+      groups: [],
+      decimals: 0,
+    });
+    expect(result.rows[0].values.expected_gift_minor).toBe(10000);
+  });
+
+  it('rejects an amount that is not a number', () => {
+    const result = plan(['Name', 'Expected cash gift'], [['A', 'lots']]);
+    expect(result.rows[0].action).toBe('error');
+    expect(result.rows[0].errors[0]).toMatch(/amount/i);
+  });
+
+  it('rejects a negative amount', () => {
+    expect(plan(['Name', 'Expected cash gift'], [['A', '-5']]).rows[0].action).toBe('error');
+  });
+
+  it('maps the workbook\u2019s own gift headers', () => {
+    expect(
+      autoMapHeaders(['Expected cash gift', 'Cash gift received', 'Gift description']),
+    ).toEqual(['expected_gift_minor', 'gift_received_minor', 'gift_description']);
   });
 });
 

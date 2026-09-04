@@ -32,10 +32,13 @@ type Step = 'choose' | 'map' | 'done';
  */
 export function ImportGuestsModal({
   weddingId,
+  decimals,
   open,
   onClose,
 }: {
   weddingId: string;
+  /** The wedding's currency decimals, for the gift columns. */
+  decimals: number;
   open: boolean;
   onClose: () => void;
 }) {
@@ -88,8 +91,9 @@ export function ImportGuestsModal({
       mapping,
       existing: guests.data ?? [],
       groups: (groups.data ?? []).map((g) => ({ id: g.id, name: g.name })),
+      decimals,
     });
-  }, [grid, mapping, guests.data, groups.data]);
+  }, [grid, mapping, guests.data, groups.data, decimals]);
 
   const willWrite = plan ? plan.summary.create + plan.summary.update : 0;
 

@@ -37,3 +37,8 @@ coverage
 
 # claude code — personal, machine-local overrides
 .claude/settings.local.json
+
+# Real guest data: names, phone numbers and gift amounts for an actual wedding.
+# This repository is public. The exported guest list stays local; the committed
+# test fixture beside the importer is anonymised.
+docs/private/

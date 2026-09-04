@@ -10,6 +10,7 @@ import {
   type RsvpStatus,
 } from './api';
 import { countGuests } from './counts';
+import { currencyDecimals } from '../../lib/units';
 import { GuestDetail } from './GuestDetail';
 import { ImportGuestsModal } from './import/ImportGuestsModal';
 import { InvitesModal } from '../invites/InvitesModal';
@@ -155,6 +156,7 @@ export function GuestsPage() {
 
       <ImportGuestsModal
         weddingId={wedding.id}
+        decimals={currencyDecimals(wedding.currency)}
         open={importing}
         onClose={() => setImporting(false)}
       />

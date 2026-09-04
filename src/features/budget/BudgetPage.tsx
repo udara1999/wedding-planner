@@ -64,7 +64,7 @@ export function BudgetPage() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  const [editing, setEditing] = useState<BudgetLineRow | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   const visible = useMemo(
@@ -72,6 +72,10 @@ export function BudgetPage() {
     [lines.data, filters],
   );
   const summary = useMemo(() => summarise(visible), [visible]);
+  // Looked up fresh on every render, so an edit made elsewhere — or the refetch
+  // after saving — is reflected in the open modal rather than being overwritten
+  // by a snapshot taken when it was opened.
+  const editing = (lines.data ?? []).find((l) => l.id === editingId) ?? null;
   const money = (minor: number | null | undefined) => formatMinorAsMajor(minor, decimals);
 
   if (lines.isLoading || categories.isLoading) {
@@ -302,7 +306,7 @@ export function BudgetPage() {
                     canEdit={canEdit}
                     totals={totals.data?.get(line.id)}
                     pending={update.isPending && update.variables?.id === line.id}
-                    onSelect={() => setEditing(line)}
+                    onSelect={() => setEditingId(line.id)}
                     onApplicability={(applicability) =>
                       update.mutate({ id: line.id, patch: { applicability } })
                     }
@@ -322,7 +326,7 @@ export function BudgetPage() {
       <Modal
         open={Boolean(editing) || creating}
         onClose={() => {
-          setEditing(null);
+          setEditingId(null);
           setCreating(false);
         }}
         title={editing ? editing.name : 'Add a budget line'}
@@ -342,7 +346,7 @@ export function BudgetPage() {
           payerOptions={payers.data ?? []}
           canEdit={canEdit}
           onDone={() => {
-            setEditing(null);
+            setEditingId(null);
             setCreating(false);
           }}
         />
@@ -375,7 +379,10 @@ function BudgetRow({
   const muted = line.applicability === 'not_applicable';
 
   return (
-    <li className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/70">
+    <li
+      onClick={onSelect}
+      className="group flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/70"
+    >
       <button type="button" onClick={onSelect} className="focus-ring min-w-0 flex-1 rounded-lg text-left">
         <p
           className={cn(
@@ -415,12 +422,15 @@ function BudgetRow({
         </p>
       </div>
 
-      <ApplicabilitySwitch
-        value={line.applicability}
-        disabled={!canEdit}
-        pending={pending}
-        onChange={onApplicability}
-      />
+      {/* Its own control, so a click here must not also open the line. */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <ApplicabilitySwitch
+          value={line.applicability}
+          disabled={!canEdit}
+          pending={pending}
+          onChange={onApplicability}
+        />
+      </div>
     </li>
   );
 }

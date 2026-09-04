@@ -65,6 +65,32 @@ body {
   overflow-x: hidden;
 }
 
+/* Tailwind 4's preflight no longer gives buttons a pointer cursor, so every
+   control in the app was showing the default arrow. Anything that does
+   something when clicked should say so before it is clicked. */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='radio']:not(:disabled),
+  [role='switch']:not(:disabled),
+  [role='option'],
+  [role='tab'],
+  select:not(:disabled),
+  summary,
+  label:has(> input[type='checkbox']:not(:disabled)),
+  input[type='checkbox']:not(:disabled),
+  input[type='radio']:not(:disabled),
+  input[type='file']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}
+
 /* Money and counts line up in columns only if the digits are the same width. */
 .tabular {
   font-variant-numeric: tabular-nums;

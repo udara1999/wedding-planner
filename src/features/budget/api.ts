@@ -88,13 +88,24 @@ export function useUpdateBudgetLine(weddingId: string) {
       }
       return rows[0];
     },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
+    onSuccess: (row) => {
+      // Write the returned row straight into the cache before refetching. The
+      // update returns the row the database actually stored — including the
+      // recomputed forecast_minor — so the list can show it immediately
+      // instead of waiting on a round trip.
+      qc.setQueryData<BudgetLineRow[]>(budgetKeys.lines(weddingId), (old) =>
+        old?.map((l) => (l.id === row.id ? row : l)),
+      );
+
       // forecast_minor is generated, so the category totals move with any
       // amount or applicability change — and so does whether a line now counts
-      // as overpaid.
-      void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
-      void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-totals'] });
+      // as overpaid. Returned so the mutation does not settle until the
+      // dependent queries are refreshed.
+      return Promise.all([
+        qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) }),
+        qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) }),
+        qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-totals'] }),
+      ]);
     },
   });
 }

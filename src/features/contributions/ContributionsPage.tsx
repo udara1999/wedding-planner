@@ -205,7 +205,11 @@ export function ContributionsPage() {
             ) : (
               <ul className="divide-y divide-stone-100">
                 {(list.data ?? []).map((c) => (
-                  <li key={c.id} className="flex items-center gap-3 py-2.5">
+                  <li
+                    key={c.id}
+                    onClick={() => startEdit(c)}
+                    className="flex cursor-pointer items-center gap-3 py-2.5 transition-colors hover:bg-stone-50/70"
+                  >
                     <button
                       type="button"
                       className="min-w-0 flex-1 text-left"
@@ -235,7 +239,10 @@ export function ContributionsPage() {
                       variant="ghost"
                       size="sm"
                       disabled={remove.isPending}
-                      onClick={() => remove.mutate(c.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        remove.mutate(c.id);
+                      }}
                     >
                       Delete
                     </Button>

@@ -336,7 +336,11 @@ export function PaymentsPage() {
                   const line = pickable.find((l) => l.id === p.budget_line_id);
                   const status = (p.status ?? 'not_due') as PaymentStatus;
                   return (
-                    <li key={p.id} className="flex items-center gap-3 py-2.5">
+                    <li
+                      key={p.id}
+                      onClick={() => startEdit(p)}
+                      className="flex cursor-pointer items-center gap-3 py-2.5 transition-colors hover:bg-stone-50/70"
+                    >
                       <button
                         type="button"
                         className="min-w-0 flex-1 text-left"
@@ -365,7 +369,11 @@ export function PaymentsPage() {
                           variant="ghost"
                           size="sm"
                           disabled={remove.isPending}
-                          onClick={() => p.id && remove.mutate(p.id)}
+                          onClick={(e) => {
+                            // Deleting must not also open the row behind it.
+                            e.stopPropagation();
+                            if (p.id) remove.mutate(p.id);
+                          }}
                         >
                           Delete
                         </Button>

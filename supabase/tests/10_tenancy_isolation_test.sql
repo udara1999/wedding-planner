@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(98);
+select plan(104);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -688,6 +688,50 @@ select ok((select overpaid_minor from v_budget_by_category
 select ok((select overpaid_minor from v_wedding_financials
              where wedding_id = (select v from w where k='a')) >= 1500,
           'Overpayment reaches the wedding financials');
+
+-- =============================================================================
+-- 18. Vendors, and the coordinator's money-free view (3.1, 3.2) — 6 assertions
+-- =============================================================================
+select tests.become_service_role();
+
+select is((select count(*)::int from template.vendor_questions where locale = 'poruwa'),
+          227,
+          'All 227 vendor questions are seeded');
+
+select is((select count(distinct category_key)::int from template.vendor_questions
+             where locale = 'poruwa'),
+          16,
+          'The questions cover all 16 vendor categories');
+
+select tests.login((select v from ids where k = 'alice'));
+insert into vendors (wedding_id, category, name, phone, quoted_minor, arrival_time)
+values ((select v from w where k='a'), 'Photographer', 'Studio Lanka', '077 000 0000',
+        250000, '08:00');
+
+-- A coordinator must not reach the base table, which carries prices.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from vendors
+             where wedding_id = (select v from w where k='a')), 0,
+          'A coordinator cannot read the vendors table');
+
+-- ...but must reach the ops view, which carries none.
+select is((select count(*)::int from v_vendors_ops
+             where wedding_id = (select v from w where k='a')), 1,
+          'A coordinator can see the vendor through the ops view');
+
+-- The ops view runs as its owner, so its WHERE clause is the only thing
+-- standing between a stranger and every wedding's vendors.
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from v_vendors_ops
+             where wedding_id = (select v from w where k='a')), 0,
+          'The ops view still keeps a stranger out');
+
+select tests.become_service_role();
+select is((select count(*)::int from information_schema.columns
+             where table_name = 'v_vendors_ops'
+               and (column_name like '%minor%' or column_name like '%quote%'
+                    or column_name like '%deposit%')), 0,
+          'The ops view exposes no money column at all');
 
 select * from finish();
 rollback;

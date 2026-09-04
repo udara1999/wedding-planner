@@ -161,6 +161,20 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
           {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
@@ -328,6 +342,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
@@ -372,6 +400,298 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      vendor_answers: {
+        Row: {
+          answer: string | null
+          notes: string | null
+          option_id: string
+          question_id: number
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          answer?: string | null
+          notes?: string | null
+          option_id: string
+          question_id: number
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          answer?: string | null
+          notes?: string | null
+          option_id?: string
+          question_id?: number
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_answers_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_answers_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_answers_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_decisions: {
+        Row: {
+          category_key: string
+          chosen_option_id: string | null
+          decided_on: string | null
+          recorded_vendor_id: string | null
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          category_key: string
+          chosen_option_id?: string | null
+          decided_on?: string | null
+          recorded_vendor_id?: string | null
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          category_key?: string
+          chosen_option_id?: string | null
+          decided_on?: string | null
+          recorded_vendor_id?: string | null
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_decisions_chosen_option_id_fkey"
+            columns: ["chosen_option_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_options: {
+        Row: {
+          category_key: string
+          contact_name: string | null
+          created_at: string
+          deposit_minor: number
+          id: string
+          label: string
+          met_or_visited: boolean
+          negotiated_minor: number
+          package: string | null
+          phone: string | null
+          quoted_minor: number
+          rating: number | null
+          sort_order: number
+          updated_at: string
+          vendor_name: string | null
+          wedding_id: string
+        }
+        Insert: {
+          category_key: string
+          contact_name?: string | null
+          created_at?: string
+          deposit_minor?: number
+          id?: string
+          label: string
+          met_or_visited?: boolean
+          negotiated_minor?: number
+          package?: string | null
+          phone?: string | null
+          quoted_minor?: number
+          rating?: number | null
+          sort_order?: number
+          updated_at?: string
+          vendor_name?: string | null
+          wedding_id: string
+        }
+        Update: {
+          category_key?: string
+          contact_name?: string | null
+          created_at?: string
+          deposit_minor?: number
+          id?: string
+          label?: string
+          met_or_visited?: boolean
+          negotiated_minor?: number
+          package?: string | null
+          phone?: string | null
+          quoted_minor?: number
+          rating?: number | null
+          sort_order?: number
+          updated_at?: string
+          vendor_name?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          arrival_time: string | null
+          category: string
+          code: string | null
+          contact_name: string | null
+          contract_location: string | null
+          contract_path: string | null
+          contract_signed: boolean
+          created_at: string
+          deposit_paid_minor: number
+          email: string | null
+          final_confirmation_date: string | null
+          finish_time: string | null
+          id: string
+          key_deliverables: string | null
+          name: string
+          negotiated_minor: number
+          notes: string | null
+          overtime_rate: string | null
+          package: string | null
+          phone: string | null
+          quoted_minor: number
+          rating: number | null
+          setup_done_by: string | null
+          status: Database["public"]["Enums"]["vendor_status"]
+          updated_at: string
+          wedding_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          arrival_time?: string | null
+          category: string
+          code?: string | null
+          contact_name?: string | null
+          contract_location?: string | null
+          contract_path?: string | null
+          contract_signed?: boolean
+          created_at?: string
+          deposit_paid_minor?: number
+          email?: string | null
+          final_confirmation_date?: string | null
+          finish_time?: string | null
+          id?: string
+          key_deliverables?: string | null
+          name: string
+          negotiated_minor?: number
+          notes?: string | null
+          overtime_rate?: string | null
+          package?: string | null
+          phone?: string | null
+          quoted_minor?: number
+          rating?: number | null
+          setup_done_by?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"]
+          updated_at?: string
+          wedding_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          arrival_time?: string | null
+          category?: string
+          code?: string | null
+          contact_name?: string | null
+          contract_location?: string | null
+          contract_path?: string | null
+          contract_signed?: boolean
+          created_at?: string
+          deposit_paid_minor?: number
+          email?: string | null
+          final_confirmation_date?: string | null
+          finish_time?: string | null
+          id?: string
+          key_deliverables?: string | null
+          name?: string
+          negotiated_minor?: number
+          notes?: string | null
+          overtime_rate?: string | null
+          package?: string | null
+          phone?: string | null
+          quoted_minor?: number
+          rating?: number | null
+          setup_done_by?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"]
+          updated_at?: string
+          wedding_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wedding_countdown_checks: {
         Row: {
@@ -839,6 +1159,20 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
           {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
@@ -943,6 +1277,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
@@ -951,6 +1299,120 @@ export type Database = {
           },
           {
             foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_vendor_decisions: {
+        Row: {
+          agreed_price_minor: number | null
+          category_key: string | null
+          chosen_label: string | null
+          chosen_option_id: string | null
+          chosen_vendor_name: string | null
+          decided_on: string | null
+          options_entered: number | null
+          recorded_in_vendors: boolean | null
+          recorded_vendor_id: string | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_decisions_chosen_option_id_fkey"
+            columns: ["chosen_option_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_vendors_ops: {
+        Row: {
+          arrival_time: string | null
+          category: string | null
+          contact_name: string | null
+          final_confirmation_date: string | null
+          finish_time: string | null
+          id: string | null
+          key_deliverables: string | null
+          name: string | null
+          phone: string | null
+          setup_done_by: string | null
+          status: Database["public"]["Enums"]["vendor_status"] | null
+          wedding_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          arrival_time?: string | null
+          category?: string | null
+          contact_name?: string | null
+          final_confirmation_date?: string | null
+          finish_time?: string | null
+          id?: string | null
+          key_deliverables?: string | null
+          name?: string | null
+          phone?: string | null
+          setup_done_by?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"] | null
+          wedding_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          arrival_time?: string | null
+          category?: string | null
+          contact_name?: string | null
+          final_confirmation_date?: string | null
+          finish_time?: string | null
+          id?: string | null
+          key_deliverables?: string | null
+          name?: string | null
+          phone?: string | null
+          setup_done_by?: string | null
+          status?: Database["public"]["Enums"]["vendor_status"] | null
+          wedding_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -1049,6 +1511,15 @@ export type Database = {
         | "not_started"
         | "in_progress"
         | "waiting"
+        | "completed"
+        | "cancelled"
+      vendor_question_group: "money" | "included" | "logistics" | "risk"
+      vendor_status:
+        | "researching"
+        | "shortlisted"
+        | "negotiating"
+        | "tentatively_booked"
+        | "confirmed"
         | "completed"
         | "cancelled"
       wedding_side: "bride" | "groom" | "both"
@@ -1206,6 +1677,16 @@ export const Constants = {
         "not_started",
         "in_progress",
         "waiting",
+        "completed",
+        "cancelled",
+      ],
+      vendor_question_group: ["money", "included", "logistics", "risk"],
+      vendor_status: [
+        "researching",
+        "shortlisted",
+        "negotiating",
+        "tentatively_booked",
+        "confirmed",
         "completed",
         "cancelled",
       ],

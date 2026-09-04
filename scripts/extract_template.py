@@ -18,8 +18,9 @@ against an unchanged workbook produces a byte-identical file.
 
 Phase 1 extracts three sheets. Later phases add their own as the tables they
 write to are created:
-    00 Lists      -> template.lookups   (the user-extensible lists only)
-    03 Budget     -> template.budget_categories + template.budget_lines
+    00 Lists           -> template.lookups   (the user-extensible lists only)
+    03 Budget          -> template.budget_categories + template.budget_lines
+    05a Vendor Compare -> template.vendor_questions
     07 Tasks      -> template.tasks
     08 Countdown  -> template.countdown_checks
 """
@@ -51,6 +52,15 @@ APPLICABILITY = {
     "required": "required",
     "optional": "optional",
     "not applicable": "not_applicable",
+}
+
+# 05a's question groups. The ordering is the product: money first, then what
+# is included, then logistics, then risk.
+QUESTION_GROUPS = {
+    "MONEY": "money",
+    "INCLUDED": "included",
+    "LOGISTICS": "logistics",
+    "RISK": "risk",
 }
 
 # Priorities the workbook uses, mapped to the task_priority enum.
@@ -363,6 +373,70 @@ def extract_budget(wb: Workbook, locale: str) -> list[str]:
     ]
 
 
+def extract_vendor_questions(wb: Workbook, locale: str) -> list[str]:
+    """05a Vendor Compare -> template.vendor_questions.
+
+    The sheet is an index followed by one block per vendor type. Each block
+    opens with a heading like "01  ·  VENUE / HOTEL", then a row of column
+    headers, then some fixed profile rows (vendor name, phone, quoted price)
+    that belong to vendor_options rather than to the questions, and finally the
+    numbered questions themselves, tagged MONEY / INCLUDED / LOGISTICS / RISK.
+
+    The group tag is what identifies a question row, which sidesteps having to
+    recognise the profile rows or the section banners at all.
+    """
+    rows = wb.rows("05a Vendor Compare")
+
+    values: list[str] = []
+    category_key = ""
+    category_label = ""
+    seq = 0
+    categories: set[str] = set()
+
+    for r in rows:
+        def cell(i: int) -> str:
+            return r[i].value if i < len(r) else ""
+
+        first = cell(1)
+        # A block heading: "01  ·  VENUE / HOTEL".
+        if first and "·" in first and not cell(2):
+            label = first.split("·", 1)[1].strip()
+            # "CATERER  (only if separate from the hotel)" -> "CATERER"
+            label = re.sub(r"\s*\(.*", "", label).strip()
+            if label:
+                category_label = label
+                category_key = slug(label)
+                categories.add(category_key)
+                seq = 0
+            continue
+
+        group = QUESTION_GROUPS.get(cell(2).strip().upper())
+        question = cell(3)
+        if not group or not question or not category_key:
+            continue
+
+        seq += 1
+        values.append(
+            f"  ({q(locale)}, {q(category_key)}, {q(category_label)}, "
+            f"{q(group)}::vendor_question_group, {seq}, {q(question)}, {q(cell(4))})"
+        )
+
+    if not values:
+        raise SystemExit("05a Vendor Compare produced no questions")
+
+    print(
+        f"-- 05a Vendor Compare: {len(values)} questions across {len(categories)} categories",
+        file=sys.stderr,
+    )
+    return [
+        "insert into template.vendor_questions",
+        '  (locale, category_key, category_label, "group", seq, question, why_it_matters)',
+        "values",
+        ",\n".join(values) + ";",
+        "",
+    ]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--workbook", default=WORKBOOK)
@@ -403,6 +477,7 @@ def main() -> int:
         "tasks": extract_tasks,
         "countdown": extract_countdown,
         "budget": extract_budget,
+        "vendor_questions": extract_vendor_questions,
     }
     wanted = (
         list(available)

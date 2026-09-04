@@ -37,3 +37,10 @@ export type BudgetByCategory = Database['public']['Views']['v_budget_by_category
 export type BudgetLineView = Database['public']['Views']['v_budget_lines']['Row'];
 export type PaymentView = Database['public']['Views']['v_payments']['Row'];
 export type WeddingFinancials = Database['public']['Views']['v_wedding_financials']['Row'];
+
+export type VendorStatus = Enums<'vendor_status'>;
+export type VendorQuestionGroup = Enums<'vendor_question_group'>;
+export type VendorRow = Tables<'vendors'>;
+export type VendorOptionRow = Tables<'vendor_options'>;
+export type VendorAnswerRow = Tables<'vendor_answers'>;
+export type VendorDecisionView = Database['public']['Views']['v_vendor_decisions']['Row'];

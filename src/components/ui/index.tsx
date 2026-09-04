@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { AlertCircle, Loader2, X } from 'lucide-react';
@@ -458,5 +459,109 @@ export function Drawer({
         {footer && <div className="border-t border-stone-100 px-5 py-3">{footer}</div>}
       </div>
     </div>
+  );
+}
+
+/* ==========================================================================
+   Modal
+   ==========================================================================
+   A wide centred panel for a record with several distinct panels to it — a
+   vendor has identity, money, linked budget lines and documents, which is more
+   than a side drawer can show without everything becoming a narrow column.
+   Use Drawer for a single form, Modal when the content wants two columns.
+   ========================================================================== */
+export function Modal({
+  open,
+  onClose,
+  title,
+  subtitle,
+  badge,
+  size = 'lg',
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  subtitle?: string;
+  badge?: React.ReactNode;
+  size?: 'md' | 'lg' | 'full';
+  children: React.ReactNode;
+}) {
+  // Escape closes it, which a mouse-only close button does not give you.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+      <button
+        aria-label="Close"
+        className="absolute inset-0 bg-stone-900/30 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className={cn(
+          'relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-pop',
+          size === 'md' && 'max-w-2xl',
+          size === 'lg' && 'max-w-5xl',
+          size === 'full' && 'h-[90dvh] max-w-[92rem]',
+        )}
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-stone-100 px-6 py-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-base font-semibold tracking-tight text-stone-900">
+                {title}
+              </h2>
+              {badge}
+            </div>
+            {subtitle && <p className="mt-0.5 truncate text-sm text-stone-500">{subtitle}</p>}
+          </div>
+          <IconButton label="Close" onClick={onClose}>
+            <X className="size-4" />
+          </IconButton>
+        </div>
+
+        {/* The panel scrolls, not the page behind it. */}
+        <div className="scroll-subtle min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A titled block inside a Modal. Grouping is what stops a long record reading
+ * as one undifferentiated column of inputs.
+ */
+export function Section({
+  title,
+  description,
+  children,
+  className,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn('space-y-3', className)}>
+      <div>
+        <h3 className="text-[11px] font-semibold tracking-wider text-stone-400 uppercase">
+          {title}
+        </h3>
+        {description && <p className="mt-0.5 text-xs text-stone-500">{description}</p>}
+      </div>
+      {children}
+    </section>
   );
 }

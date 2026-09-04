@@ -17,10 +17,10 @@ import {
   Button,
   Card,
   CardBody,
-  Drawer,
   EmptyState,
   ErrorState,
   InlineError,
+  Modal,
   Page,
   PageHeader,
   Skeleton,
@@ -185,11 +185,18 @@ export function VendorsPage() {
         </Card>
       )}
 
-      <Drawer
+      <Modal
         open={Boolean(selected)}
         onClose={() => setSelectedId(null)}
         title={selected?.name ?? ''}
         subtitle={selected?.category ?? undefined}
+        badge={
+          selected && (
+            <Badge tone={TONE[selected.status]}>
+              {PIPELINE.find((p) => p.status === selected.status)?.label ?? selected.status}
+            </Badge>
+          )
+        }
       >
         {selected && (
           <VendorDetail
@@ -206,7 +213,7 @@ export function VendorsPage() {
             }}
           />
         )}
-      </Drawer>
+      </Modal>
     </Page>
   );
 }

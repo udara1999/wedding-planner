@@ -17,6 +17,7 @@ import {
   Field,
   InlineError,
   Input,
+  Section,
   Select,
   Skeleton,
   Textarea,
@@ -105,114 +106,156 @@ export function VendorDetail({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Name">
-          <Input value={form.name} disabled={!canEdit} onChange={(e) => set('name', e.target.value)} />
-        </Field>
-        <Field label="Category">
-          <Input
-            value={form.category}
-            disabled={!canEdit}
-            onChange={(e) => set('category', e.target.value)}
-          />
-        </Field>
-        <Field label="Contact">
-          <Input
-            value={form.contact_name}
-            disabled={!canEdit}
-            onChange={(e) => set('contact_name', e.target.value)}
-          />
-        </Field>
-        <Field label="Phone">
-          <Input value={form.phone} disabled={!canEdit} onChange={(e) => set('phone', e.target.value)} />
-        </Field>
-      </div>
+    <>
+      {/* Two columns: what the vendor IS on the left, what they cost and what
+          they are attached to on the right. In one column these ran together
+          into a single long strip of inputs. */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="space-y-6">
+          <Section title="Who they are">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Name">
+                <Input
+                  value={form.name}
+                  disabled={!canEdit}
+                  onChange={(e) => set('name', e.target.value)}
+                />
+              </Field>
+              <Field label="Category">
+                <Input
+                  value={form.category}
+                  disabled={!canEdit}
+                  onChange={(e) => set('category', e.target.value)}
+                />
+              </Field>
+              <Field label="Contact">
+                <Input
+                  value={form.contact_name}
+                  disabled={!canEdit}
+                  onChange={(e) => set('contact_name', e.target.value)}
+                />
+              </Field>
+              <Field label="Phone">
+                <Input
+                  value={form.phone}
+                  disabled={!canEdit}
+                  onChange={(e) => set('phone', e.target.value)}
+                />
+              </Field>
+            </div>
+            <Field label="Email">
+              <Input
+                type="email"
+                value={form.email}
+                disabled={!canEdit}
+                onChange={(e) => set('email', e.target.value)}
+              />
+            </Field>
+            <Field label="Package / inclusions">
+              <Textarea
+                rows={3}
+                value={form.package}
+                disabled={!canEdit}
+                onChange={(e) => set('package', e.target.value)}
+              />
+            </Field>
+          </Section>
 
-      <Field label="Package / inclusions">
-        <Textarea
-          rows={2}
-          value={form.package}
-          disabled={!canEdit}
-          onChange={(e) => set('package', e.target.value)}
-        />
-      </Field>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        {MONEY.map(([key, label]) => (
-          <Field
-            key={key}
-            label={`${label} (${currency})`}
-            hint={key === 'quoted_minor' ? 'What they asked for their package.' : undefined}
+          <Section
+            title="On the day"
+            description="A coordinator sees these and never the money — they read the vendor through v_vendors_ops."
           >
-            <Input
-              inputMode="decimal"
-              value={form[key]}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Arrival time">
+                <Input
+                  type="time"
+                  value={form.arrival_time}
+                  disabled={!canEdit}
+                  onChange={(e) => set('arrival_time', e.target.value)}
+                />
+              </Field>
+              <Field label="Finish time">
+                <Input
+                  type="time"
+                  value={form.finish_time}
+                  disabled={!canEdit}
+                  onChange={(e) => set('finish_time', e.target.value)}
+                />
+              </Field>
+            </div>
+            <Field label="Key deliverables">
+              <Textarea
+                rows={2}
+                value={form.key_deliverables}
+                disabled={!canEdit}
+                onChange={(e) => set('key_deliverables', e.target.value)}
+              />
+            </Field>
+          </Section>
+
+          <Section title="Notes">
+            <Textarea
+              rows={3}
+              value={form.notes}
               disabled={!canEdit}
-              onChange={(e) => set(key, e.target.value)}
+              onChange={(e) => set('notes', e.target.value)}
             />
-          </Field>
-        ))}
+            <label className="flex items-center gap-2 text-sm text-stone-700">
+              <input
+                type="checkbox"
+                checked={vendor.contract_signed}
+                disabled={!canEdit}
+                onChange={(e) => onSave({ contract_signed: e.target.checked })}
+              />
+              Contract signed
+            </label>
+          </Section>
+        </div>
+
+        <div className="space-y-6">
+          <Section
+            title="What they quoted"
+            description="Their own figure for the whole package. What it actually costs comes from the budget lines below."
+          >
+            <div className="grid gap-3 sm:grid-cols-3">
+              {MONEY.map(([key, label]) => (
+                <Field key={key} label={`${label} (${currency})`}>
+                  <Input
+                    inputMode="decimal"
+                    value={form[key]}
+                    disabled={!canEdit}
+                    onChange={(e) => set(key, e.target.value)}
+                  />
+                </Field>
+              ))}
+            </div>
+          </Section>
+
+          <VendorBudgetLinks
+            weddingId={weddingId}
+            vendorId={vendor.id}
+            currency={currency}
+            decimals={decimals}
+            canEdit={canEdit}
+          />
+
+          <Attachments vendorId={vendor.id} weddingId={weddingId} canEdit={canEdit} />
+        </div>
       </div>
 
-      {/* Day-of fields. A coordinator sees these through v_vendors_ops and
-          never the money above. */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Arrival time">
-          <Input
-            type="time"
-            value={form.arrival_time}
-            disabled={!canEdit}
-            onChange={(e) => set('arrival_time', e.target.value)}
-          />
-        </Field>
-        <Field label="Finish time">
-          <Input
-            type="time"
-            value={form.finish_time}
-            disabled={!canEdit}
-            onChange={(e) => set('finish_time', e.target.value)}
-          />
-        </Field>
-      </div>
-
-      <Field label="Key deliverables">
-        <Textarea
-          rows={2}
-          value={form.key_deliverables}
-          disabled={!canEdit}
-          onChange={(e) => set('key_deliverables', e.target.value)}
-        />
-      </Field>
-
-      <label className="flex items-center gap-2 text-sm text-stone-700">
-        <input
-          type="checkbox"
-          checked={vendor.contract_signed}
-          disabled={!canEdit}
-          onChange={(e) => onSave({ contract_signed: e.target.checked })}
-        />
-        Contract signed
-      </label>
-
-      <Field label="Notes">
-        <Textarea
-          rows={2}
-          value={form.notes}
-          disabled={!canEdit}
-          onChange={(e) => set('notes', e.target.value)}
-        />
-      </Field>
-
-      {problem && <p className="text-xs text-red-700">{problem}</p>}
+      {problem && <p className="mt-4 text-xs text-red-700">{problem}</p>}
 
       {canEdit && (
-        <div className="flex items-center justify-between gap-3">
+        /* Pinned to the bottom of the scrolling panel: with this much content,
+           a Save button that scrolls out of reach is a Save button nobody
+           finds. */
+        <div className="sticky bottom-0 -mx-6 mt-6 flex items-center justify-between gap-3 border-t border-stone-100 bg-white/95 px-6 py-3 backdrop-blur">
           <Button loading={saving} onClick={save}>
             Save vendor
           </Button>
           {confirming ? (
             <span className="flex items-center gap-2">
+              <span className="text-xs text-stone-500">Delete this vendor?</span>
               <Button size="sm" variant="danger" onClick={onDelete}>
                 Delete
               </Button>
@@ -232,17 +275,7 @@ export function VendorDetail({
           )}
         </div>
       )}
-
-      <VendorBudgetLinks
-        weddingId={weddingId}
-        vendorId={vendor.id}
-        currency={currency}
-        decimals={decimals}
-        canEdit={canEdit}
-      />
-
-      <Attachments vendorId={vendor.id} weddingId={weddingId} canEdit={canEdit} />
-    </div>
+    </>
   );
 }
 

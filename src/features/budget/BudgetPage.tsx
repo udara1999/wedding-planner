@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { Plus, Search, Sparkles, Wallet } from 'lucide-react';
 import {
   useBudgetByCategory,
   useBudgetCategories,
@@ -10,21 +11,24 @@ import {
 import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { BudgetLineForm } from './BudgetLineForm';
 import { EMPTY_FILTERS, matchesFilters, summarise, type BudgetFilters } from './filters';
-import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
 import { useSeedWedding } from '../weddings/api';
+import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
 import type { Applicability, BudgetLineRow, MyWedding } from '../../types/db';
 import {
+  Badge,
   Button,
   Card,
   CardBody,
-  CardHeader,
-  CardTitle,
+  Drawer,
   EmptyState,
   ErrorState,
-  Field,
+  InlineError,
   Input,
+  Page,
+  PageHeader,
   Select,
-  Spinner,
+  SkeletonRows,
+  Stat,
   cn,
 } from '../../components/ui';
 
@@ -42,29 +46,35 @@ export function BudgetPage() {
   const seed = useSeedWedding();
 
   const [filters, setFilters] = useState<BudgetFilters>(EMPTY_FILTERS);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<BudgetLineRow | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const visible = useMemo(
     () => (lines.data ?? []).filter((l) => matchesFilters(l, filters)),
     [lines.data, filters],
   );
   const summary = useMemo(() => summarise(visible), [visible]);
-  const selected = visible.find((l) => l.id === selectedId) ?? null;
-
   const money = (minor: number | null | undefined) => formatMinorAsMajor(minor, decimals);
 
   if (lines.isLoading || categories.isLoading) {
     return (
-      <div className="p-8">
-        <Spinner label="Loading the budget" />
-      </div>
+      <Page width="wide">
+        <PageHeader title="Budget" />
+        <Card>
+          <CardBody className="pt-5">
+            <SkeletonRows rows={8} />
+          </CardBody>
+        </Card>
+      </Page>
     );
   }
+
   if (lines.error) {
     return (
-      <div className="p-8">
+      <Page width="wide">
+        <PageHeader title="Budget" />
         <ErrorState error={lines.error} onRetry={() => void lines.refetch()} />
-      </div>
+      </Page>
     );
   }
 
@@ -74,64 +84,161 @@ export function BudgetPage() {
   if ((lines.data ?? []).length === 0) {
     const isOwner = wedding.role === 'owner';
     return (
-      <div className="mx-auto max-w-2xl px-6 py-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>This wedding has no plan in it yet</CardTitle>
-          </CardHeader>
-          <CardBody className="space-y-4">
-            <p className="text-sm text-stone-600">
-              The budget, tasks, countdown checklist and the editable dropdown lists all come
-              from the template. Copying it in is safe to repeat: it never overwrites anything
-              you have already changed.
-            </p>
-            {isOwner ? (
-              <>
-                <Button disabled={seed.isPending} onClick={() => seed.mutate(wedding.id)}>
-                  {seed.isPending ? 'Setting up…' : 'Set up the plan from the template'}
+      <Page width="narrow">
+        <PageHeader title="Budget" />
+        <EmptyState
+          icon={<Sparkles className="size-5" />}
+          title="This wedding has no plan in it yet"
+          description="The budget, tasks, countdown checklist and the editable dropdown lists all come from the template. Copying it in is safe to repeat: it never overwrites anything you have already changed."
+          action={
+            isOwner ? (
+              <div className="space-y-2">
+                <Button
+                  size="lg"
+                  loading={seed.isPending}
+                  icon={<Sparkles className="size-4" />}
+                  onClick={() => seed.mutate(wedding.id)}
+                >
+                  Set up the plan from the template
                 </Button>
-                {seed.error && (
-                  <p className="text-xs text-red-700">
-                    {seed.error instanceof Error ? seed.error.message : 'Could not set it up'}
-                  </p>
-                )}
-              </>
+                <InlineError error={seed.error} />
+              </div>
             ) : (
-              <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
                 Only the owner can set the plan up. Ask them to open this page once.
               </p>
-            )}
-          </CardBody>
-        </Card>
-      </div>
+            )
+          }
+        />
+      </Page>
     );
   }
 
-  return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-xl font-semibold text-stone-900">Budget</h1>
-        <p className="mt-0.5 text-sm text-stone-500">
-          Every line the plan knows about. The forecast is worked out by the database — actual,
-          else negotiated, else quoted, else budgeted — and a line marked not applicable forecasts
-          nothing.
-        </p>
-      </header>
+  const activeCategory = filters.categoryId;
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <Stat label={`Budgeted (${currency})`} value={money(summary.budgetedMinor)} />
-        <Stat label={`Forecast (${currency})`} value={money(summary.forecastMinor)} />
+  return (
+    <Page width="wide">
+      <PageHeader
+        title="Budget"
+        description="Forecast is worked out by the database — actual, else negotiated, else quoted, else budgeted. A line marked not applicable forecasts nothing but keeps its budget."
+        actions={
+          canEdit && (
+            <Button icon={<Plus className="size-4" />} onClick={() => setCreating(true)}>
+              Add line
+            </Button>
+          )
+        }
+      />
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        <Stat
+          label={`Budgeted (${currency})`}
+          value={money(summary.budgetedMinor)}
+          icon={<Wallet className="size-3.5" />}
+          hint={`${summary.count} lines in view`}
+        />
+        <Stat
+          label={`Forecast (${currency})`}
+          value={money(summary.forecastMinor)}
+          tone="accent"
+          hint={
+            summary.notApplicableCount > 0
+              ? `${summary.notApplicableCount} not applicable, excluded`
+              : undefined
+          }
+        />
         <Stat
           label={`Variance (${currency})`}
           value={money(summary.varianceMinor)}
           tone={summary.varianceMinor > 0 ? 'bad' : summary.varianceMinor < 0 ? 'good' : 'flat'}
+          hint={summary.varianceMinor > 0 ? 'Forecast is over budget' : 'Forecast is within budget'}
         />
       </div>
 
-      <Card className="mb-5">
-        <CardBody className="grid gap-4 sm:grid-cols-3">
-          <Field label="Category">
+      <div className="grid items-start gap-5 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        {/* Categories double as the filter, which removes a dropdown and puts
+            the money where it can be scanned. */}
+        <Card className="hidden lg:block">
+          <CardBody className="pt-4">
+            <button
+              type="button"
+              onClick={() => setFilters((f) => ({ ...f, categoryId: 'all' }))}
+              className={cn(
+                'focus-ring flex w-full items-baseline justify-between gap-2 rounded-lg px-2 py-1.5 text-sm',
+                activeCategory === 'all'
+                  ? 'bg-wine-50 font-medium text-wine-800'
+                  : 'text-stone-600 hover:bg-stone-50',
+              )}
+            >
+              <span>All categories</span>
+              <span className="tabular text-xs text-stone-400">{(lines.data ?? []).length}</span>
+            </button>
+
+            <div className="mt-1 space-y-0.5">
+              {(byCategory.data ?? []).map((row) => {
+                const id = row.category_id ?? '';
+                const active = activeCategory === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() =>
+                      setFilters((f) => ({ ...f, categoryId: f.categoryId === id ? 'all' : id }))
+                    }
+                    className={cn(
+                      'focus-ring block w-full rounded-lg px-2 py-1.5 text-left',
+                      active ? 'bg-wine-50' : 'hover:bg-stone-50',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'block truncate text-[13px]',
+                        active ? 'font-medium text-wine-800' : 'text-stone-700',
+                      )}
+                    >
+                      {row.category_label}
+                    </span>
+                    <span className="tabular block text-[11px] text-stone-400">
+                      {money(Number(row.forecast_minor ?? 0))} forecast
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          {/* Toolbar rather than a separate filter card: it belongs to the list
+              it filters, and saves a whole row of vertical space. */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-4 py-3">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" />
+              <Input
+                className="pl-9"
+                placeholder="Search a line name or code, e.g. necklace or BG077"
+                value={filters.search}
+                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+              />
+            </div>
             <Select
+              className="w-40"
+              value={filters.applicability}
+              onChange={(e) =>
+                setFilters((f) => ({
+                  ...f,
+                  applicability: e.target.value as Applicability | 'all',
+                }))
+              }
+            >
+              <option value="all">Any applicability</option>
+              <option value="required">Required</option>
+              <option value="optional">Optional</option>
+              <option value="not_applicable">Not applicable</option>
+            </Select>
+            {/* Category filter for narrow screens, where the rail is hidden. */}
+            <Select
+              className="w-44 lg:hidden"
               value={filters.categoryId}
               onChange={(e) => setFilters((f) => ({ ...f, categoryId: e.target.value }))}
             >
@@ -142,51 +249,21 @@ export function BudgetPage() {
                 </option>
               ))}
             </Select>
-          </Field>
-          <Field label="Applies?">
-            <Select
-              value={filters.applicability}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  applicability: e.target.value as Applicability | 'all',
-                }))
-              }
-            >
-              <option value="all">Any</option>
-              <option value="required">Required</option>
-              <option value="optional">Optional</option>
-              <option value="not_applicable">Not applicable</option>
-            </Select>
-          </Field>
-          <Field label="Search" hint="By line name or its workbook code.">
-            <Input
-              placeholder="necklace, or BG077"
-              value={filters.search}
-              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-            />
-          </Field>
-        </CardBody>
-      </Card>
+          </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Card>
-          <CardHeader className="flex items-baseline justify-between">
-            <CardTitle>
-              {summary.count} {summary.count === 1 ? 'line' : 'lines'}
-            </CardTitle>
-            {summary.notApplicableCount > 0 && (
-              <span className="text-xs text-stone-400">
-                {summary.notApplicableCount} not applicable
-              </span>
-            )}
-          </CardHeader>
-          <CardBody>
+          <CardBody className="px-0 pb-0">
             {visible.length === 0 ? (
-              <EmptyState
-                title="Nothing matches those filters"
-                description="Widen the category, applicability or search and the lines will come back."
-              />
+              <div className="px-4 py-6">
+                <EmptyState
+                  title="Nothing matches those filters"
+                  description="Widen the category, applicability or search and the lines will come back."
+                  action={
+                    <Button variant="secondary" onClick={() => setFilters(EMPTY_FILTERS)}>
+                      Clear filters
+                    </Button>
+                  }
+                />
+              </div>
             ) : (
               <ul className="divide-y divide-stone-100">
                 {visible.map((line) => (
@@ -195,10 +272,9 @@ export function BudgetPage() {
                     line={line}
                     currency={currency}
                     decimals={decimals}
-                    selected={line.id === selectedId}
                     canEdit={canEdit}
                     pending={update.isPending && update.variables?.id === line.id}
-                    onSelect={() => setSelectedId(line.id === selectedId ? null : line.id)}
+                    onSelect={() => setEditing(line)}
                     onApplicability={(applicability) =>
                       update.mutate({ id: line.id, patch: { applicability } })
                     }
@@ -207,97 +283,43 @@ export function BudgetPage() {
               </ul>
             )}
             {update.error && (
-              <p className="mt-3 text-xs text-red-700">
-                {update.error instanceof Error ? update.error.message : 'Could not update'}
-              </p>
+              <div className="px-4 py-3">
+                <InlineError error={update.error} />
+              </div>
             )}
           </CardBody>
         </Card>
-
-        <div className="lg:sticky lg:top-6">
-          {selected ? (
-            <BudgetLineForm
-              line={selected}
-              currency={currency}
-              payerOptions={payers.data ?? []}
-              canEdit={canEdit}
-            />
-          ) : (
-            <Card>
-              <CardBody>
-                <EmptyState
-                  title="Pick a line"
-                  description="Choose a budget line to see and edit its quoted, negotiated and actual amounts."
-                />
-              </CardBody>
-            </Card>
-          )}
-
-          {byCategory.data && byCategory.data.length > 0 && (
-            <Card className="mt-5">
-              <CardHeader>
-                <CardTitle>By category</CardTitle>
-              </CardHeader>
-              <CardBody>
-                <ul className="space-y-1.5 text-sm">
-                  {byCategory.data.map((row) => (
-                    <li key={row.category_id} className="flex items-baseline justify-between gap-3">
-                      <button
-                        type="button"
-                        className={cn(
-                          'truncate text-left hover:text-wine-800',
-                          filters.categoryId === row.category_id
-                            ? 'font-medium text-wine-800'
-                            : 'text-stone-600',
-                        )}
-                        onClick={() =>
-                          setFilters((f) => ({
-                            ...f,
-                            categoryId:
-                              f.categoryId === row.category_id ? 'all' : (row.category_id ?? 'all'),
-                          }))
-                        }
-                      >
-                        {row.category_label}
-                      </button>
-                      <span className="shrink-0 tabular-nums text-stone-900">
-                        {money(Number(row.forecast_minor ?? 0))}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardBody>
-            </Card>
-          )}
-        </div>
       </div>
-    </div>
-  );
-}
 
-function Stat({
-  label,
-  value,
-  tone = 'flat',
-}: {
-  label: string;
-  value: string;
-  tone?: 'good' | 'bad' | 'flat';
-}) {
-  return (
-    <div className="rounded-lg border border-stone-200 bg-white px-4 py-3">
-      <p className="text-xs text-stone-500">{label}</p>
-      <p
-        className={cn(
-          'mt-0.5 text-lg font-semibold tabular-nums',
-          tone === 'bad' && 'text-red-700',
-          tone === 'good' && 'text-green-700',
-          tone === 'flat' && 'text-stone-900',
-        )}
+      <Drawer
+        open={Boolean(editing) || creating}
+        onClose={() => {
+          setEditing(null);
+          setCreating(false);
+        }}
+        title={editing ? editing.name : 'Add a budget line'}
+        subtitle={
+          editing
+            ? [editing.code, (categories.data ?? []).find((c) => c.id === editing.category_id)?.label]
+                .filter(Boolean)
+                .join(' · ')
+            : 'It joins the category you choose and counts towards its forecast.'
+        }
       >
-        {value}
-      </p>
-    </div>
+        <BudgetLineForm
+          weddingId={wedding.id}
+          line={editing}
+          categories={categories.data ?? []}
+          currency={currency}
+          payerOptions={payers.data ?? []}
+          canEdit={canEdit}
+          onDone={() => {
+            setEditing(null);
+            setCreating(false);
+          }}
+        />
+      </Drawer>
+    </Page>
   );
 }
 
@@ -305,7 +327,6 @@ function BudgetRow({
   line,
   currency,
   decimals,
-  selected,
   canEdit,
   pending,
   onSelect,
@@ -314,7 +335,6 @@ function BudgetRow({
   line: BudgetLineRow;
   currency: string;
   decimals: number;
-  selected: boolean;
   canEdit: boolean;
   pending: boolean;
   onSelect: () => void;
@@ -325,28 +345,28 @@ function BudgetRow({
   const muted = line.applicability === 'not_applicable';
 
   return (
-    <li
-      className={cn(
-        'flex items-center gap-3 py-2.5',
-        selected && 'bg-wine-50/60',
-        muted && 'opacity-55',
-      )}
-    >
-      <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
-        <p className={cn('truncate text-sm', muted ? 'text-stone-500' : 'text-stone-900')}>
+    <li className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/70">
+      <button type="button" onClick={onSelect} className="focus-ring min-w-0 flex-1 rounded-lg text-left">
+        <p
+          className={cn(
+            'truncate text-sm',
+            muted ? 'text-stone-400 line-through decoration-stone-300' : 'text-stone-900',
+          )}
+        >
           {line.name}
         </p>
-        <p className="truncate text-xs text-stone-400">
-          {line.code ?? '—'}
-          {line.payer ? ` · ${line.payer}` : ''}
+        <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-stone-400">
+          {line.code && <span className="font-mono text-[11px]">{line.code}</span>}
+          {line.payer && <span>· {line.payer}</span>}
+          {line.status === 'completed' && <Badge tone="good">done</Badge>}
         </p>
       </button>
 
       <div className="shrink-0 text-right">
-        <p className={cn('text-sm tabular-nums', muted ? 'text-stone-400' : 'text-stone-900')}>
+        <p className={cn('tabular text-sm', muted ? 'text-stone-400' : 'text-stone-900')}>
           {formatMinorAsMajor(line.forecast_minor, decimals)}
         </p>
-        <p className="text-[11px] tabular-nums text-stone-400">
+        <p className="tabular text-[11px] text-stone-400">
           of {formatMinorAsMajor(line.budgeted_minor, decimals)} {currency}
         </p>
       </div>

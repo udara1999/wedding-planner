@@ -23,6 +23,8 @@ import {
   ErrorState,
   Field,
   Input,
+  Page,
+  PageHeader,
   Select,
   Spinner,
 } from '../../components/ui';
@@ -149,17 +151,14 @@ export function SetupPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-xl font-semibold text-stone-900">Setup</h1>
-        <p className="mt-0.5 text-sm text-stone-500">
-          The couple, the day and the venue. Dates and times entered here drive every schedule in
-          the app.
-        </p>
-      </header>
+    <Page width="wide">
+      <PageHeader
+        title="Setup"
+        description="The couple, the day and the venue. Dates and times entered here drive every schedule in the app."
+      />
 
       {!canEdit && (
-        <div className="mb-5 rounded-md border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+        <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
           You have <strong>{wedding.role}</strong> access, so this page is read-only.
         </div>
       )}
@@ -331,7 +330,7 @@ export function SetupPage() {
           </div>
         )}
       </form>
-    </div>
+    </Page>
   );
 }
 

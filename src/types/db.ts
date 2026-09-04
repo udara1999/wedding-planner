@@ -36,3 +36,4 @@ export type PaymentRow = Tables<'payments'>;
 export type BudgetByCategory = Database['public']['Views']['v_budget_by_category']['Row'];
 export type BudgetLineView = Database['public']['Views']['v_budget_lines']['Row'];
 export type PaymentView = Database['public']['Views']['v_payments']['Row'];
+export type WeddingFinancials = Database['public']['Views']['v_wedding_financials']['Row'];

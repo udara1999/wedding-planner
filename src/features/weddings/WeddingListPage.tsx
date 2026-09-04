@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { CalendarDays, LogOut, Plus } from 'lucide-react';
 import { useMyWeddings } from './api';
 import { useAuth } from '../auth/AuthProvider';
 import {
@@ -8,7 +9,9 @@ import {
   CardBody,
   EmptyState,
   ErrorState,
-  Spinner,
+  Page,
+  PageHeader,
+  Skeleton,
 } from '../../components/ui';
 
 const roleTone = {
@@ -24,27 +27,38 @@ export function WeddingListPage() {
   const { signOut, user } = useAuth();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <header className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-stone-900">Your weddings</h1>
-          <p className="mt-0.5 text-sm text-stone-500">{user?.email}</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => void signOut()}>
-          Sign out
-        </Button>
-      </header>
+    <Page width="narrow">
+      <PageHeader
+        title="Your weddings"
+        description={user?.email ?? undefined}
+        actions={
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<LogOut className="size-4" />}
+            onClick={() => void signOut()}
+          >
+            Sign out
+          </Button>
+        }
+      />
 
-      {isLoading && <Spinner label="Loading your weddings" />}
+      {isLoading && (
+        <div className="space-y-3">
+          <Skeleton className="h-20 rounded-xl" />
+          <Skeleton className="h-20 rounded-xl" />
+        </div>
+      )}
       {error && <ErrorState error={error} onRetry={() => void refetch()} />}
 
       {data && data.length === 0 && (
         <EmptyState
+          icon={<CalendarDays className="size-5" />}
           title="No weddings yet"
           description="Create one to get started. You will be able to invite your partner, family and coordinator afterwards."
           action={
             <Link to="/new">
-              <Button>Create a wedding</Button>
+              <Button icon={<Plus className="size-4" />}>Create a wedding</Button>
             </Link>
           }
         />
@@ -53,14 +67,14 @@ export function WeddingListPage() {
       {data && data.length > 0 && (
         <div className="space-y-3">
           {data.map((w) => (
-            <Link key={w.id} to={`/w/${w.id}`} className="block">
-              <Card className="transition-shadow hover:shadow-md">
-                <CardBody className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-stone-900">
+            <Link key={w.id} to={`/w/${w.id}`} className="focus-ring block rounded-xl">
+              <Card className="hover:border-wine-200 hover:shadow-raised">
+                <CardBody className="flex items-center justify-between gap-3 pt-5">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-stone-900">
                       {w.bride_name || 'Bride'} &amp; {w.groom_name || 'Groom'}
                     </p>
-                    <p className="mt-0.5 text-sm text-stone-500">
+                    <p className="mt-0.5 truncate text-sm text-stone-500">
                       {w.wedding_date
                         ? new Date(w.wedding_date).toLocaleDateString('en-GB', {
                             day: '2-digit',
@@ -81,11 +95,13 @@ export function WeddingListPage() {
 
           <div className="pt-2">
             <Link to="/new">
-              <Button variant="secondary">Create another wedding</Button>
+              <Button variant="secondary" icon={<Plus className="size-4" />}>
+                Create another wedding
+              </Button>
             </Link>
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 }

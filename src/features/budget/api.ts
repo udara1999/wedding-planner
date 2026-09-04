@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
-import type { BudgetByCategory, BudgetCategoryRow, BudgetLineRow } from '../../types/db';
+import type {
+  BudgetByCategory,
+  BudgetCategoryRow,
+  BudgetLineRow,
+  WeddingFinancials,
+} from '../../types/db';
 
 export const budgetKeys = {
   categories: (weddingId: string) => ['budget', weddingId, 'categories'] as const,
@@ -108,6 +113,81 @@ export function usePayerOptions(weddingId: string) {
         .eq('kind', 'Owner')
         .order('sort_order');
       return unwrap(res).map((r) => r.value);
+    },
+  });
+}
+
+export interface NewBudgetLine {
+  name: string;
+  category_id: string;
+  code: string | null;
+  applicability: BudgetLineRow['applicability'];
+  payer: string | null;
+  budgeted_minor: number;
+}
+
+export function useCreateBudgetLine(weddingId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: NewBudgetLine) => {
+      // No source_template_id: a line the couple added themselves is not a
+      // template copy, and leaving it null keeps re-seeding idempotent rather
+      // than colliding on (wedding_id, source_template_id).
+      const res = await supabase
+        .from('budget_lines')
+        .insert({ ...input, wedding_id: weddingId })
+        .select('*');
+      const rows = unwrap(res);
+      if (rows.length === 0) throw new Error('That budget line could not be created.');
+      return rows[0];
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
+      void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
+    },
+  });
+}
+
+export function useDeleteBudgetLine(weddingId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await supabase.from('budget_lines').delete().eq('id', id).select('id');
+      const rows = unwrap(res);
+      if (rows.length === 0) {
+        throw new Error('That budget line could not be deleted.');
+      }
+      return id;
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
+      void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
+      // Payments reference budget lines (ON DELETE SET NULL), so a delete can
+      // leave a payment unattached — the payments list must not keep showing
+      // the old link.
+      void qc.invalidateQueries({ queryKey: ['payments', weddingId] });
+    },
+  });
+}
+
+/**
+ * The 01 START HERE money block (ticket 2.8).
+ *
+ * The view is guarded by app.can_see_money, so a coordinator or viewer gets no
+ * row rather than an error — callers should treat "no data" as "not entitled",
+ * not as "nothing spent".
+ */
+export function useWeddingFinancials(weddingId: string) {
+  return useQuery({
+    queryKey: ['financials', weddingId] as const,
+    queryFn: async (): Promise<WeddingFinancials | null> => {
+      const res = await supabase
+        .from('v_wedding_financials')
+        .select('*')
+        .eq('wedding_id', weddingId)
+        .maybeSingle();
+      if (res.error) throw new Error(res.error.message);
+      return res.data;
     },
   });
 }

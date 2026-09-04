@@ -1,4 +1,5 @@
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -60,11 +61,15 @@ export function CreateWeddingPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10">
-      <Link to="/" className="text-sm text-stone-500 hover:text-stone-800">
-        ← Back
+      <Link
+        to="/"
+        className="focus-ring inline-flex items-center gap-1.5 rounded-lg text-sm text-stone-500 hover:text-stone-800"
+      >
+        <ArrowLeft className="size-4" />
+        Back
       </Link>
 
-      <Card className="mt-4">
+      <Card className="mt-4 shadow-raised">
         <CardHeader>
           <CardTitle>Create a wedding</CardTitle>
         </CardHeader>
@@ -116,9 +121,18 @@ export function CreateWeddingPage() {
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating…' : 'Create wedding'}
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              loading={isSubmitting}
+              icon={<Sparkles className="size-4" />}
+            >
+              {isSubmitting ? 'Creating and setting up…' : 'Create wedding'}
             </Button>
+            <p className="text-center text-xs text-stone-500">
+              The budget, tasks and checklists are copied in from the template straight away.
+            </p>
           </form>
         </CardBody>
       </Card>

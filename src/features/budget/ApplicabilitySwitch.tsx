@@ -32,7 +32,7 @@ export function ApplicabilitySwitch({
       role="radiogroup"
       aria-label="Applies?"
       className={cn(
-        'inline-flex overflow-hidden rounded-md border border-stone-300',
+        'inline-flex overflow-hidden rounded-lg border border-stone-200 bg-stone-50 p-0.5',
         pending && 'opacity-60',
       )}
     >
@@ -48,11 +48,10 @@ export function ApplicabilitySwitch({
             disabled={disabled || pending}
             onClick={() => !active && onChange(option.value)}
             className={cn(
-              'px-2 py-1 text-[11px] font-medium transition-colors',
-              'border-r border-stone-200 last:border-r-0',
-              active && option.value === 'not_applicable' && 'bg-stone-200 text-stone-700',
-              active && option.value !== 'not_applicable' && 'bg-wine-700 text-white',
-              !active && 'bg-white text-stone-500 hover:bg-stone-50',
+              'focus-ring rounded-md px-2 py-1 text-[11px] font-medium transition-all',
+              active && option.value === 'not_applicable' && 'bg-white text-stone-600 shadow-sm',
+              active && option.value !== 'not_applicable' && 'bg-wine-700 text-white shadow-sm',
+              !active && 'text-stone-500 hover:text-stone-800',
               (disabled || pending) && 'cursor-not-allowed',
             )}
           >

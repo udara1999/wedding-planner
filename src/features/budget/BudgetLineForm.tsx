@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useUpdateBudgetLine } from './api';
+import { Trash2 } from 'lucide-react';
+import { useCreateBudgetLine, useDeleteBudgetLine, useUpdateBudgetLine } from './api';
+import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { currencyDecimals, formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
-import type { BudgetLineRow, TaskStatus } from '../../types/db';
-import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Field, Input, Select } from '../../components/ui';
+import type { Applicability, BudgetCategoryRow, BudgetLineRow, TaskStatus } from '../../types/db';
+import { Button, Field, InlineError, Input, Select, Textarea } from '../../components/ui';
 
 const STATUSES: { value: TaskStatus; label: string }[] = [
   { value: 'not_started', label: 'Not started' },
@@ -27,6 +29,8 @@ type MoneyField = (typeof MONEY_FIELDS)[number][0];
 
 const schema = z.object({
   name: z.string().trim().min(1, 'A line needs a name'),
+  category_id: z.string().min(1, 'Pick a category'),
+  code: z.string().trim().max(20).optional().nullable(),
   payer: z.string().trim().max(60).optional().nullable(),
   status: z.enum(['not_started', 'in_progress', 'waiting', 'completed', 'cancelled']),
   notes: z.string().trim().max(2000).optional().nullable(),
@@ -39,38 +43,79 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+const BLANK: FormValues = {
+  name: '',
+  category_id: '',
+  code: '',
+  payer: '',
+  status: 'not_started',
+  notes: '',
+  budgeted_minor: '',
+  quoted_minor: '',
+  negotiated_minor: '',
+  actual_minor: '',
+  refundable_deposit_minor: '',
+};
+
+/**
+ * One form for creating and editing. A separate "new line" form would drift
+ * from this one the first time a column is added, and they share every rule
+ * about money parsing and applicability.
+ */
 export function BudgetLineForm({
+  weddingId,
   line,
+  categories,
   currency,
   payerOptions,
   canEdit,
+  onDone,
 }: {
-  line: BudgetLineRow;
+  weddingId: string;
+  /** null puts the form in create mode. */
+  line: BudgetLineRow | null;
+  categories: BudgetCategoryRow[];
   currency: string;
   payerOptions: string[];
   canEdit: boolean;
+  onDone: () => void;
 }) {
   const decimals = currencyDecimals(currency);
-  const update = useUpdateBudgetLine(line.wedding_id);
+  const create = useCreateBudgetLine(weddingId);
+  const update = useUpdateBudgetLine(weddingId);
+  const remove = useDeleteBudgetLine(weddingId);
 
-  // Money is validated in onSubmit rather than in the schema: the number of
+  const [applicability, setApplicability] = useState<Applicability>(
+    line?.applicability ?? 'required',
+  );
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  // Money is validated on submit rather than in the schema: the number of
   // decimal places depends on the wedding's currency, which the schema cannot see.
-  const form = useForm<FormValues>({ resolver: zodResolver(schema) });
+  const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: BLANK });
 
   useEffect(() => {
-    form.reset({
-      name: line.name,
-      payer: line.payer ?? '',
-      status: line.status,
-      notes: line.notes ?? '',
-      budgeted_minor: formatMinorAsMajor(line.budgeted_minor, decimals),
-      quoted_minor: formatMinorAsMajor(line.quoted_minor, decimals),
-      negotiated_minor: formatMinorAsMajor(line.negotiated_minor, decimals),
-      actual_minor: formatMinorAsMajor(line.actual_minor, decimals),
-      refundable_deposit_minor: formatMinorAsMajor(line.refundable_deposit_minor, decimals),
-    });
+    setConfirmingDelete(false);
+    setApplicability(line?.applicability ?? 'required');
+    form.reset(
+      line
+        ? {
+            name: line.name,
+            category_id: line.category_id ?? '',
+            code: line.code ?? '',
+            payer: line.payer ?? '',
+            status: line.status,
+            notes: line.notes ?? '',
+            budgeted_minor: formatMinorAsMajor(line.budgeted_minor, decimals),
+            quoted_minor: formatMinorAsMajor(line.quoted_minor, decimals),
+            negotiated_minor: formatMinorAsMajor(line.negotiated_minor, decimals),
+            actual_minor: formatMinorAsMajor(line.actual_minor, decimals),
+            refundable_deposit_minor: formatMinorAsMajor(line.refundable_deposit_minor, decimals),
+          }
+        : { ...BLANK, category_id: categories[0]?.id ?? '' },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [line.id, line.updated_at]);
+  }, [line?.id, line?.updated_at, categories.length]);
 
   async function onSubmit(values: FormValues) {
     const amounts: Partial<Record<MoneyField, number>> = {};
@@ -83,97 +128,172 @@ export function BudgetLineForm({
       }
     }
 
-    await update.mutateAsync({
-      id: line.id,
-      patch: {
-        name: values.name,
-        payer: values.payer?.trim() ? values.payer.trim() : null,
-        status: values.status,
-        notes: values.notes?.trim() ? values.notes.trim() : null,
-        ...amounts,
-      },
-    });
+    if (line) {
+      await update.mutateAsync({
+        id: line.id,
+        patch: {
+          name: values.name,
+          payer: values.payer?.trim() || null,
+          status: values.status,
+          notes: values.notes?.trim() || null,
+          applicability,
+          ...amounts,
+        },
+      });
+    } else {
+      await create.mutateAsync({
+        name: values.name.trim(),
+        category_id: values.category_id,
+        code: values.code?.trim() || null,
+        applicability,
+        payer: values.payer?.trim() || null,
+        budgeted_minor: amounts.budgeted_minor ?? 0,
+      });
+    }
+    onDone();
   }
 
+  const busy = create.isPending || update.isPending;
+  const error = create.error ?? update.error ?? remove.error;
+
   return (
-    <Card>
-      <CardHeader className="flex items-start justify-between gap-3">
-        <CardTitle>{line.code ? `${line.code} · ${line.name}` : line.name}</CardTitle>
-        {line.applicability === 'not_applicable' && <Badge tone="neutral">not applicable</Badge>}
-      </CardHeader>
-      <CardBody>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <Field label="Line item" error={form.formState.errors.name?.message}>
-            <Input disabled={!canEdit} {...form.register('name')} />
-          </Field>
+    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <Field label="Line item" error={form.formState.errors.name?.message}>
+        <Input
+          disabled={!canEdit}
+          placeholder="Bridal necklace set"
+          {...form.register('name')}
+        />
+      </Field>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Who pays" error={form.formState.errors.payer?.message}>
-              <Select disabled={!canEdit} {...form.register('payer')}>
-                <option value="">Not decided</option>
-                {payerOptions.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Status">
-              <Select disabled={!canEdit} {...form.register('status')}>
-                {STATUSES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {MONEY_FIELDS.map(([key, label, hint]) => (
-              <Field
-                key={key}
-                label={`${label} (${currency})`}
-                hint={hint}
-                error={form.formState.errors[key]?.message}
-              >
-                <Input inputMode="decimal" disabled={!canEdit} {...form.register(key)} />
-              </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Category" error={form.formState.errors.category_id?.message}>
+          {/* Locked after creation: moving a line between categories silently
+              rewrites two category totals, which deserves its own action. */}
+          <Select disabled={!canEdit || Boolean(line)} {...form.register('category_id')}>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
             ))}
-          </div>
+          </Select>
+        </Field>
+        <Field
+          label="Code"
+          hint={line ? undefined : 'Optional. Yours to choose for a line you add.'}
+        >
+          <Input disabled={!canEdit || Boolean(line)} placeholder="BG200" {...form.register('code')} />
+        </Field>
+      </div>
 
-          <div className="rounded-md bg-stone-50 px-3 py-2 text-xs text-stone-600">
-            Forecast now:{' '}
-            <strong className="text-stone-900">
-              {formatMinorAsMajor(line.forecast_minor, decimals)} {currency}
-            </strong>
-            {line.applicability === 'not_applicable'
-              ? ' — zero while this line is not applicable.'
-              : ' — actual, else negotiated, else quoted, else budgeted. Computed by the database.'}
-          </div>
+      <Field label="Applies?" hint="A not-applicable line keeps its budget but forecasts nothing.">
+        <div className="pt-0.5">
+          <ApplicabilitySwitch
+            value={applicability}
+            disabled={!canEdit}
+            onChange={setApplicability}
+          />
+        </div>
+      </Field>
 
-          <Field label="Notes" error={form.formState.errors.notes?.message}>
-            <Input disabled={!canEdit} {...form.register('notes')} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Who pays">
+          <Select disabled={!canEdit} {...form.register('payer')}>
+            <option value="">Not decided</option>
+            {payerOptions.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        {line && (
+          <Field label="Status">
+            <Select disabled={!canEdit} {...form.register('status')}>
+              {STATUSES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
           </Field>
+        )}
+      </div>
 
-          {update.error && (
-            <p className="text-xs text-red-700">
-              {update.error instanceof Error ? update.error.message : 'Could not save'}
-            </p>
-          )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {(line ? MONEY_FIELDS : MONEY_FIELDS.slice(0, 1)).map(([key, label, hint]) => (
+          <Field
+            key={key}
+            label={`${label} (${currency})`}
+            hint={hint}
+            error={form.formState.errors[key]?.message}
+          >
+            <Input inputMode="decimal" disabled={!canEdit} {...form.register(key)} />
+          </Field>
+        ))}
+      </div>
 
-          {canEdit && (
-            <div className="flex items-center gap-3">
-              <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
-                {update.isPending ? 'Saving…' : 'Save line'}
+      {line && (
+        <div className="rounded-lg bg-stone-50 px-3 py-2.5 text-xs text-stone-600">
+          Forecast now{' '}
+          <strong className="tabular text-stone-900">
+            {formatMinorAsMajor(line.forecast_minor, decimals)} {currency}
+          </strong>
+          {applicability === 'not_applicable'
+            ? ' — zero while this line is not applicable.'
+            : ' — actual, else negotiated, else quoted, else budgeted. Worked out by the database.'}
+        </div>
+      )}
+
+      {line && (
+        <Field label="Notes" error={form.formState.errors.notes?.message}>
+          <Textarea disabled={!canEdit} rows={2} {...form.register('notes')} />
+        </Field>
+      )}
+
+      <InlineError error={error} />
+
+      {canEdit && (
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <Button type="submit" loading={busy}>
+            {line ? 'Save changes' : 'Add line'}
+          </Button>
+
+          {line &&
+            (confirmingDelete ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-stone-500">Delete this line?</span>
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  loading={remove.isPending}
+                  onClick={() => void remove.mutateAsync(line.id).then(onDone)}
+                >
+                  Delete
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConfirmingDelete(false)}
+                >
+                  Keep
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                icon={<Trash2 className="size-4" />}
+                onClick={() => setConfirmingDelete(true)}
+              >
+                Delete
               </Button>
-              {update.isSuccess && !form.formState.isDirty && (
-                <span className="text-sm text-green-700">Saved</span>
-              )}
-            </div>
-          )}
-        </form>
-      </CardBody>
-    </Card>
+            ))}
+        </div>
+      )}
+    </form>
   );
 }

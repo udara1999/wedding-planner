@@ -28,7 +28,10 @@ import {
   Field,
   Input,
   Select,
+  Page,
+  PageHeader,
   Spinner,
+  Stat,
 } from '../../components/ui';
 
 const STAGES: { value: PaymentStage; label: string }[] = [
@@ -212,14 +215,11 @@ export function PaymentsPage() {
   const mutationError = create.error ?? update.error ?? remove.error;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-xl font-semibold text-stone-900">Payments</h1>
-        <p className="mt-0.5 text-sm text-stone-500">
-          Every instalment against a budget line. Whether something is due, due soon or overdue is
-          worked out from today's date, so it changes on its own.
-        </p>
-      </header>
+    <Page width="wide">
+      <PageHeader
+        title="Payments"
+        description="Every instalment against a budget line. Whether something is due, due soon or overdue is worked out from today's date, so it changes on its own."
+      />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <Stat label={`Raised (${currency})`} value={formatMinorAsMajor(totals.due, decimals)} />
@@ -392,15 +392,7 @@ export function PaymentsPage() {
           </CardBody>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-stone-200 bg-white px-4 py-3">
-      <p className="text-xs text-stone-500">{label}</p>
-      <p className="mt-0.5 text-lg font-semibold tabular-nums text-stone-900">{value}</p>
-    </div>
-  );
-}

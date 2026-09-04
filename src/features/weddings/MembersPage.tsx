@@ -15,6 +15,8 @@ import {
   ErrorState,
   Field,
   Input,
+  Page,
+  PageHeader,
   Select,
   Spinner,
 } from '../../components/ui';
@@ -64,13 +66,11 @@ export function MembersPage() {
   }
 
   return (
-    <div className="max-w-2xl px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-xl font-semibold text-stone-900">People</h1>
-        <p className="mt-0.5 text-sm text-stone-500">
-          Who can see this wedding, and how much of it.
-        </p>
-      </header>
+    <Page width="default">
+      <PageHeader
+        title="People"
+        description="Who can see this wedding, and how much of it."
+      />
 
       <Card className="mb-6">
         <CardHeader>
@@ -210,6 +210,6 @@ export function MembersPage() {
           )}
         </CardBody>
       </Card>
-    </div>
+    </Page>
   );
 }

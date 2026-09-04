@@ -1,25 +1,54 @@
 @import 'tailwindcss';
 
-/* Design tokens carried over from the workbook's "Refined Kandyan" palette,
-   so the app and the spreadsheet look like the same product. */
+/* =============================================================================
+   Design tokens — "Refined Kandyan"
+   =============================================================================
+   Wine and gold on warm ivory, carried over from the workbook so the app and
+   the spreadsheet read as one product.
+
+   The neutral is `stone`, not `gray`: a cool grey next to a warm ivory looks
+   dirty. Every surface, border and muted text in the app comes from stone so
+   the whole thing stays on one temperature.
+   ========================================================================== */
 @theme {
+  /* Primary. Used for actions, active navigation and anything the couple owns. */
   --color-wine-50: #fbf5f6;
-  --color-wine-100: #f5dede;
+  --color-wine-100: #f6e4e7;
+  --color-wine-200: #eec8ce;
+  --color-wine-300: #dfa0aa;
+  --color-wine-400: #c96e7e;
+  --color-wine-500: #ab4557;
   --color-wine-600: #8a2a3c;
   --color-wine-700: #6e1e2e;
   --color-wine-800: #551622;
   --color-wine-900: #3d0f18;
 
+  /* Secondary. Ceremonial accent — badges, highlights, never a primary action. */
   --color-gold-50: #fbf8f2;
   --color-gold-100: #f3ead6;
+  --color-gold-200: #e7d6b4;
+  --color-gold-300: #d8bd8c;
   --color-gold-400: #c9a86a;
   --color-gold-500: #b08d57;
-  --color-gold-800: #7a5c00;
+  --color-gold-600: #937046;
+  --color-gold-700: #75583a;
+  --color-gold-800: #5c4530;
 
+  /* Surfaces. `app` is the page, `panel` is anything raised off it. */
   --color-ivory: #fbf8f4;
   --color-surface: #f5f1ea;
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Softer and larger than Tailwind's defaults: rounded corners and diffuse
+     shadows are most of what separates "modern" from "administrative". */
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+
+  --shadow-card: 0 1px 2px 0 rgb(28 25 23 / 0.04), 0 1px 3px 0 rgb(28 25 23 / 0.06);
+  --shadow-raised: 0 2px 4px -1px rgb(28 25 23 / 0.06), 0 8px 24px -6px rgb(28 25 23 / 0.12);
+  --shadow-pop: 0 4px 8px -2px rgb(28 25 23 / 0.08), 0 16px 40px -12px rgb(28 25 23 / 0.18);
 }
 
 html,
@@ -31,6 +60,26 @@ body,
 body {
   @apply bg-ivory text-stone-900 antialiased;
   font-family: var(--font-sans);
+  /* Nothing in this app is meant to scroll sideways. A stray wide child used to
+     push the whole page, taking the sidebar with it. */
+  overflow-x: hidden;
+}
+
+/* Money and counts line up in columns only if the digits are the same width. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* One focus treatment everywhere, so keyboard users get a consistent signal. */
+@utility focus-ring {
+  @apply focus-visible:ring-2 focus-visible:ring-wine-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-ivory focus-visible:outline-none;
+}
+
+/* Scrollbars inside panels, kept unobtrusive so a scrolling list does not
+   introduce a hard grey bar in the middle of the layout. */
+@utility scroll-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-stone-300) transparent;
 }
 
 /* Print rules for the day-of pack (plan ticket 8.6, decision D6). */

@@ -25,7 +25,10 @@ import {
   ErrorState,
   Field,
   Input,
+  Page,
+  PageHeader,
   Spinner,
+  Stat,
 } from '../../components/ui';
 
 const schema = z.object({
@@ -158,14 +161,11 @@ export function ContributionsPage() {
   const mutationError = create.error ?? update.error ?? remove.error;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-xl font-semibold text-stone-900">Contributions</h1>
-        <p className="mt-0.5 text-sm text-stone-500">
-          Who has agreed to fund what, and how much has actually arrived.
-          {isFamily && ' You can see and edit your own contribution.'}
-        </p>
-      </header>
+    <Page width="wide">
+      <PageHeader
+        title="Contributions"
+        description="Who has agreed to fund what, and how much has actually arrived."
+      />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <Stat label={`Agreed (${currency})`} value={formatMinorAsMajor(totals.agreed, decimals)} />
@@ -318,15 +318,7 @@ export function ContributionsPage() {
           </Card>
         )}
       </div>
-    </div>
+    </Page>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-stone-200 bg-white px-4 py-3">
-      <p className="text-xs text-stone-500">{label}</p>
-      <p className="mt-0.5 text-lg font-semibold tabular-nums text-stone-900">{value}</p>
-    </div>
-  );
-}

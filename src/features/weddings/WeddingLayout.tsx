@@ -1,7 +1,25 @@
+import { useState } from 'react';
 import { NavLink, Outlet, useParams, Link } from 'react-router-dom';
+import {
+  CalendarClock,
+  ClipboardList,
+  CreditCard,
+  HandCoins,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  Menu,
+  Phone,
+  Settings,
+  Store,
+  Users,
+  UsersRound,
+  Wallet,
+  X,
+} from 'lucide-react';
 import { useMyWeddings } from './api';
 import { useAuth } from '../auth/AuthProvider';
-import { Badge, ErrorState, Spinner } from '../../components/ui';
+import { Badge, Button, ErrorState, IconButton, Spinner, cn } from '../../components/ui';
 import type { MemberRole } from '../../types/db';
 
 /**
@@ -15,6 +33,7 @@ interface NavItem {
   to: string;
   label: string;
   roles: MemberRole[];
+  icon: React.ReactNode;
   phase?: string;
 }
 
@@ -23,26 +42,91 @@ const COUPLE: MemberRole[] = ['owner', 'partner'];
 const MONEY: MemberRole[] = ['owner', 'partner', 'family'];
 const OPS: MemberRole[] = ['owner', 'partner', 'coordinator'];
 
-const NAV: NavItem[] = [
-  { to: '', label: 'Dashboard', roles: ALL },
-  { to: 'setup', label: 'Setup', roles: ALL },
-  { to: 'budget', label: 'Budget', roles: MONEY, phase: '2' },
-  { to: 'payments', label: 'Payments', roles: MONEY, phase: '2' },
-  { to: 'contributions', label: 'Contributions', roles: MONEY, phase: '2' },
-  { to: 'vendors', label: 'Vendors', roles: ALL, phase: '3' },
-  { to: 'compare', label: 'Compare vendors', roles: COUPLE, phase: '3' },
-  { to: 'guests', label: 'Guests', roles: ALL, phase: '4' },
-  { to: 'seating', label: 'Seating', roles: ALL, phase: '4' },
-  { to: 'tasks', label: 'Tasks', roles: ALL, phase: '5' },
-  { to: 'timeline', label: 'Day timeline', roles: OPS, phase: '8' },
-  { to: 'contacts', label: 'Contact sheet', roles: OPS, phase: '8' },
-  { to: 'members', label: 'People', roles: COUPLE },
+const ICON = 'size-4 shrink-0';
+
+/** Grouped so a fifteen-item list reads as four short ones. */
+const GROUPS: { heading: string; items: NavItem[] }[] = [
+  {
+    heading: 'Plan',
+    items: [
+      { to: '', label: 'Dashboard', roles: ALL, icon: <LayoutDashboard className={ICON} /> },
+      { to: 'setup', label: 'Setup', roles: ALL, icon: <Settings className={ICON} /> },
+      {
+        to: 'tasks',
+        label: 'Tasks',
+        roles: ALL,
+        icon: <ListChecks className={ICON} />,
+        phase: '5',
+      },
+    ],
+  },
+  {
+    heading: 'Money',
+    items: [
+      { to: 'budget', label: 'Budget', roles: MONEY, icon: <Wallet className={ICON} /> },
+      { to: 'payments', label: 'Payments', roles: MONEY, icon: <CreditCard className={ICON} /> },
+      {
+        to: 'contributions',
+        label: 'Contributions',
+        roles: MONEY,
+        icon: <HandCoins className={ICON} />,
+      },
+    ],
+  },
+  {
+    heading: 'People & vendors',
+    items: [
+      { to: 'vendors', label: 'Vendors', roles: ALL, icon: <Store className={ICON} />, phase: '3' },
+      {
+        to: 'compare',
+        label: 'Compare vendors',
+        roles: COUPLE,
+        icon: <ClipboardList className={ICON} />,
+        phase: '3',
+      },
+      {
+        to: 'guests',
+        label: 'Guests',
+        roles: ALL,
+        icon: <UsersRound className={ICON} />,
+        phase: '4',
+      },
+      {
+        to: 'seating',
+        label: 'Seating',
+        roles: ALL,
+        icon: <UsersRound className={ICON} />,
+        phase: '4',
+      },
+      { to: 'members', label: 'People', roles: COUPLE, icon: <Users className={ICON} /> },
+    ],
+  },
+  {
+    heading: 'The day',
+    items: [
+      {
+        to: 'timeline',
+        label: 'Day timeline',
+        roles: OPS,
+        icon: <CalendarClock className={ICON} />,
+        phase: '8',
+      },
+      {
+        to: 'contacts',
+        label: 'Contact sheet',
+        roles: OPS,
+        icon: <Phone className={ICON} />,
+        phase: '8',
+      },
+    ],
+  },
 ];
 
 export function WeddingLayout() {
   const { weddingId } = useParams<{ weddingId: string }>();
   const { data, isLoading, error, refetch } = useMyWeddings();
   const { signOut } = useAuth();
+  const [navOpen, setNavOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -75,68 +159,145 @@ export function WeddingLayout() {
     );
   }
 
-  const visible = NAV.filter((i) => i.roles.includes(wedding.role));
+  const groups = GROUPS.map((g) => ({
+    ...g,
+    items: g.items.filter((i) => i.roles.includes(wedding.role)),
+  })).filter((g) => g.items.length > 0);
+
+  const days = wedding.days_to_go;
 
   return (
-    <div className="flex min-h-full">
-      <aside className="no-print w-60 shrink-0 border-r border-stone-200 bg-white">
-        <div className="border-b border-stone-200 px-4 py-4">
-          <Link to="/" className="text-xs text-stone-400 hover:text-stone-700">
-            ← All weddings
+    /**
+     * The shell owns the only scroll container. `h-full overflow-hidden` on the
+     * frame plus `overflow-y-auto` on the content means the sidebar stays put
+     * while a long budget scrolls — previously the whole page scrolled and took
+     * the navigation with it.
+     */
+    <div className="flex h-full overflow-hidden bg-ivory">
+      {/* Backdrop for the mobile drawer. */}
+      {navOpen && (
+        <button
+          aria-label="Close navigation"
+          className="fixed inset-0 z-30 bg-stone-900/25 backdrop-blur-[1px] lg:hidden"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
+      <aside
+        className={cn(
+          'no-print scroll-subtle z-40 flex h-full w-64 shrink-0 flex-col overflow-y-auto',
+          'border-r border-stone-200/80 bg-white',
+          // Off-canvas below lg, a normal column above it.
+          'fixed inset-y-0 left-0 transition-transform duration-200 lg:static lg:translate-x-0',
+          navOpen ? 'translate-x-0 shadow-pop' : '-translate-x-full',
+        )}
+      >
+        <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3">
+          <Link
+            to="/"
+            className="focus-ring group min-w-0 rounded-lg"
+            onClick={() => setNavOpen(false)}
+          >
+            <span className="text-[11px] font-medium text-stone-400 group-hover:text-stone-600">
+              All weddings
+            </span>
+            <p className="truncate text-[15px] leading-snug font-semibold tracking-tight text-stone-900">
+              {wedding.bride_name} &amp; {wedding.groom_name}
+            </p>
           </Link>
-          <p className="mt-1.5 truncate text-sm font-semibold text-stone-900">
-            {wedding.bride_name} &amp; {wedding.groom_name}
-          </p>
-          <div className="mt-1.5 flex items-center gap-2">
-            <Badge tone="gold">{wedding.role}</Badge>
-            {typeof wedding.days_to_go === 'number' && (
-              <span className="text-xs text-stone-500">
-                {wedding.days_to_go >= 0
-                  ? `${wedding.days_to_go} days to go`
-                  : `${Math.abs(wedding.days_to_go)} days ago`}
-              </span>
-            )}
-          </div>
+          <IconButton
+            label="Close navigation"
+            className="lg:hidden"
+            size="sm"
+            onClick={() => setNavOpen(false)}
+          >
+            <X className="size-4" />
+          </IconButton>
         </div>
 
-        <nav className="space-y-0.5 p-2">
-          {visible.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === ''}
-              className={({ isActive }) =>
-                [
-                  'flex items-center justify-between rounded-md px-3 py-2 text-sm',
-                  isActive
-                    ? 'bg-wine-50 font-medium text-wine-800'
-                    : 'text-stone-700 hover:bg-stone-50',
-                ].join(' ')
-              }
-            >
-              <span>{item.label}</span>
-              {item.phase && (
-                <span className="text-[10px] text-stone-300" title={`Phase ${item.phase}`}>
-                  P{item.phase}
-                </span>
-              )}
-            </NavLink>
+        <div className="mx-4 mb-3 flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2">
+          <Badge tone="gold">{wedding.role}</Badge>
+          {typeof days === 'number' && (
+            <span className="tabular text-xs text-stone-500">
+              {days >= 0 ? `${days} days to go` : `${Math.abs(days)} days ago`}
+            </span>
+          )}
+        </div>
+
+        <nav className="flex-1 space-y-4 px-2 pb-2">
+          {groups.map((group) => (
+            <div key={group.heading}>
+              <p className="px-3 pb-1 text-[10px] font-semibold tracking-wider text-stone-400 uppercase">
+                {group.heading}
+              </p>
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.to === ''}
+                    onClick={() => setNavOpen(false)}
+                    className={({ isActive }) =>
+                      cn(
+                        'focus-ring group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+                        isActive
+                          ? 'bg-wine-50 font-medium text-wine-800'
+                          : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900',
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <span className={isActive ? 'text-wine-600' : 'text-stone-400'}>
+                          {item.icon}
+                        </span>
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {item.phase && (
+                          <span
+                            title={`Arrives in phase ${item.phase}`}
+                            className="rounded bg-stone-100 px-1 text-[10px] text-stone-400"
+                          >
+                            P{item.phase}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
-        <div className="p-2">
-          <button
+        <div className="border-t border-stone-100 p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            icon={<LogOut className="size-4" />}
             onClick={() => void signOut()}
-            className="w-full rounded-md px-3 py-2 text-left text-sm text-stone-500 hover:bg-stone-50"
           >
             Sign out
-          </button>
+          </Button>
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1">
-        <Outlet context={{ wedding }} />
-      </main>
+      {/* The one scrolling region. min-w-0 stops a wide child widening the
+          flex item and reintroducing a horizontal scrollbar. */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="no-print flex items-center gap-3 border-b border-stone-200/80 bg-white/80 px-4 py-2.5 backdrop-blur lg:hidden">
+          <IconButton label="Open navigation" onClick={() => setNavOpen(true)}>
+            <Menu className="size-5" />
+          </IconButton>
+          <p className="truncate text-sm font-semibold text-stone-900">
+            {wedding.bride_name} &amp; {wedding.groom_name}
+          </p>
+        </header>
+
+        <main className="scroll-subtle min-w-0 flex-1 overflow-y-auto">
+          <Outlet context={{ wedding }} />
+        </main>
+      </div>
     </div>
   );
 }

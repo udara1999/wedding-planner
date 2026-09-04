@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Heart } from 'lucide-react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,19 +42,32 @@ export function SignInPage() {
   return <SignInForm onForgot={() => setMode('forgot')} onCreateAccount={() => setMode('signup')} />;
 }
 
-function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+function Shell({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-wine-800">Wedding Planner</h1>
+    <div className="flex min-h-full items-center justify-center bg-ivory px-4 py-12">
+      {/* A soft wash behind the card: enough to stop a white card on an ivory
+          page reading as a plain form, without becoming decoration. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,var(--color-wine-100),transparent)] opacity-70"
+      />
+      <div className="relative w-full max-w-sm">
+        <div className="mb-7 text-center">
+          <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-wine-700 text-white shadow-raised">
+            <Heart className="size-5" fill="currentColor" />
+          </div>
+          <h1 className="text-[22px] font-semibold tracking-tight text-stone-900">Wedding Planner</h1>
           <p className="mt-1 text-sm text-stone-500">Plan the whole day in one place.</p>
         </div>
-        <Card>
+
+        <Card className="shadow-raised">
           <CardHeader>
             <CardTitle>{title}</CardTitle>
           </CardHeader>
-          <CardBody>{children}</CardBody>
+          <CardBody>
+            {subtitle && <p className="mb-4 text-sm text-stone-500">{subtitle}</p>}
+            {children}
+          </CardBody>
         </Card>
       </div>
     </div>

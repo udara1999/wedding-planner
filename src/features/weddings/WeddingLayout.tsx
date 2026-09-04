@@ -61,8 +61,18 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
     ],
   },
   {
-    heading: 'Money',
+    // Vendors lead the money section because that is the order the work
+    // happens in: you find and compare vendors, and the budget lines and
+    // payments follow from what you agree with them.
+    heading: 'Vendors & money',
     items: [
+      { to: 'vendors', label: 'Vendors', roles: ALL, icon: <Store className={ICON} /> },
+      {
+        to: 'compare',
+        label: 'Compare vendors',
+        roles: COUPLE,
+        icon: <ClipboardList className={ICON} />,
+      },
       { to: 'budget', label: 'Budget', roles: MONEY, icon: <Wallet className={ICON} /> },
       { to: 'payments', label: 'Payments', roles: MONEY, icon: <CreditCard className={ICON} /> },
       {
@@ -74,15 +84,8 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
     ],
   },
   {
-    heading: 'People & vendors',
+    heading: 'People',
     items: [
-      { to: 'vendors', label: 'Vendors', roles: ALL, icon: <Store className={ICON} /> },
-      {
-        to: 'compare',
-        label: 'Compare vendors',
-        roles: COUPLE,
-        icon: <ClipboardList className={ICON} />,
-      },
       { to: 'guests', label: 'Guests', roles: ALL, icon: <UsersRound className={ICON} /> },
       {
         to: 'seating',

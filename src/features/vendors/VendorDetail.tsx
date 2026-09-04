@@ -9,6 +9,7 @@ import {
   type VendorInput,
 } from './vendorsApi';
 import { VendorBudgetLinks } from './VendorBudgetLinks';
+import { VendorPayments } from './VendorPayments';
 import { formatMinorForInput, parseMajorToMinor } from '../../lib/units';
 import type { VendorRow } from '../../types/db';
 import {
@@ -238,6 +239,13 @@ export function VendorDetail({
             currency={currency}
             decimals={decimals}
             canEdit={canEdit}
+          />
+
+          <VendorPayments
+            weddingId={weddingId}
+            vendorId={vendor.id}
+            currency={currency}
+            decimals={decimals}
           />
 
           <Attachments vendorId={vendor.id} weddingId={weddingId} canEdit={canEdit} />

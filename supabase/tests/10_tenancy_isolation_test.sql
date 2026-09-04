@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(139);
+select plan(148);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1004,6 +1004,145 @@ select is((select rsvp_status::text from guests
              where rsvp_token = (select v from tok where k='household')),
           'declined',
           'Replying with nobody coming marks the household declined');
+
+-- =============================================================================
+-- The vendor precedence rule  (20260904000100)
+-- =============================================================================
+-- payments.vendor_id was dropped in 2400 precisely because two paths to a
+-- vendor can disagree. It is back, so the reason it is safe this time has to be
+-- provable rather than asserted in a comment: the budget line's vendor wins,
+-- always, and the column follows it.
+-- =============================================================================
+-- Same reason as `ids` and `w` above: created by the service role so the grant
+-- can be made, then written and read while impersonating a real user.
+select tests.become_service_role();
+create temporary table pv (k text primary key, v uuid);
+grant select, insert on pv to public;
+
+select tests.login((select v from ids where k = 'alice'));
+
+with ins as (
+  insert into vendors (wedding_id, category, name)
+  values ((select v from w where k='a'), 'Photography', 'Studio One')
+  returning id
+)
+insert into pv select 'vendor1', id from ins;
+
+with ins as (
+  insert into vendors (wedding_id, category, name)
+  values ((select v from w where k='a'), 'Photography', 'Studio Two')
+  returning id
+)
+insert into pv select 'vendor2', id from ins;
+
+-- A line that names a vendor, and one that names none.
+with ins as (
+  insert into budget_lines (wedding_id, code, name, budgeted_minor, vendor_id)
+  values ((select v from w where k='a'), 'VP001', 'Photography package', 100000,
+          (select v from pv where k='vendor1'))
+  returning id
+)
+insert into pv select 'line_with', id from ins;
+
+with ins as (
+  insert into budget_lines (wedding_id, code, name, budgeted_minor)
+  values ((select v from w where k='a'), 'VP002', 'Album printing', 20000)
+  returning id
+)
+insert into pv select 'line_without', id from ins;
+
+-- 1. The line's vendor wins over whatever the client sent.
+with ins as (
+  insert into payments (wedding_id, budget_line_id, vendor_id,
+                        amount_due_minor, amount_paid_minor, paid_on)
+  values ((select v from w where k='a'),
+          (select v from pv where k='line_with'),
+          (select v from pv where k='vendor2'),   -- deliberately the wrong one
+          60000, 60000, current_date)
+  returning id
+)
+insert into pv select 'pay_on_line', id from ins;
+
+select is((select vendor_id from payments where id = (select v from pv where k='pay_on_line')),
+          (select v from pv where k='vendor1'),
+          'A payment is attributed to its budget line''s vendor, not the one it was sent with');
+
+-- 2. With no vendor on the line, the payment's own choice stands.
+with ins as (
+  insert into payments (wedding_id, budget_line_id, vendor_id,
+                        amount_due_minor, amount_paid_minor, paid_on)
+  values ((select v from w where k='a'),
+          (select v from pv where k='line_without'),
+          (select v from pv where k='vendor2'),
+          20000, 20000, current_date)
+  returning id
+)
+insert into pv select 'pay_own_vendor', id from ins;
+
+select is((select vendor_id from payments where id = (select v from pv where k='pay_own_vendor')),
+          (select v from pv where k='vendor2'),
+          'A payment on a line with no vendor keeps the vendor it names');
+
+-- 3. Re-pointing the line carries its payments with it.
+update budget_lines set vendor_id = (select v from pv where k='vendor2')
+ where id = (select v from pv where k='line_with');
+
+select is((select vendor_id from payments where id = (select v from pv where k='pay_on_line')),
+          (select v from pv where k='vendor2'),
+          'Re-linking a budget line moves the payments made against it');
+
+-- 4. The line wins unconditionally: a payment that had named its own vendor is
+--    taken over once the line names one.
+update budget_lines set vendor_id = (select v from pv where k='vendor1')
+ where id = (select v from pv where k='line_without');
+
+select is((select vendor_id from payments where id = (select v from pv where k='pay_own_vendor')),
+          (select v from pv where k='vendor1'),
+          'A line that gains a vendor takes over the payments on it');
+
+-- 5. Clearing the line's vendor clears the payments that were following it.
+update budget_lines set vendor_id = null
+ where id = (select v from pv where k='line_without');
+
+select is((select vendor_id from payments where id = (select v from pv where k='pay_own_vendor')),
+          null,
+          'Clearing a line''s vendor clears the payments that had followed it');
+
+-- 6. The case the column exists for: money out with no budget line at all.
+insert into payments (wedding_id, vendor_id, amount_due_minor, amount_paid_minor, paid_on)
+values ((select v from w where k='a'), (select v from pv where k='vendor2'),
+        5000, 5000, current_date);
+
+select is((select unbudgeted_paid_minor from v_vendor_financials
+            where vendor_id = (select v from pv where k='vendor2')),
+          5000::bigint,
+          'A payment with no budget line is reported as unbudgeted against its vendor');
+
+select is((select paid_minor from v_vendor_financials
+            where vendor_id = (select v from pv where k='vendor2')),
+          65000::bigint,
+          'A vendor''s paid total includes payments no budget line covers');
+
+-- 7. Two lines and two payments must not multiply each other. This is the bug
+--    the two lateral aggregates exist to prevent, and it would look like a
+--    plausible number rather than an error.
+insert into budget_lines (wedding_id, code, name, budgeted_minor, vendor_id)
+values ((select v from w where k='a'), 'VP003', 'Second shooter', 40000,
+        (select v from pv where k='vendor2'));
+
+insert into payments (wedding_id, budget_line_id, amount_due_minor, amount_paid_minor, paid_on)
+values ((select v from w where k='a'),
+        (select v from pv where k='line_with'), 40000, 40000, current_date);
+
+select is((select budgeted_minor from v_vendor_financials
+            where vendor_id = (select v from pv where k='vendor2')),
+          140000::bigint,
+          'Budget lines are summed once regardless of how many payments exist');
+
+select is((select budget_line_count from v_vendor_financials
+            where vendor_id = (select v from pv where k='vendor2')),
+          2::bigint,
+          'The line count is the number of lines, not lines times payments');
 
 select * from finish();
 rollback;

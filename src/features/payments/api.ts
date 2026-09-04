@@ -44,6 +44,10 @@ export type PaymentInput = Partial<
   Pick<
     PaymentRow,
     | 'budget_line_id'
+    // Only takes effect when the budget line names no vendor: the database
+    // trigger gives the line's vendor precedence, so sending a different one
+    // here is corrected rather than stored.
+    | 'vendor_id'
     | 'code'
     | 'stage'
     | 'amount_due_minor'
@@ -71,6 +75,8 @@ function useInvalidateMoney(weddingId: string) {
     void qc.invalidateQueries({ queryKey: paymentKeys.list(weddingId) });
     void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
     void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
+    // A payment is now attributed to a vendor, so the vendor totals move with it.
+    void qc.invalidateQueries({ queryKey: ['vendors', weddingId] });
     // Paid, outstanding and overpaid per line all move with a payment.
     void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-totals'] });
     void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-payments'] });

@@ -14,7 +14,9 @@ import {
 } from './api';
 import { BudgetLinePicker } from './BudgetLinePicker';
 import { ReceiptField } from './ReceiptField';
+import { STAGES, STATUS_LABEL, STATUS_TONE } from './status';
 import { useBudgetLines } from '../budget/api';
+import { useVendors } from '../vendors/vendorsApi';
 import {
   currencyDecimals,
   formatMinorAsMajor,
@@ -40,33 +42,8 @@ import {
   Stat,
 } from '../../components/ui';
 
-const STAGES: { value: PaymentStage; label: string }[] = [
-  { value: 'booking_deposit', label: 'Booking deposit' },
-  { value: 'advance', label: 'Advance' },
-  { value: 'progress_payment', label: 'Progress payment' },
-  { value: 'final_payment', label: 'Final payment' },
-  { value: 'extra_overtime', label: 'Extra / overtime' },
-  { value: 'refundable_deposit', label: 'Refundable deposit' },
-  { value: 'refund_received', label: 'Refund received' },
-];
 
-const STATUS_TONE: Record<PaymentStatus, 'neutral' | 'good' | 'warn' | 'stop' | 'gold'> = {
-  draft: 'neutral',
-  paid: 'good',
-  overdue: 'stop',
-  due: 'warn',
-  due_soon: 'gold',
-  not_due: 'neutral',
-};
 
-const STATUS_LABEL: Record<PaymentStatus, string> = {
-  draft: 'draft',
-  paid: 'paid',
-  overdue: 'overdue',
-  due: 'due',
-  due_soon: 'due soon',
-  not_due: 'not due',
-};
 
 const schema = z.object({
   stage: z.enum([
@@ -117,6 +94,7 @@ export function PaymentsPage() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [lineId, setLineId] = useState<string | null>(null);
+  const [vendorId, setVendorId] = useState<string | null>(null);
   const [lineError, setLineError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'all'>('all');
   const [stageFilter, setStageFilter] = useState<PaymentStage | 'all'>('all');
@@ -126,6 +104,16 @@ export function PaymentsPage() {
     () => (lines.data ?? []).map((l) => ({ id: l.id, code: l.code, name: l.name })),
     [lines.data],
   );
+
+  const vendors = useVendors(wedding.id);
+  const vendorName = useMemo(
+    () => new Map((vendors.data ?? []).map((v) => [v.id, v.name])),
+    [vendors.data],
+  );
+
+  // The same precedence the database enforces, so the form never offers a
+  // choice that would be silently overruled on save.
+  const lineVendorId = (lines.data ?? []).find((l) => l.id === lineId)?.vendor_id ?? null;
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: BLANK });
 
@@ -164,6 +152,7 @@ export function PaymentsPage() {
   function startEdit(p: PaymentView) {
     setEditingId(p.id ?? null);
     setLineId(p.budget_line_id ?? null);
+    setVendorId(p.vendor_id ?? null);
     setLineError(null);
     form.reset({
       stage: (p.stage ?? 'final_payment') as PaymentStage,
@@ -181,6 +170,7 @@ export function PaymentsPage() {
   function startNew() {
     setEditingId(null);
     setLineId(null);
+    setVendorId(null);
     setLineError(null);
     form.reset(BLANK);
   }
@@ -208,6 +198,9 @@ export function PaymentsPage() {
 
     const patch: PaymentInput = {
       budget_line_id: lineId,
+      // Sent for the case the line names no vendor. When it does, the database
+      // overrides this with the line's vendor, so the two cannot disagree.
+      vendor_id: lineVendorId ?? vendorId,
       stage: values.stage,
       amount_due_minor: amountDue,
       amount_paid_minor: amountPaid,
@@ -351,6 +344,9 @@ export function PaymentsPage() {
                         </p>
                         <p className="truncate text-xs text-stone-400">
                           {line?.code ? `${line.code} · ` : ''}
+                          {p.vendor_id && vendorName.has(p.vendor_id)
+                            ? `${vendorName.get(p.vendor_id)} · `
+                            : ''}
                           {p.due_date ? `due ${p.due_date}` : 'no due date'}
                           {p.method ? ` · ${p.method}` : ''}
                         </p>
@@ -410,9 +406,39 @@ export function PaymentsPage() {
                   invalid={Boolean(lineError)}
                   onChange={(id) => {
                     setLineId(id);
+                    // A vendor chosen for the previous line does not carry over
+                    // to a new one.
+                    setVendorId(null);
                     if (id) setLineError(null);
                   }}
                 />
+              </Field>
+
+              {/* Who was paid. The budget line answers this whenever it names a
+                  vendor, so the field shows that answer and locks — one fact,
+                  one place. It opens up only when the line has no vendor, which
+                  is the case that was previously unattributable. */}
+              <Field
+                label="Paid to"
+                hint={
+                  lineVendorId
+                    ? 'Taken from the budget line. Change it on the line to change it here.'
+                    : 'Optional. This budget line has no vendor, so the payment can name one.'
+                }
+              >
+                <Select
+                  disabled={!canEdit || Boolean(lineVendorId)}
+                  value={lineVendorId ?? vendorId ?? ''}
+                  onChange={(e) => setVendorId(e.target.value || null)}
+                >
+                  <option value="">Not recorded</option>
+                  {(vendors.data ?? []).map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.name}
+                      {v.category ? ` · ${v.category}` : ''}
+                    </option>
+                  ))}
+                </Select>
               </Field>
 
               <Field label="Stage">

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
 import { buildReceiptPath } from '../payments/receipts';
 import type { Database, Tables } from '../../types/database.types';
-import type { VendorRow, VendorStatus } from '../../types/db';
+import type { PaymentView, VendorRow, VendorStatus } from '../../types/db';
 
 export type VendorAttachmentRow = Tables<'vendor_attachments'>;
 export type AttachmentKind = VendorAttachmentRow['kind'];
@@ -259,6 +259,33 @@ export function useLinkBudgetLine(weddingId: string) {
       void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'financials'] });
       void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'linkable-lines'] });
       void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'lines'] });
+    },
+  });
+}
+
+/**
+ * Every payment attributed to one vendor, newest first.
+ *
+ * Read through v_payments so the six-state status is the same one the payments
+ * screen shows. Attribution is the vendor_id column, which the database keeps
+ * equal to the budget line's vendor whenever the line names one — so this
+ * includes payments made against the vendor's lines without anyone having
+ * tagged them by hand, and payments on lines with no vendor that were tagged
+ * deliberately.
+ */
+export function useVendorPayments(weddingId: string, vendorId: string | null) {
+  return useQuery({
+    queryKey: ['vendors', weddingId, 'payments', vendorId] as const,
+    enabled: Boolean(vendorId),
+    queryFn: async (): Promise<PaymentView[]> => {
+      const res = await supabase
+        .from('v_payments')
+        .select('*')
+        .eq('wedding_id', weddingId)
+        .eq('vendor_id', vendorId!)
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('paid_on', { ascending: false, nullsFirst: false });
+      return unwrap(res);
     },
   });
 }

@@ -2,9 +2,16 @@ import { useState } from 'react';
 import { NavLink, Outlet, useParams, Link } from 'react-router-dom';
 import {
   Armchair,
+  BedDouble,
+  BookOpen,
+  CakeSlice,
   CalendarClock,
+  Camera,
+  Car,
   ClipboardList,
   CreditCard,
+  Flower2,
+  Gem,
   Gift,
   HandCoins,
   Hourglass,
@@ -12,12 +19,21 @@ import {
   ListChecks,
   LogOut,
   Menu,
+  Music,
+  Package,
+  PackageCheck,
+  Palette,
+  PartyPopper,
   Phone,
+  Scale,
   Settings,
+  Shirt,
+  Sparkles,
   Store,
   UserCheck,
   Users,
   UsersRound,
+  UtensilsCrossed,
   Wallet,
   X,
 } from 'lucide-react';
@@ -25,6 +41,7 @@ import { useMyWeddings } from './api';
 import { useAuth } from '../auth/AuthProvider';
 import { Badge, Button, ErrorState, IconButton, Spinner, cn } from '../../components/ui';
 import type { MemberRole } from '../../types/db';
+import { CHECKLIST_MODULES, MODULE_GROUPS } from '../checklists/config';
 
 /**
  * Navigation is derived from the caller's role, mirroring the RLS policies.
@@ -111,16 +128,41 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
         icon: <CalendarClock className={ICON} />,
         phase: '8',
       },
-      {
-        to: 'contacts',
-        label: 'Contact sheet',
-        roles: OPS,
-        icon: <Phone className={ICON} />,
-        phase: '8',
-      },
     ],
   },
+  // Phase 6. Generated from the module registry so a module cannot be added
+  // and left unreachable — the config carries its own group.
+  ...MODULE_GROUPS.map((heading) => ({
+    heading,
+    items: CHECKLIST_MODULES.filter((m) => m.group === heading).map((m) => ({
+      to: `m/${m.slug}`,
+      label: m.title,
+      roles: ALL,
+      icon: MODULE_ICONS[m.slug] ?? <ClipboardList className={ICON} />,
+    })),
+  })),
 ];
+
+/** One icon per module. Missing ones fall back rather than breaking the nav. */
+const MODULE_ICONS: Record<string, React.ReactNode> = {
+  attire: <Shirt className={ICON} />,
+  jewellery: <Gem className={ICON} />,
+  beauty: <Sparkles className={ICON} />,
+  ceremony: <Flower2 className={ICON} />,
+  legal: <Scale className={ICON} />,
+  decor: <Palette className={ICON} />,
+  menu: <UtensilsCrossed className={ICON} />,
+  cake: <CakeSlice className={ICON} />,
+  transport: <Car className={ICON} />,
+  accommodation: <BedDouble className={ICON} />,
+  shots: <Camera className={ICON} />,
+  procurement: <Package className={ICON} />,
+  party: <PartyPopper className={ICON} />,
+  music: <Music className={ICON} />,
+  contacts: <Phone className={ICON} />,
+  closure: <PackageCheck className={ICON} />,
+  lessons: <BookOpen className={ICON} />,
+};
 
 export function WeddingLayout() {
   const { weddingId } = useParams<{ weddingId: string }>();

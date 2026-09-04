@@ -21,6 +21,7 @@ import { GiftsPage } from './features/gifts/GiftsPage';
 import { TasksPage } from './features/tasks/TasksPage';
 import { CountdownPage } from './features/countdown/CountdownPage';
 import { ResponsibilitiesPage } from './features/responsibilities/ResponsibilitiesPage';
+import { ChecklistModulePage } from './features/checklists/ChecklistModule';
 import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
@@ -164,6 +165,10 @@ export default function App() {
               <Route path="tasks" element={<TasksPage />} />
               <Route path="countdown" element={<CountdownPage />} />
               <Route path="responsibilities" element={<ResponsibilitiesPage />} />
+              {/* Ticket 6.1: one route for all seventeen checklist modules.
+                  Seventeen <Route> entries would be seventeen places to forget
+                  the eighteenth. */}
+              <Route path="m/:slug" element={<ChecklistModulePage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

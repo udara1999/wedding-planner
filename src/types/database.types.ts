@@ -39,6 +39,361 @@ export type Database = {
   }
   public: {
     Tables: {
+      accommodations: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          check_in: string | null
+          check_out: string | null
+          confirmation_ref: string | null
+          cost_minor: number
+          created_at: string
+          guest_id: string | null
+          hotel: string | null
+          id: string
+          name: string
+          nights: number | null
+          notes: string | null
+          owner: string | null
+          room_type: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          check_in?: string | null
+          check_out?: string | null
+          confirmation_ref?: string | null
+          cost_minor?: number
+          created_at?: string
+          guest_id?: string | null
+          hotel?: string | null
+          id?: string
+          name: string
+          nights?: number | null
+          notes?: string | null
+          owner?: string | null
+          room_type?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          check_in?: string | null
+          check_out?: string | null
+          confirmation_ref?: string | null
+          cost_minor?: number
+          created_at?: string
+          guest_id?: string | null
+          hotel?: string | null
+          id?: string
+          name?: string
+          nights?: number | null
+          notes?: string | null
+          owner?: string | null
+          room_type?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accommodations_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accommodations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "accommodations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accommodations_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accommodations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "accommodations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "accommodations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "accommodations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attire_items: {
+        Row: {
+          alterations: string | null
+          applicability: Database["public"]["Enums"]["applicability"]
+          collect_by: string | null
+          cost_minor: number
+          created_at: string
+          final_fitting_on: string | null
+          fitting_1_on: string | null
+          fitting_2_on: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          paid_minor: number
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          subject: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          alterations?: string | null
+          applicability?: Database["public"]["Enums"]["applicability"]
+          collect_by?: string | null
+          cost_minor?: number
+          created_at?: string
+          final_fitting_on?: string | null
+          fitting_1_on?: string | null
+          fitting_2_on?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          paid_minor?: number
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          alterations?: string | null
+          applicability?: Database["public"]["Enums"]["applicability"]
+          collect_by?: string | null
+          cost_minor?: number
+          created_at?: string
+          final_fitting_on?: string | null
+          fitting_1_on?: string | null
+          fitting_2_on?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          paid_minor?: number
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attire_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "attire_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attire_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attire_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "attire_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "attire_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "attire_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beauty_appointments: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          at_time: string | null
+          cost_minor: number
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          on_date: string | null
+          owner: string | null
+          paid_minor: number
+          provider: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          subject: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          at_time?: string | null
+          cost_minor?: number
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          on_date?: string | null
+          owner?: string | null
+          paid_minor?: number
+          provider?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          at_time?: string | null
+          cost_minor?: number
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          on_date?: string | null
+          owner?: string | null
+          paid_minor?: number
+          provider?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beauty_appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_categories: {
         Row: {
           id: string
@@ -62,6 +417,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "budget_categories_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -192,6 +554,13 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -204,6 +573,440 @@ export type Database = {
           },
           {
             foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cake_items: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          cost_minor: number
+          created_at: string
+          delivery_at: string | null
+          flavour: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          servings: number | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          tiers: number | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          cost_minor?: number
+          created_at?: string
+          delivery_at?: string | null
+          flavour?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          servings?: number | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          tiers?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          cost_minor?: number
+          created_at?: string
+          delivery_at?: string | null
+          flavour?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          servings?: number | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          tiers?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cake_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "cake_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cake_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cake_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "cake_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "cake_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "cake_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ceremony_steps: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          at_time: string | null
+          cost_minor: number
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          items_needed: string | null
+          leads: string | null
+          location: string | null
+          name: string
+          notes: string | null
+          owner: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          at_time?: string | null
+          cost_minor?: number
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          items_needed?: string | null
+          leads?: string | null
+          location?: string | null
+          name: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          at_time?: string | null
+          cost_minor?: number
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          items_needed?: string | null
+          leads?: string | null
+          location?: string | null
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ceremony_steps_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      closure_tasks: {
+        Row: {
+          amount_minor: number
+          applicability: Database["public"]["Enums"]["applicability"]
+          cost_minor: number
+          created_at: string
+          done_on: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          target_date: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+          window_label: string | null
+        }
+        Insert: {
+          amount_minor?: number
+          applicability?: Database["public"]["Enums"]["applicability"]
+          cost_minor?: number
+          created_at?: string
+          done_on?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          target_date?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+          window_label?: string | null
+        }
+        Update: {
+          amount_minor?: number
+          applicability?: Database["public"]["Enums"]["applicability"]
+          cost_minor?: number
+          created_at?: string
+          done_on?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          target_date?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+          window_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "closure_tasks_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          backup_phone: string | null
+          cost_minor: number
+          created_at: string
+          group_label: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          phone: string | null
+          role: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          backup_phone?: string | null
+          cost_minor?: number
+          created_at?: string
+          group_label?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          phone?: string | null
+          role?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          backup_phone?: string | null
+          cost_minor?: number
+          created_at?: string
+          group_label?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          phone?: string | null
+          role?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "contacts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contacts_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contacts_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contacts_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -268,6 +1071,13 @@ export type Database = {
             foreignKeyName: "contributions_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contributions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -280,6 +1090,116 @@ export type Database = {
           },
           {
             foreignKeyName: "contributions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decor_items: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          area: string | null
+          checked_on_day: boolean
+          cost_minor: number
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          qty: number | null
+          remove_after: string | null
+          setup_by: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          area?: string | null
+          checked_on_day?: boolean
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          qty?: number | null
+          remove_after?: string | null
+          setup_by?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          area?: string | null
+          checked_on_day?: boolean
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          qty?: number | null
+          remove_after?: string | null
+          setup_by?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decor_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "decor_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decor_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decor_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "decor_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "decor_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "decor_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -307,6 +1227,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "guest_groups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "guest_groups_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -483,6 +1410,13 @@ export type Database = {
             foreignKeyName: "guests_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -495,6 +1429,562 @@ export type Database = {
           },
           {
             foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jewellery_items: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          collect_on: string | null
+          cost_minor: number
+          created_at: string
+          custodian: string | null
+          deposit_minor: number
+          id: string
+          insured: boolean
+          name: string
+          notes: string | null
+          owner: string | null
+          ownership: Database["public"]["Enums"]["jewellery_ownership"]
+          return_by: string | null
+          returned_on: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          subject: string | null
+          updated_at: string
+          value_minor: number
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          collect_on?: string | null
+          cost_minor?: number
+          created_at?: string
+          custodian?: string | null
+          deposit_minor?: number
+          id?: string
+          insured?: boolean
+          name: string
+          notes?: string | null
+          owner?: string | null
+          ownership?: Database["public"]["Enums"]["jewellery_ownership"]
+          return_by?: string | null
+          returned_on?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          updated_at?: string
+          value_minor?: number
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          collect_on?: string | null
+          cost_minor?: number
+          created_at?: string
+          custodian?: string | null
+          deposit_minor?: number
+          id?: string
+          insured?: boolean
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          ownership?: Database["public"]["Enums"]["jewellery_ownership"]
+          return_by?: string | null
+          returned_on?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          subject?: string | null
+          updated_at?: string
+          value_minor?: number
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jewellery_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_requirements: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          authority: string | null
+          cost_minor: number
+          created_at: string
+          document_held: boolean
+          due_date: string | null
+          id: string
+          jurisdiction: string | null
+          name: string
+          notes: string | null
+          owner: string | null
+          reference_url: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          verified_on: string | null
+          verify_status: Database["public"]["Enums"]["verify_status"]
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          authority?: string | null
+          cost_minor?: number
+          created_at?: string
+          document_held?: boolean
+          due_date?: string | null
+          id?: string
+          jurisdiction?: string | null
+          name: string
+          notes?: string | null
+          owner?: string | null
+          reference_url?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          verified_on?: string | null
+          verify_status?: Database["public"]["Enums"]["verify_status"]
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          authority?: string | null
+          cost_minor?: number
+          created_at?: string
+          document_held?: boolean
+          due_date?: string | null
+          id?: string
+          jurisdiction?: string | null
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          reference_url?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          verified_on?: string | null
+          verify_status?: Database["public"]["Enums"]["verify_status"]
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_requirements_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          category: string | null
+          cost_minor: number
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          verdict: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          category?: string | null
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          verdict?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          category?: string | null
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          verdict?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "lessons_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "lessons_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "lessons_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "lessons_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          cost_minor: number
+          course: string | null
+          created_at: string
+          dietary: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          per_head: boolean
+          qty: number | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          cost_minor?: number
+          course?: string | null
+          created_at?: string
+          dietary?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          per_head?: boolean
+          qty?: number | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          cost_minor?: number
+          course?: string | null
+          created_at?: string
+          dietary?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          per_head?: boolean
+          qty?: number | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "menu_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "menu_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "menu_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "menu_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      music_cues: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          artist: string | null
+          cost_minor: number
+          created_at: string
+          cue_at: string | null
+          id: string
+          moment: string | null
+          name: string
+          notes: string | null
+          owner: string | null
+          sort_order: number
+          source: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          track: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          artist?: string | null
+          cost_minor?: number
+          created_at?: string
+          cue_at?: string | null
+          id?: string
+          moment?: string | null
+          name: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          source?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          track?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          artist?: string | null
+          cost_minor?: number
+          created_at?: string
+          cue_at?: string | null
+          id?: string
+          moment?: string | null
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          sort_order?: number
+          source?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          track?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "music_cues_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "music_cues_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "music_cues_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "music_cues_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "music_cues_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "music_cues_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "music_cues_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -609,6 +2099,13 @@ export type Database = {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -621,6 +2118,134 @@ export type Database = {
           },
           {
             foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      procurement_items: {
+        Row: {
+          actual_minor: number
+          applicability: Database["public"]["Enums"]["applicability"]
+          bought: boolean
+          bought_on: string | null
+          category: string | null
+          container: string | null
+          cost_minor: number
+          created_at: string
+          id: string
+          loaded: boolean
+          name: string
+          needed_on_day: boolean
+          notes: string | null
+          owner: string | null
+          packed: boolean
+          qty: number | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          stored_where: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+          where_to_buy: string | null
+        }
+        Insert: {
+          actual_minor?: number
+          applicability?: Database["public"]["Enums"]["applicability"]
+          bought?: boolean
+          bought_on?: string | null
+          category?: string | null
+          container?: string | null
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          loaded?: boolean
+          name: string
+          needed_on_day?: boolean
+          notes?: string | null
+          owner?: string | null
+          packed?: boolean
+          qty?: number | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          stored_where?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+          where_to_buy?: string | null
+        }
+        Update: {
+          actual_minor?: number
+          applicability?: Database["public"]["Enums"]["applicability"]
+          bought?: boolean
+          bought_on?: string | null
+          category?: string | null
+          container?: string | null
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          loaded?: boolean
+          name?: string
+          needed_on_day?: boolean
+          notes?: string | null
+          owner?: string | null
+          packed?: boolean
+          qty?: number | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          stored_where?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+          where_to_buy?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "procurement_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procurement_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "procurement_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -724,6 +2349,13 @@ export type Database = {
             foreignKeyName: "responsibilities_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -813,6 +2445,13 @@ export type Database = {
             foreignKeyName: "rsvp_submissions_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "rsvp_submissions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -874,6 +2513,13 @@ export type Database = {
             foreignKeyName: "seating_tables_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -886,6 +2532,241 @@ export type Database = {
           },
           {
             foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shot_list_items: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          captured: boolean
+          cost_minor: number
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          owner: string | null
+          people_needed: string | null
+          planned_at: string | null
+          priority: string | null
+          section: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          captured?: boolean
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          owner?: string | null
+          people_needed?: string | null
+          planned_at?: string | null
+          priority?: string | null
+          section?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          captured?: boolean
+          cost_minor?: number
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          people_needed?: string | null
+          planned_at?: string | null
+          priority?: string | null
+          section?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shot_list_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_legs: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"]
+          arrive_by: string | null
+          cost_minor: number
+          created_at: string
+          destination: string | null
+          driver: string | null
+          driver_phone: string | null
+          id: string
+          name: string
+          notes: string | null
+          owner: string | null
+          passengers: string | null
+          pickup_at: string | null
+          pickup_from: string | null
+          return_trip: boolean
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          vehicle: string | null
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          arrive_by?: string | null
+          cost_minor?: number
+          created_at?: string
+          destination?: string | null
+          driver?: string | null
+          driver_phone?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          owner?: string | null
+          passengers?: string | null
+          pickup_at?: string | null
+          pickup_from?: string | null
+          return_trip?: boolean
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vehicle?: string | null
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"]
+          arrive_by?: string | null
+          cost_minor?: number
+          created_at?: string
+          destination?: string | null
+          driver?: string | null
+          driver_phone?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          owner?: string | null
+          passengers?: string | null
+          pickup_at?: string | null
+          pickup_from?: string | null
+          return_trip?: boolean
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          vehicle?: string | null
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_legs_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_legs_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_legs_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -932,6 +2813,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_vendor_questions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_answers_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
           },
           {
             foreignKeyName: "vendor_answers_wedding_id_fkey"
@@ -1016,6 +2904,13 @@ export type Database = {
             foreignKeyName: "vendor_attachments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1088,6 +2983,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vendors"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
           },
           {
             foreignKeyName: "vendor_decisions_wedding_id_fkey"
@@ -1168,6 +3070,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "vendor_options_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -1287,6 +3196,13 @@ export type Database = {
             foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1360,6 +3276,13 @@ export type Database = {
             foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1421,6 +3344,13 @@ export type Database = {
             foreignKeyName: "wedding_invitations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_invitations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1463,6 +3393,13 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wedding_lookups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "wedding_lookups_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -1522,6 +3459,13 @@ export type Database = {
             foreignKeyName: "wedding_members_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1534,6 +3478,137 @@ export type Database = {
           },
           {
             foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_party: {
+        Row: {
+          accessories: string | null
+          applicability: Database["public"]["Enums"]["applicability"]
+          arrive_by: string | null
+          cost_minor: number
+          created_at: string
+          duties: string | null
+          gift_given: boolean
+          id: string
+          name: string
+          notes: string | null
+          outfit: string | null
+          outfit_ready: boolean
+          owner: string | null
+          phone: string | null
+          role: string | null
+          room_needed: boolean
+          side: Database["public"]["Enums"]["wedding_side"] | null
+          sort_order: number
+          status: Database["public"]["Enums"]["task_status"]
+          transport: string | null
+          updated_at: string
+          vendor_id: string | null
+          wedding_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          accessories?: string | null
+          applicability?: Database["public"]["Enums"]["applicability"]
+          arrive_by?: string | null
+          cost_minor?: number
+          created_at?: string
+          duties?: string | null
+          gift_given?: boolean
+          id?: string
+          name: string
+          notes?: string | null
+          outfit?: string | null
+          outfit_ready?: boolean
+          owner?: string | null
+          phone?: string | null
+          role?: string | null
+          room_needed?: boolean
+          side?: Database["public"]["Enums"]["wedding_side"] | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          transport?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          accessories?: string | null
+          applicability?: Database["public"]["Enums"]["applicability"]
+          arrive_by?: string | null
+          cost_minor?: number
+          created_at?: string
+          duties?: string | null
+          gift_given?: boolean
+          id?: string
+          name?: string
+          notes?: string | null
+          outfit?: string | null
+          outfit_ready?: boolean
+          owner?: string | null
+          phone?: string | null
+          role?: string | null
+          room_needed?: boolean
+          side?: Database["public"]["Enums"]["wedding_side"] | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          transport?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+          wedding_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_party_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_party_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wedding_party_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -1601,6 +3676,13 @@ export type Database = {
             foreignKeyName: "wedding_tasks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1631,6 +3713,7 @@ export type Database = {
           coordinator_phone: string | null
           created_at: string
           created_by: string | null
+          crew_count: number
           currency: string
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
@@ -1666,6 +3749,7 @@ export type Database = {
           coordinator_phone?: string | null
           created_at?: string
           created_by?: string | null
+          crew_count?: number
           currency?: string
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -1701,6 +3785,7 @@ export type Database = {
           coordinator_phone?: string | null
           created_at?: string
           created_by?: string | null
+          crew_count?: number
           currency?: string
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
@@ -1748,6 +3833,13 @@ export type Database = {
           wedding_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -1838,6 +3930,13 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1850,6 +3949,60 @@ export type Database = {
           },
           {
             foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_catering_headcount: {
+        Row: {
+          awaiting_reply: number | null
+          cater_for: number | null
+          cater_for_if_all_accept: number | null
+          confirmed: number | null
+          crew_count: number | null
+          declined_heads: number | null
+          guest_buffer_pct: number | null
+          invited: number | null
+          wedding_id: string | null
+        }
+        Relationships: []
+      }
+      v_ceremony_length: {
+        Row: {
+          active_steps: number | null
+          minutes: number | null
+          starts_at: string | null
+          step_count: number | null
+          steps_without_duration: number | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -1872,6 +4025,13 @@ export type Database = {
             foreignKeyName: "guests_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1884,6 +4044,92 @@ export type Database = {
           },
           {
             foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_jewellery_custody: {
+        Row: {
+          applicability: Database["public"]["Enums"]["applicability"] | null
+          awaiting_return: boolean | null
+          collect_on: string | null
+          custodian: string | null
+          deposit_minor: number | null
+          insured: boolean | null
+          item_id: string | null
+          name: string | null
+          no_custodian: boolean | null
+          overdue_return: boolean | null
+          ownership: Database["public"]["Enums"]["jewellery_ownership"] | null
+          return_by: string | null
+          returned_on: string | null
+          subject: string | null
+          value_minor: number | null
+          wedding_id: string | null
+        }
+        Insert: {
+          applicability?: Database["public"]["Enums"]["applicability"] | null
+          awaiting_return?: never
+          collect_on?: string | null
+          custodian?: string | null
+          deposit_minor?: number | null
+          insured?: boolean | null
+          item_id?: string | null
+          name?: string | null
+          no_custodian?: never
+          overdue_return?: never
+          ownership?: Database["public"]["Enums"]["jewellery_ownership"] | null
+          return_by?: string | null
+          returned_on?: string | null
+          subject?: string | null
+          value_minor?: number | null
+          wedding_id?: string | null
+        }
+        Update: {
+          applicability?: Database["public"]["Enums"]["applicability"] | null
+          awaiting_return?: never
+          collect_on?: string | null
+          custodian?: string | null
+          deposit_minor?: number | null
+          insured?: boolean | null
+          item_id?: string | null
+          name?: string | null
+          no_custodian?: never
+          overdue_return?: never
+          ownership?: Database["public"]["Enums"]["jewellery_ownership"] | null
+          return_by?: string | null
+          returned_on?: string | null
+          subject?: string | null
+          value_minor?: number | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"
@@ -2004,6 +4250,13 @@ export type Database = {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2038,6 +4291,13 @@ export type Database = {
           wedding_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "wedding_tasks_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -2090,6 +4350,13 @@ export type Database = {
           wedding_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "seating_tables_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -2168,6 +4435,13 @@ export type Database = {
             foreignKeyName: "vendor_options_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2206,6 +4480,13 @@ export type Database = {
           wedding_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -2309,6 +4590,13 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
           {
             foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
@@ -2440,6 +4728,7 @@ export type Database = {
     Enums: {
       applicability: "required" | "optional" | "not_applicable"
       attachment_kind: "quote" | "contract" | "invoice" | "other"
+      jewellery_ownership: "owned" | "gifted" | "rented" | "borrowed"
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
       payment_stage:
         | "booking_deposit"
@@ -2473,6 +4762,7 @@ export type Database = {
         | "confirmed"
         | "completed"
         | "cancelled"
+      verify_status: "to_verify" | "verified" | "not_applicable"
       wedding_side: "bride" | "groom" | "both"
     }
     CompositeTypes: {
@@ -2606,6 +4896,7 @@ export const Constants = {
     Enums: {
       applicability: ["required", "optional", "not_applicable"],
       attachment_kind: ["quote", "contract", "invoice", "other"],
+      jewellery_ownership: ["owned", "gifted", "rented", "borrowed"],
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
       payment_stage: [
         "booking_deposit",
@@ -2643,6 +4934,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      verify_status: ["to_verify", "verified", "not_applicable"],
       wedding_side: ["bride", "groom", "both"],
     },
   },

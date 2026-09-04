@@ -15,7 +15,7 @@ import { BudgetLineForm } from './BudgetLineForm';
 import { EMPTY_FILTERS, matchesFilters, summarise, type BudgetFilters } from './filters';
 import { useFilterParam } from '../../lib/filterParam';
 import { useSeedWedding } from '../weddings/api';
-import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
+import { currencyDecimals, formatMoney } from '../../lib/units';
 import type { Applicability, BudgetLineRow, MyWedding, PaymentStage } from '../../types/db';
 import {
   Badge,
@@ -87,7 +87,7 @@ export function BudgetPage() {
   // after saving — is reflected in the open modal rather than being overwritten
   // by a snapshot taken when it was opened.
   const editing = (lines.data ?? []).find((l) => l.id === editingId) ?? null;
-  const money = (minor: number | null | undefined) => formatMinorAsMajor(minor, decimals);
+  const money = (minor: number | null | undefined) => formatMoney(minor, decimals);
 
   if (lines.isLoading || categories.isLoading) {
     return (
@@ -428,7 +428,7 @@ function PaymentState({
   // Overpaying used to be invisible: outstanding floors at zero, so the excess
   // showed up nowhere at all.
   if (overpaid > 0) {
-    return <Badge tone="stop">overpaid by {formatMinorAsMajor(overpaid, decimals)}</Badge>;
+    return <Badge tone="stop">overpaid by {formatMoney(overpaid, decimals)}</Badge>;
   }
 
   // An overdue or imminent payment is the headline whatever else is true of
@@ -447,7 +447,7 @@ function PaymentState({
     return (
       <Badge tone="accent">
         {lastStage ? `${STAGE_SHORT[lastStage]} paid` : 'part paid'} ·{' '}
-        {formatMinorAsMajor(outstanding, decimals)} to go
+        {formatMoney(outstanding, decimals)} to go
       </Badge>
     );
   }
@@ -509,10 +509,10 @@ function BudgetRow({
 
       <div className="shrink-0 text-right">
         <p className={cn('tabular text-sm', muted ? 'text-stone-400' : 'text-stone-900')}>
-          {formatMinorAsMajor(line.forecast_minor, decimals)}
+          {formatMoney(line.forecast_minor, decimals)}
         </p>
         <p className="tabular text-[11px] text-stone-400">
-          of {formatMinorAsMajor(line.budgeted_minor, decimals)} {currency}
+          of {formatMoney(line.budgeted_minor, decimals)} {currency}
         </p>
       </div>
 

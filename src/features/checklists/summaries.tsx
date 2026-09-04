@@ -1,6 +1,6 @@
 import { AlertTriangle, Clock, Gem, UtensilsCrossed } from 'lucide-react';
 import { useCateringHeadcount, useCeremonyLength, useJewelleryCustody } from './api';
-import { formatMinorAsMajor } from '../../lib/units';
+import { formatMoney } from '../../lib/units';
 import { Badge, Card, CardBody, Stat, cn } from '../../components/ui';
 
 /**
@@ -39,9 +39,9 @@ export function JewellerySummary({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label={`Total value (${currency})`}
-          value={formatMinorAsMajor(totalValue, decimals)}
+          value={formatMoney(totalValue, decimals)}
           icon={<Gem className="size-3.5" />}
-          hint={`${formatMinorAsMajor(insuredValue, decimals)} insured`}
+          hint={`${formatMoney(insuredValue, decimals)} insured`}
         />
         <Stat label="Out on loan" value={awaiting.length} hint="rented or borrowed, not yet back" />
         <Stat
@@ -79,7 +79,7 @@ export function JewellerySummary({
                   {r.custodian ? ` — with ${r.custodian}` : ' — nobody named'}
                   {r.return_by ? `, due back ${r.return_by}` : ', no return date set'}
                   {Number(r.deposit_minor ?? 0) > 0 &&
-                    `, ${currency} ${formatMinorAsMajor(Number(r.deposit_minor), decimals)} deposit at stake`}
+                    `, ${currency} ${formatMoney(Number(r.deposit_minor), decimals)} deposit at stake`}
                 </li>
               ))}
             </ul>

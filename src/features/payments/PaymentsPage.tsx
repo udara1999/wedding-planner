@@ -20,7 +20,7 @@ import { useFilterParam } from '../../lib/filterParam';
 import { useVendors } from '../vendors/vendorsApi';
 import {
   currencyDecimals,
-  formatMinorAsMajor,
+  formatMoney,
   formatMinorForInput,
   parseMajorToMinor,
 } from '../../lib/units';
@@ -256,11 +256,11 @@ export function PaymentsPage() {
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <Stat label={`Raised (${currency})`} value={formatMinorAsMajor(totals.due, decimals)} />
-        <Stat label={`Paid (${currency})`} value={formatMinorAsMajor(totals.paid, decimals)} />
+        <Stat label={`Raised (${currency})`} value={formatMoney(totals.due, decimals)} />
+        <Stat label={`Paid (${currency})`} value={formatMoney(totals.paid, decimals)} />
         <Stat
           label={`Still to pay (${currency})`}
-          value={formatMinorAsMajor(totals.outstanding, decimals)}
+          value={formatMoney(totals.outstanding, decimals)}
         />
       </div>
 
@@ -366,10 +366,10 @@ export function PaymentsPage() {
                       </button>
                       <div className="shrink-0 text-right">
                         <p className="text-sm tabular-nums text-stone-900">
-                          {formatMinorAsMajor(p.amount_paid_minor, decimals)}
+                          {formatMoney(p.amount_paid_minor, decimals)}
                         </p>
                         <p className="text-[11px] tabular-nums text-stone-400">
-                          of {formatMinorAsMajor(p.amount_due_minor, decimals)}
+                          of {formatMoney(p.amount_due_minor, decimals)}
                         </p>
                       </div>
                       <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>

@@ -9,7 +9,7 @@ import { LinePayments } from './LinePayments';
 import { useVendors } from '../vendors/vendorsApi';
 import {
   currencyDecimals,
-  formatMinorAsMajor,
+  formatMoney,
   formatMinorForInput,
   parseMajorToMinor,
 } from '../../lib/units';
@@ -309,7 +309,7 @@ export function BudgetLineForm({
               <div className="rounded-lg bg-stone-50 px-3 py-2.5 text-xs text-stone-600">
                 Forecast now{' '}
                 <strong className="tabular text-stone-900">
-                  {formatMinorAsMajor(line.forecast_minor, decimals)} {currency}
+                  {formatMoney(line.forecast_minor, decimals)} {currency}
                 </strong>
                 {applicability === 'not_applicable'
                   ? ' — zero while this line is not applicable.'

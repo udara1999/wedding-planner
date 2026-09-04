@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link2, Search, Unlink } from 'lucide-react';
 import { useLinkBudgetLine, useLinkableBudgetLines, useVendorFinancials } from './vendorsApi';
-import { formatMinorAsMajor } from '../../lib/units';
+import { formatMoney } from '../../lib/units';
 import { Badge, Button, InlineError, Input, Skeleton, Stat, cn } from '../../components/ui';
 
 /**
@@ -69,13 +69,13 @@ export function VendorBudgetLinks({
         <div className="grid grid-cols-2 gap-2">
           <Stat
             label={`Forecast from lines (${currency})`}
-            value={formatMinorAsMajor(Number(money.forecast_minor ?? 0), decimals)}
+            value={formatMoney(Number(money.forecast_minor ?? 0), decimals)}
             hint={`${Number(money.budget_line_count ?? 0)} linked`}
           />
           <Stat
             label={`Paid (${currency})`}
-            value={formatMinorAsMajor(Number(money.paid_minor ?? 0), decimals)}
-            hint={`${formatMinorAsMajor(Number(money.outstanding_minor ?? 0), decimals)} outstanding`}
+            value={formatMoney(Number(money.paid_minor ?? 0), decimals)}
+            hint={`${formatMoney(Number(money.outstanding_minor ?? 0), decimals)} outstanding`}
             tone={Number(money.overpaid_minor ?? 0) > 0 ? 'bad' : 'flat'}
           />
         </div>
@@ -93,13 +93,13 @@ export function VendorBudgetLinks({
           {gap > 0 ? (
             <>
               Your budget lines add up to{' '}
-              <strong>{formatMinorAsMajor(gap, decimals)} {currency}</strong> more than this
+              <strong>{formatMoney(gap, decimals)} {currency}</strong> more than this
               vendor quoted.
             </>
           ) : (
             <>
               This vendor quoted{' '}
-              <strong>{formatMinorAsMajor(Math.abs(gap), decimals)} {currency}</strong> more than
+              <strong>{formatMoney(Math.abs(gap), decimals)} {currency}</strong> more than
               the lines you have linked. Something they will charge for may not be budgeted yet.
             </>
           )}
@@ -120,7 +120,7 @@ export function VendorBudgetLinks({
               </span>
               <span className="min-w-0 flex-1 truncate text-xs text-stone-800">{l.name}</span>
               <span className="tabular shrink-0 text-xs text-stone-700">
-                {formatMinorAsMajor(l.forecast_minor, decimals)}
+                {formatMoney(l.forecast_minor, decimals)}
               </span>
               {canEdit && (
                 <Button

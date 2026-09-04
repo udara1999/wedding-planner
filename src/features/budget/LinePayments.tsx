@@ -1,5 +1,5 @@
 import { usePaymentsForLine } from './api';
-import { formatMinorAsMajor } from '../../lib/units';
+import { formatMoney } from '../../lib/units';
 import type { PaymentStatus } from '../../types/db';
 import { Badge, Skeleton } from '../../components/ui';
 
@@ -73,7 +73,7 @@ export function LinePayments({
                 </p>
               </div>
               <span className="tabular shrink-0 text-xs text-stone-900">
-                {formatMinorAsMajor(p.amount_paid_minor, decimals)}
+                {formatMoney(p.amount_paid_minor, decimals)}
               </span>
               <Badge tone={TONE[status]}>{LABEL[status]}</Badge>
             </li>
@@ -86,8 +86,8 @@ export function LinePayments({
           {rows.length} {rows.length === 1 ? 'payment' : 'payments'}
         </span>
         <span className={overpaid > 0 ? 'font-medium text-red-700' : 'text-stone-700'}>
-          {formatMinorAsMajor(paid, decimals)} {currency} paid
-          {overpaid > 0 && ` · ${formatMinorAsMajor(overpaid, decimals)} over forecast`}
+          {formatMoney(paid, decimals)} {currency} paid
+          {overpaid > 0 && ` · ${formatMoney(overpaid, decimals)} over forecast`}
         </span>
       </div>
     </div>

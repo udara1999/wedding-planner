@@ -29,6 +29,7 @@ import {
   VendorSchedulePage,
 } from './features/dayof/DayOfPages';
 import { PackPage } from './features/dayof/PackPage';
+import { ExportPage } from './features/export/ExportPage';
 import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
@@ -183,6 +184,7 @@ export default function App() {
               {/* Ticket 8.6. Inside the wedding shell so it has the wedding,
                   but it lays itself out for paper. */}
               <Route path="pack" element={<PackPage />} />
+              <Route path="export" element={<ExportPage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

@@ -1,7 +1,7 @@
 import { AlertTriangle, CalendarClock } from 'lucide-react';
 import { useVendorFinancials, useVendorPayments } from './vendorsApi';
 import { STAGE_LABEL, STATUS_LABEL, STATUS_TONE } from '../payments/status';
-import { formatMinorAsMajor } from '../../lib/units';
+import { formatMoney } from '../../lib/units';
 import type { PaymentStatus } from '../../types/db';
 import { Badge, Section, SkeletonRows, cn } from '../../components/ui';
 
@@ -40,10 +40,10 @@ export function VendorPayments({
       {/* Two by two rather than four across. These sit in one column of a
           modal, and at four across the amounts wrapped mid-number. */}
       <div className="grid grid-cols-2 gap-3">
-        <Figure label="Paid" value={formatMinorAsMajor(paid, decimals)} currency={currency} />
+        <Figure label="Paid" value={formatMoney(paid, decimals)} currency={currency} />
         <Figure
           label="Still due"
-          value={formatMinorAsMajor(due, decimals)}
+          value={formatMoney(due, decimals)}
           currency={currency}
           tone={due > 0 ? 'warn' : undefined}
         />
@@ -63,7 +63,7 @@ export function VendorPayments({
         <p className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>
-            {currency} {formatMinorAsMajor(unbudgeted, decimals)} was paid to this vendor against no
+            {currency} {formatMoney(unbudgeted, decimals)} was paid to this vendor against no
             budget line, so it is not in any forecast. Link those payments to a line, or add one.
           </span>
         </p>
@@ -105,13 +105,13 @@ export function VendorPayments({
                       <span className="mr-1 text-[11px] font-normal text-stone-400">
                         {currency}
                       </span>
-                      {formatMinorAsMajor(p.amount_paid_minor, decimals)}
+                      {formatMoney(p.amount_paid_minor, decimals)}
                     </p>
                     {/* Only when it differs. "of 50,000" under "50,000" is
                         noise on every settled row. */}
                     {!settled && (
                       <p className="tabular text-[11px] text-stone-400">
-                        of {formatMinorAsMajor(p.amount_due_minor, decimals)}
+                        of {formatMoney(p.amount_due_minor, decimals)}
                       </p>
                     )}
                   </div>

@@ -14,7 +14,7 @@ import { useVendors } from '../vendors/vendorsApi';
 import { useOwnerOptions } from '../weddings/lookups';
 import {
   currencyDecimals,
-  formatMinorAsMajor,
+  formatMoney,
   formatMinorForInput,
   parseMajorToMinor,
 } from '../../lib/units';
@@ -211,7 +211,7 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
         />
         <Stat label="Switched off" value={counts.dropped} hint="kept, not deleted" />
         {config.showCost && (
-          <Stat label={`Cost (${currency})`} value={formatMinorAsMajor(counts.cost, decimals)} />
+          <Stat label={`Cost (${currency})`} value={formatMoney(counts.cost, decimals)} />
         )}
       </div>
 
@@ -354,7 +354,7 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
 /** How a value reads in a list row, by kind. */
 function formatValue(field: FieldDef, value: unknown, decimals: number): string | null {
   if (value === null || value === undefined || value === '') return null;
-  if (field.kind === 'money') return formatMinorAsMajor(Number(value), decimals);
+  if (field.kind === 'money') return formatMoney(Number(value), decimals);
   if (field.kind === 'boolean') return value ? field.label.toLowerCase() : null;
   if (field.kind === 'time') return String(value).slice(0, 5);
   return String(value);
@@ -407,7 +407,7 @@ function ChecklistRowItem({
 
       {config.showCost && (row.cost_minor ?? 0) > 0 && (
         <p className="tabular shrink-0 text-sm text-stone-700">
-          {formatMinorAsMajor(row.cost_minor, decimals)}
+          {formatMoney(row.cost_minor, decimals)}
         </p>
       )}
 

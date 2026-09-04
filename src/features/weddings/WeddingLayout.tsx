@@ -10,6 +10,7 @@ import {
   Car,
   ClipboardList,
   CreditCard,
+  Download,
   Flower2,
   Gem,
   Gift,
@@ -68,6 +69,26 @@ const OPS: MemberRole[] = ['owner', 'partner', 'coordinator'];
 
 const ICON = 'size-4 shrink-0';
 
+/** One icon per module. Missing ones fall back rather than breaking the nav. */
+const MODULE_ICONS: Record<string, React.ReactNode> = {
+  attire: <Shirt className={ICON} />,
+  jewellery: <Gem className={ICON} />,
+  beauty: <Sparkles className={ICON} />,
+  ceremony: <Flower2 className={ICON} />,
+  legal: <Scale className={ICON} />,
+  decor: <Palette className={ICON} />,
+  menu: <UtensilsCrossed className={ICON} />,
+  cake: <CakeSlice className={ICON} />,
+  transport: <Car className={ICON} />,
+  accommodation: <BedDouble className={ICON} />,
+  shots: <Camera className={ICON} />,
+  procurement: <Package className={ICON} />,
+  party: <PartyPopper className={ICON} />,
+  music: <Music className={ICON} />,
+  contacts: <Phone className={ICON} />,
+  closure: <PackageCheck className={ICON} />,
+  lessons: <BookOpen className={ICON} />,
+};
 /** Grouped so a fifteen-item list reads as four short ones. */
 const GROUPS: { heading: string; items: NavItem[] }[] = [
   {
@@ -154,28 +175,21 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
       icon: MODULE_ICONS[m.slug] ?? <ClipboardList className={ICON} />,
     })),
   })),
+  {
+    heading: 'Your data',
+    items: [
+      // Ticket 9.2. Deliberately visible rather than buried in a settings
+      // menu: a couple who can see the export believe they can leave, and
+      // that is why they stay.
+      {
+        to: 'export',
+        label: 'Export everything',
+        roles: MONEY,
+        icon: <Download className={ICON} />,
+      },
+    ],
+  },
 ];
-
-/** One icon per module. Missing ones fall back rather than breaking the nav. */
-const MODULE_ICONS: Record<string, React.ReactNode> = {
-  attire: <Shirt className={ICON} />,
-  jewellery: <Gem className={ICON} />,
-  beauty: <Sparkles className={ICON} />,
-  ceremony: <Flower2 className={ICON} />,
-  legal: <Scale className={ICON} />,
-  decor: <Palette className={ICON} />,
-  menu: <UtensilsCrossed className={ICON} />,
-  cake: <CakeSlice className={ICON} />,
-  transport: <Car className={ICON} />,
-  accommodation: <BedDouble className={ICON} />,
-  shots: <Camera className={ICON} />,
-  procurement: <Package className={ICON} />,
-  party: <PartyPopper className={ICON} />,
-  music: <Music className={ICON} />,
-  contacts: <Phone className={ICON} />,
-  closure: <PackageCheck className={ICON} />,
-  lessons: <BookOpen className={ICON} />,
-};
 
 export function WeddingLayout() {
   const { weddingId } = useParams<{ weddingId: string }>();

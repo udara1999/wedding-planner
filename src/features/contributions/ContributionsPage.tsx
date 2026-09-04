@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../auth/AuthProvider';
 import {
   currencyDecimals,
-  formatMinorAsMajor,
+  formatMoney,
   formatMinorForInput,
   parseMajorToMinor,
 } from '../../lib/units';
@@ -173,14 +173,14 @@ export function ContributionsPage() {
       />
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <Stat label={`Agreed (${currency})`} value={formatMinorAsMajor(totals.agreed, decimals)} />
+        <Stat label={`Agreed (${currency})`} value={formatMoney(totals.agreed, decimals)} />
         <Stat
           label={`Received (${currency})`}
-          value={formatMinorAsMajor(totals.received, decimals)}
+          value={formatMoney(totals.received, decimals)}
         />
         <Stat
           label={`Still to come (${currency})`}
-          value={formatMinorAsMajor(totals.outstanding, decimals)}
+          value={formatMoney(totals.outstanding, decimals)}
         />
       </div>
 
@@ -222,17 +222,17 @@ export function ContributionsPage() {
                     </button>
                     <div className="shrink-0 text-right">
                       <p className="text-sm tabular-nums text-stone-900">
-                        {formatMinorAsMajor(c.received_minor, decimals)}
+                        {formatMoney(c.received_minor, decimals)}
                       </p>
                       <p className="text-[11px] tabular-nums text-stone-400">
-                        of {formatMinorAsMajor(c.agreed_minor, decimals)} {currency}
+                        of {formatMoney(c.agreed_minor, decimals)} {currency}
                       </p>
                     </div>
                     {c.still_to_come_minor === 0 && c.agreed_minor > 0 ? (
                       <Badge tone="good">complete</Badge>
                     ) : (
                       <Badge tone="neutral">
-                        {formatMinorAsMajor(c.still_to_come_minor, decimals)} to come
+                        {formatMoney(c.still_to_come_minor, decimals)} to come
                       </Badge>
                     )}
                     <Button

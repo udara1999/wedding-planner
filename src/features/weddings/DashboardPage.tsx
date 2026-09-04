@@ -16,7 +16,7 @@ import { useGuests } from '../guests/api';
 import { countGuests } from '../guests/counts';
 import { useVendors } from '../vendors/vendorsApi';
 import { AlertsPanel } from '../alerts/AlertsPanel';
-import { currencyDecimals, formatMinorAsMajor, formatRateAsPercent } from '../../lib/units';
+import { currencyDecimals, formatMoney, formatRateAsPercent } from '../../lib/units';
 import type { MyWedding } from '../../types/db';
 import {
   Badge,
@@ -58,7 +58,7 @@ export function DashboardPage() {
   const vendors = useVendors(wedding.id);
 
   const money = (minor: number | null | undefined) =>
-    minor === null || minor === undefined ? '—' : formatMinorAsMajor(Number(minor), decimals);
+    minor === null || minor === undefined ? '—' : formatMoney(Number(minor), decimals);
 
   const f = financials.data;
   const days = wedding.days_to_go;
@@ -232,7 +232,7 @@ export function DashboardPage() {
                         <div className="flex items-baseline justify-between gap-2 text-xs">
                           <span className="min-w-0 truncate text-stone-600">{c.label}</span>
                           <span className="tabular shrink-0 text-stone-500">
-                            {formatMinorAsMajor(c.forecast, decimals)}
+                            {formatMoney(c.forecast, decimals)}
                           </span>
                         </div>
                         {/* Budgeted as a faint track, forecast on top of it, and

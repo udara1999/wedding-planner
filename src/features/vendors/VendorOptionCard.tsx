@@ -1,6 +1,6 @@
 import { Award, Check, Pencil, Phone, Star, Store, User } from 'lucide-react';
 import type { VendorOptionInput } from './api';
-import { formatMinorAsMajor } from '../../lib/units';
+import { formatMoney } from '../../lib/units';
 import type { VendorOptionRow } from '../../types/db';
 import { Badge, Button, Card, CardBody, cn } from '../../components/ui';
 
@@ -88,14 +88,14 @@ export function VendorOptionCard({
           </p>
           <p className="tabular mt-0.5 text-lg font-semibold text-stone-900">
             <span className="mr-1 text-xs font-normal text-stone-400">{currency}</span>
-            {effective > 0 ? formatMinorAsMajor(effective, decimals) : '—'}
+            {effective > 0 ? formatMoney(effective, decimals) : '—'}
           </p>
           <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-stone-400">
             {negotiatedDown && (
               <span>
                 quoted{' '}
                 <span className="tabular line-through">
-                  {formatMinorAsMajor(option.quoted_minor, decimals)}
+                  {formatMoney(option.quoted_minor, decimals)}
                 </span>
               </span>
             )}
@@ -103,7 +103,7 @@ export function VendorOptionCard({
               <span>
                 deposit{' '}
                 <span className="tabular">
-                  {formatMinorAsMajor(option.deposit_minor, decimals)}
+                  {formatMoney(option.deposit_minor, decimals)}
                 </span>
               </span>
             )}

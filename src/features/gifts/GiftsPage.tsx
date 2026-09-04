@@ -7,7 +7,7 @@ import { giftKeys } from './api';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   currencyDecimals,
-  formatMinorAsMajor,
+  formatMoney,
   formatMinorForInput,
   parseMajorToMinor,
 } from '../../lib/units';
@@ -121,20 +121,20 @@ export function GiftsPage() {
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label={`Expected (${currency})`}
-          value={formatMinorAsMajor(s?.expected_minor ?? 0, decimals)}
+          value={formatMoney(s?.expected_minor ?? 0, decimals)}
           icon={<Gift className="size-3.5" />}
           hint={`${s?.households_expected ?? 0} households`}
         />
         <Stat
           label={`Received (${currency})`}
-          value={formatMinorAsMajor(s?.received_minor ?? 0, decimals)}
+          value={formatMoney(s?.received_minor ?? 0, decimals)}
           icon={<Wallet className="size-3.5" />}
           hint={`${s?.households_received ?? 0} households`}
           tone="good"
         />
         <Stat
           label={`Still expected (${currency})`}
-          value={formatMinorAsMajor(s?.still_expected_minor ?? 0, decimals)}
+          value={formatMoney(s?.still_expected_minor ?? 0, decimals)}
           icon={<HandHeart className="size-3.5" />}
           hint="summed per household, never netted"
         />
@@ -305,7 +305,7 @@ function GiftRow({
             )}
           >
             {difference > 0 ? '+' : ''}
-            {formatMinorAsMajor(difference, decimals)}
+            {formatMoney(difference, decimals)}
           </span>
         )}
       </td>

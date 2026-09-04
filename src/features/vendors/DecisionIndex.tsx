@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Check, CircleDashed, Store } from 'lucide-react';
 import { useVendorDecisions } from './api';
-import { formatMinorAsMajor } from '../../lib/units';
+import { formatMoney } from '../../lib/units';
 import { Badge, Card, CardBody, CardHeader, CardTitle, Skeleton, cn } from '../../components/ui';
 
 interface CategoryRef {
@@ -107,7 +107,7 @@ export function DecisionIndex({
                       </td>
                       <td className="tabular px-2 py-2 text-right text-stone-800">
                         {decision?.agreed_price_minor
-                          ? `${formatMinorAsMajor(Number(decision.agreed_price_minor), decimals)} ${currency}`
+                          ? `${formatMoney(Number(decision.agreed_price_minor), decimals)} ${currency}`
                           : '—'}
                       </td>
                       <td className="px-5 py-2 text-right">

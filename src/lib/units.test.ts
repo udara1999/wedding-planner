@@ -1,14 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  currencyDecimals,
-  formatCountForInput,
-  formatMinorAsMajor,
-  formatMinorForInput,
-  formatRateAsPercent,
-  formatRateForInput,
-  parseMajorToMinor,
-  parsePercentAsRate,
-} from './units';
+import { currencyDecimals, formatCountForInput, formatMinorAsMajor, formatMinorForInput, formatMoney, formatRateAsPercent, formatRateForInput, parseMajorToMinor, parsePercentAsRate } from './units';
 
 describe('parseMajorToMinor', () => {
   it('converts a whole amount to minor units', () => {
@@ -154,5 +145,45 @@ describe('values shown in an input', () => {
     expect(formatCountForInput(0)).toBe('');
     expect(formatCountForInput(null)).toBe('');
     expect(formatCountForInput(3)).toBe('3');
+  });
+});
+
+describe('formatMoney', () => {
+  it('groups thousands', () => {
+    expect(formatMoney(100000, 2)).toBe('1,000.00');
+    expect(formatMoney(1000000, 2)).toBe('10,000.00');
+    expect(formatMoney(10000000, 2)).toBe('100,000.00');
+    expect(formatMoney(100000000, 2)).toBe('1,000,000.00');
+  });
+
+  it('leaves small amounts alone', () => {
+    expect(formatMoney(0, 2)).toBe('0.00');
+    expect(formatMoney(99999, 2)).toBe('999.99');
+  });
+
+  it('groups a currency with no minor unit', () => {
+    expect(formatMoney(1000, 0)).toBe('1,000');
+    expect(formatMoney(1000000, 0)).toBe('1,000,000');
+  });
+
+  it('does not group the decimals', () => {
+    // A naive regex over the whole string groups the fraction too.
+    expect(formatMoney(123456789, 2)).toBe('1,234,567.89');
+  });
+
+  it('keeps the minus sign outside the grouping', () => {
+    expect(formatMoney(-100000, 2)).toBe('-1,000.00');
+    expect(formatMoney(-100000000, 2)).toBe('-1,000,000.00');
+  });
+
+  it('is empty for nothing, like the plain formatter', () => {
+    expect(formatMoney(null, 2)).toBe('');
+    expect(formatMoney(undefined, 2)).toBe('');
+  });
+
+  it('round-trips through the parser, which strips the separators', () => {
+    // The two directions have to agree, or a value shown grouped cannot be
+    // edited and saved back.
+    expect(parseMajorToMinor(formatMoney(123456789, 2), 2)).toBe(123456789);
   });
 });

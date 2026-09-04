@@ -10,7 +10,7 @@ import {
   type VendorFinancials,
 } from './vendorsApi';
 import { VendorDetail } from './VendorDetail';
-import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
+import { currencyDecimals, formatMoney } from '../../lib/units';
 import type { MyWedding, VendorRow, VendorStatus } from '../../types/db';
 import {
   Badge,
@@ -318,9 +318,9 @@ function VendorCard({
         <p className="truncate text-[11px] text-stone-400">{vendor.category}</p>
         {price > 0 && (
           <p className="tabular mt-1 text-xs text-stone-700">
-            {formatMinorAsMajor(price, decimals)} {currency}
+            {formatMoney(price, decimals)} {currency}
             {lineCount > 0 && paid > 0 && (
-              <span className="text-stone-400"> · {formatMinorAsMajor(paid, decimals)} paid</span>
+              <span className="text-stone-400"> · {formatMoney(paid, decimals)} paid</span>
             )}
           </p>
         )}

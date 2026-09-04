@@ -46,8 +46,7 @@ function toScaledInteger(raw: string, decimals: number): bigint | null {
   const kept = padded.slice(0, decimals);
   const decider = padded.slice(decimals, decimals + 1);
 
-  let scaled =
-    BigInt(intPart || '0') * 10n ** BigInt(decimals) + BigInt(kept === '' ? '0' : kept);
+  let scaled = BigInt(intPart || '0') * 10n ** BigInt(decimals) + BigInt(kept === '' ? '0' : kept);
   if (Number(decider) >= 5) scaled += 1n;
 
   return negative ? -scaled : scaled;
@@ -73,6 +72,34 @@ export function formatMinorAsMajor(minor: number | null | undefined, decimals: n
     const padded = digits.padStart(decimals + 1, '0');
     out = `${padded.slice(0, -decimals)}.${padded.slice(-decimals)}`;
   }
+  return negative ? `-${out}` : out;
+}
+
+/**
+ * Money for a person to read: 1,000.00 rather than 1000.00.
+ *
+ * A SEPARATE function from formatMinorAsMajor on purpose, and the distinction
+ * is load-bearing. That one produces a machine-readable string — it feeds
+ * `formatMinorForInput`, where a grouped value in a number field is wrong, and
+ * the XLSX export, where `Number('260,000.00')` is NaN. This one is for
+ * display only.
+ *
+ * Grouping is applied to the integer part by hand rather than through
+ * Intl.NumberFormat. Intl would also localise the decimal separator, and in a
+ * locale that uses a comma for it the result reads as 1.000,00 — which is
+ * correct for that locale and wrong for a Sri Lankan wedding budget, where the
+ * workbook this replaces writes 1,000.00.
+ */
+export function formatMoney(minor: number | null | undefined, decimals: number): string {
+  const plain = formatMinorAsMajor(minor, decimals);
+  if (plain === '') return '';
+
+  const negative = plain.startsWith('-');
+  const body = negative ? plain.slice(1) : plain;
+  const [whole, fraction] = body.split('.');
+
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const out = fraction === undefined ? grouped : `${grouped}.${fraction}`;
   return negative ? `-${out}` : out;
 }
 
@@ -109,10 +136,7 @@ export function formatRateAsPercent(rate: number | null | undefined): string {
    and a placeholder carries the format instead.
    ========================================================================== */
 
-export function formatMinorForInput(
-  minor: number | null | undefined,
-  decimals: number,
-): string {
+export function formatMinorForInput(minor: number | null | undefined, decimals: number): string {
   if (minor === null || minor === undefined || minor === 0) return '';
   return formatMinorAsMajor(minor, decimals);
 }

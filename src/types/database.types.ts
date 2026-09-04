@@ -157,6 +157,20 @@ export type Database = {
             foreignKeyName: "accommodations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "accommodations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "accommodations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -281,6 +295,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "attire_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "attire_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -417,6 +445,20 @@ export type Database = {
             foreignKeyName: "beauty_appointments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "beauty_appointments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -471,6 +513,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -624,6 +680,20 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -739,6 +809,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "cake_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "cake_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -875,6 +959,20 @@ export type Database = {
             foreignKeyName: "ceremony_steps_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -990,6 +1088,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "closure_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -1120,6 +1232,20 @@ export type Database = {
             foreignKeyName: "contacts_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contacts_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contacts_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1204,6 +1330,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contributions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "contributions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -1334,6 +1474,20 @@ export type Database = {
             foreignKeyName: "decor_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "decor_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "decor_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1385,6 +1539,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guest_groups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guest_groups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -1577,6 +1745,20 @@ export type Database = {
             foreignKeyName: "guests_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1707,6 +1889,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -1855,6 +2051,20 @@ export type Database = {
             foreignKeyName: "legal_requirements_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "legal_requirements_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -1964,6 +2174,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "lessons_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "lessons_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -2091,6 +2315,20 @@ export type Database = {
             foreignKeyName: "menu_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "menu_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "menu_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2209,6 +2447,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "music_cues_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "music_cues_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -2362,6 +2614,20 @@ export type Database = {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2504,6 +2770,20 @@ export type Database = {
             foreignKeyName: "procurement_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "procurement_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2633,6 +2913,20 @@ export type Database = {
             foreignKeyName: "responsibilities_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2729,6 +3023,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "risks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -2838,6 +3146,20 @@ export type Database = {
             foreignKeyName: "rsvp_submissions_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "rsvp_submissions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "rsvp_submissions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -2907,6 +3229,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -3040,6 +3376,20 @@ export type Database = {
             foreignKeyName: "shot_list_items_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "shot_list_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -3161,6 +3511,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -3303,6 +3667,20 @@ export type Database = {
             foreignKeyName: "transport_legs_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "transport_legs_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -3374,6 +3752,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_answers_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_answers_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -3480,6 +3872,20 @@ export type Database = {
             foreignKeyName: "vendor_attachments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -3572,6 +3978,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -3671,6 +4091,20 @@ export type Database = {
             foreignKeyName: "vendor_options_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -3759,6 +4193,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_schedule_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -3894,6 +4342,20 @@ export type Database = {
             foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -3908,6 +4370,92 @@ export type Database = {
             foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_billing: {
+        Row: {
+          amount_minor: number
+          currency: string | null
+          notes: string | null
+          paid_at: string | null
+          plan: string | null
+          reference: string | null
+          state: Database["public"]["Enums"]["billing_state"]
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          amount_minor?: number
+          currency?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          plan?: string | null
+          reference?: string | null
+          state?: Database["public"]["Enums"]["billing_state"]
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          amount_minor?: number
+          currency?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          plan?: string | null
+          reference?: string | null
+          state?: Database["public"]["Enums"]["billing_state"]
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "v_alerts"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_billing_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: true
             referencedRelation: "weddings"
             referencedColumns: ["id"]
           },
@@ -3975,6 +4523,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_countdown_checks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -4056,6 +4618,20 @@ export type Database = {
             foreignKeyName: "wedding_invitations_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_invitations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_invitations_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -4110,6 +4686,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_lookups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_lookups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -4179,6 +4769,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -4330,6 +4934,20 @@ export type Database = {
             foreignKeyName: "wedding_party_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_party_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -4417,6 +5035,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -4607,6 +5239,20 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -4714,6 +5360,20 @@ export type Database = {
             foreignKeyName: "budget_lines_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -4775,6 +5435,20 @@ export type Database = {
             foreignKeyName: "ceremony_steps_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "ceremony_steps_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -4810,6 +5484,19 @@ export type Database = {
         }
         Relationships: []
       }
+      v_entitlement: {
+        Row: {
+          days_to_go: number | null
+          in_free_window: boolean | null
+          paid_at: string | null
+          payment_due: boolean | null
+          plan: string | null
+          settled: boolean | null
+          state: Database["public"]["Enums"]["billing_state"] | null
+          wedding_id: string | null
+        }
+        Relationships: []
+      }
       v_gift_summary: {
         Row: {
           expected_minor: number | null
@@ -4833,6 +5520,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -4926,6 +5627,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "jewellery_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -5085,6 +5800,20 @@ export type Database = {
             foreignKeyName: "payments_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -5137,6 +5866,20 @@ export type Database = {
             foreignKeyName: "wedding_tasks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -5155,6 +5898,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_reconciliation: {
+        Row: {
+          closure_done: number | null
+          closure_tasks: number | null
+          contributions_received_minor: number | null
+          cost_per_guest_minor: number | null
+          currency: string | null
+          forecast_minor: number | null
+          gifts_received_minor: number | null
+          guests_attending: number | null
+          net_cost_minor: number | null
+          net_per_guest_minor: number | null
+          overdue_minor: number | null
+          refundable_out_minor: number | null
+          spent_minor: number | null
+          still_to_pay_minor: number | null
+          total_budget_minor: number | null
+          true_cost_minor: number | null
+          variance_to_forecast_minor: number | null
+          wedding_id: string | null
+        }
+        Relationships: []
       }
       v_seating_summary: {
         Row: {
@@ -5197,6 +5963,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "seating_tables_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -5247,6 +6027,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_events_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -5348,6 +6142,20 @@ export type Database = {
             foreignKeyName: "vendor_options_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -5398,6 +6206,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -5495,6 +6317,20 @@ export type Database = {
             foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
             referencedRelation: "v_seating_summary"
             referencedColumns: ["wedding_id"]
           },
@@ -5573,6 +6409,20 @@ export type Database = {
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "v_catering_headcount"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_entitlement"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_reconciliation"
             referencedColumns: ["wedding_id"]
           },
           {
@@ -5708,6 +6558,7 @@ export type Database = {
       alert_severity: "critical" | "high" | "medium" | "low"
       applicability: "required" | "optional" | "not_applicable"
       attachment_kind: "quote" | "contract" | "invoice" | "other"
+      billing_state: "free_window" | "due" | "paid" | "comped" | "lapsed"
       jewellery_ownership: "owned" | "gifted" | "rented" | "borrowed"
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
       payment_stage:
@@ -5878,6 +6729,7 @@ export const Constants = {
       alert_severity: ["critical", "high", "medium", "low"],
       applicability: ["required", "optional", "not_applicable"],
       attachment_kind: ["quote", "contract", "invoice", "other"],
+      billing_state: ["free_window", "due", "paid", "comped", "lapsed"],
       jewellery_ownership: ["owned", "gifted", "rented", "borrowed"],
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
       payment_stage: [

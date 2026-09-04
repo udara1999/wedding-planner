@@ -518,3 +518,5 @@ export function Section({
     </section>
   );
 }
+
+export { SearchableSelect, type SearchableOption } from './SearchableSelect';

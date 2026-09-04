@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FileText, Paperclip, Trash2 } from 'lucide-react';
 import {
   signedContractUrl,
@@ -8,6 +8,8 @@ import {
   type AttachmentKind,
   type VendorInput,
 } from './vendorsApi';
+import { useVendorCategories } from './api';
+import { useWedding } from '../weddings/api';
 import { VendorBudgetLinks } from './VendorBudgetLinks';
 import { VendorPayments } from './VendorPayments';
 import { formatMinorForInput, parseMajorToMinor } from '../../lib/units';
@@ -18,10 +20,12 @@ import {
   Field,
   InlineError,
   Input,
+  SearchableSelect,
   Section,
   Select,
   Skeleton,
   Textarea,
+  type SearchableOption,
 } from '../../components/ui';
 
 const KINDS: AttachmentKind[] = ['quote', 'contract', 'invoice', 'other'];
@@ -51,6 +55,22 @@ export function VendorDetail({
   onSave: (patch: VendorInput) => void;
   onDelete: () => void;
 }) {
+  // The same source the Compare screen reads, so the two lists cannot drift.
+  // my_weddings() carries no tradition, so the locale comes from the row.
+  const weddingRow = useWedding(weddingId);
+  const categories = useVendorCategories(weddingRow.data?.tradition ?? 'poruwa');
+  const categoryOptions = useMemo<SearchableOption[]>(
+    () =>
+      (categories.data ?? [])
+        .filter((c) => c.category_key)
+        .map((c) => ({
+          value: c.category_label ?? c.category_key!,
+          label: c.category_label ?? c.category_key!,
+          hint: c.question_count ? `${c.question_count} questions` : undefined,
+        })),
+    [categories.data],
+  );
+
   const build = () => ({
     name: vendor.name,
     category: vendor.category,
@@ -122,11 +142,27 @@ export function VendorDetail({
                   onChange={(e) => set('name', e.target.value)}
                 />
               </Field>
-              <Field label="Category">
-                <Input
-                  value={form.category}
+              {/* The same 16 categories the Compare screen works through, so
+                  a vendor and the comparison that chose them line up. Free
+                  text is still accepted: the column is text, some rows predate
+                  the list, and refusing what is already stored would be data
+                  loss dressed up as validation. */}
+              <Field
+                label="Category"
+                hint={
+                  categoryOptions.length === 0
+                    ? undefined
+                    : 'Search the list, or type your own and use it.'
+                }
+              >
+                <SearchableSelect
+                  options={categoryOptions}
+                  value={form.category || null}
                   disabled={!canEdit}
-                  onChange={(e) => set('category', e.target.value)}
+                  allowCustom
+                  placeholder="Choose a category"
+                  searchPlaceholder="Search categories"
+                  onChange={(next) => set('category', next ?? '')}
                 />
               </Field>
               <Field label="Contact">

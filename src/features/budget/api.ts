@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
+import { useOwnerOptions } from '../weddings/lookups';
 import type {
   BudgetByCategory,
   BudgetCategoryRow,
@@ -128,18 +129,9 @@ export function useUpdateBudgetLine(weddingId: string) {
  * without a migration (plan §4.3).
  */
 export function usePayerOptions(weddingId: string) {
-  return useQuery({
-    queryKey: ['budget', weddingId, 'payers'] as const,
-    queryFn: async (): Promise<string[]> => {
-      const res = await supabase
-        .from('wedding_lookups')
-        .select('value, sort_order')
-        .eq('wedding_id', weddingId)
-        .eq('kind', 'Owner')
-        .order('sort_order');
-      return unwrap(res).map((r) => r.value);
-    },
-  });
+  // Kept as a name because "who pays" is what the budget calls it, but it is
+  // the shared Owner list — see features/weddings/lookups.ts.
+  return useOwnerOptions(weddingId);
 }
 
 export interface NewBudgetLine {

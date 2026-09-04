@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(175);
+select plan(186);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1386,6 +1386,94 @@ select is((select expected_minor from v_gift_summary
             where wedding_id = (select v from w where k='a')),
           10000::bigint,
           'A family member sees only their own side''s gifts, by the same RLS as the guest list');
+
+-- =============================================================================
+-- Phase 5: readiness and the responsibility matrix — 11 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- ---------------------------------------------------------------- 5.5 seeding
+-- The failure this guards against has happened once already, in 1.4:
+-- seed_wedding was fully tested and nothing called it, so every wedding was
+-- empty. Here the risk is narrower and the same shape — the template content
+-- and the table both exist, and the function forgets to copy one to the other.
+select is((select count(*)::int from responsibilities
+            where wedding_id = (select v from w where k='a')),
+          (select count(*)::int from template.responsibilities where locale = 'poruwa'),
+          'seed_wedding copies every template responsibility into the wedding');
+
+select ok((select count(*)::int from responsibilities
+            where wedding_id = (select v from w where k='a')) > 0,
+          'And there is template content for it to copy');
+
+-- The roles arrive; the names deliberately do not. An invented name would
+-- defeat the warning that exists to catch its absence.
+select is((select count(*)::int from responsibilities
+            where wedding_id = (select v from w where k='a')
+              and person_name is not null),
+          0,
+          'Seeding names nobody, so the 5.5 warning starts by firing');
+
+select ok((select count(*)::int from responsibilities
+            where wedding_id = (select v from w where k='a')
+              and responsible is not null) > 0,
+          'But the RACI roles are seeded, so there is something to attach a name to');
+
+-- ---------------------------------------------------------------- 5.5 tenancy
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from responsibilities
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'A stranger cannot read another wedding''s responsibility matrix');
+
+select tests.login((select v from ids where k = 'coordinator'));
+select ok((select count(*)::int from responsibilities
+            where wedding_id = (select v from w where k='a')) > 0,
+          'A coordinator can read it — they are the one running the day');
+
+select throws_ok(
+  $q$ insert into responsibilities (wedding_id, activity)
+      values ((select v from w where k='a'), 'Coordinator writes') $q$);
+
+-- ---------------------------------------------------------------- 5.3 readiness
+select tests.login((select v from ids where k = 'alice'));
+
+-- A clean area to assert against, rather than arithmetic over 93 seeded rows.
+insert into wedding_tasks (wedding_id, category, task, status, due_date)
+values ((select v from w where k='a'), 'ZZ Readiness', 'done one',   'completed',  current_date),
+       ((select v from w where k='a'), 'ZZ Readiness', 'done two',   'completed',  current_date),
+       ((select v from w where k='a'), 'ZZ Readiness', 'to do',      'not_started', current_date + 5),
+       ((select v from w where k='a'), 'ZZ Readiness', 'struck off', 'cancelled',  current_date),
+       ((select v from w where k='a'), 'ZZ Readiness', 'late',       'in_progress', current_date - 3);
+
+-- THE property. Cancelled leaves the denominator rather than counting as done:
+-- 2 completed of 4 relevant is 0.5. Counting the cancelled row would give 0.4,
+-- and an area with work struck off could never reach 100% however much was
+-- finished — which is how people stop trusting a progress bar.
+select is((select ratio from v_readiness
+            where wedding_id = (select v from w where k='a') and area = 'ZZ Readiness'),
+          0.5000::numeric,
+          'Cancelled tasks leave the denominator instead of counting as incomplete');
+
+select is((select overdue from v_readiness
+            where wedding_id = (select v from w where k='a') and area = 'ZZ Readiness'),
+          1::bigint,
+          'Overdue counts what is past its date and not finished');
+
+-- A cancelled task is not overdue however old it is: it is not work any more.
+insert into wedding_tasks (wedding_id, category, task, status, due_date)
+values ((select v from w where k='a'), 'ZZ Cancelled', 'abandoned', 'cancelled', current_date - 90);
+
+select is((select overdue from v_readiness
+            where wedding_id = (select v from w where k='a') and area = 'ZZ Cancelled'),
+          0::bigint,
+          'A cancelled task is never overdue, however long ago its date was');
+
+-- Nothing but cancelled work reports no progress, which is not the same as 0%.
+select is((select ratio from v_readiness
+            where wedding_id = (select v from w where k='a') and area = 'ZZ Cancelled'),
+          null,
+          'An area with everything cancelled has no ratio rather than a zero');
 
 select * from finish();
 rollback;

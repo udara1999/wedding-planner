@@ -18,6 +18,9 @@ import { VendorsPage } from './features/vendors/VendorsPage';
 import { GuestsPage } from './features/guests/GuestsPage';
 import { SeatingPage } from './features/seating/SeatingPage';
 import { GiftsPage } from './features/gifts/GiftsPage';
+import { TasksPage } from './features/tasks/TasksPage';
+import { CountdownPage } from './features/countdown/CountdownPage';
+import { ResponsibilitiesPage } from './features/responsibilities/ResponsibilitiesPage';
 import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
@@ -158,6 +161,9 @@ export default function App() {
               <Route path="guests" element={<GuestsPage />} />
               <Route path="seating" element={<SeatingPage />} />
               <Route path="gifts" element={<GiftsPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+              <Route path="countdown" element={<CountdownPage />} />
+              <Route path="responsibilities" element={<ResponsibilitiesPage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

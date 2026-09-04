@@ -7,6 +7,7 @@ import {
   CreditCard,
   Gift,
   HandCoins,
+  Hourglass,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -14,6 +15,7 @@ import {
   Phone,
   Settings,
   Store,
+  UserCheck,
   Users,
   UsersRound,
   Wallet,
@@ -53,12 +55,15 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
     items: [
       { to: '', label: 'Dashboard', roles: ALL, icon: <LayoutDashboard className={ICON} /> },
       { to: 'setup', label: 'Setup', roles: ALL, icon: <Settings className={ICON} /> },
+      { to: 'tasks', label: 'Tasks', roles: ALL, icon: <ListChecks className={ICON} /> },
+      // Phase 5. Grouped with Plan rather than with the day, because the
+      // countdown is planning right up until it is not.
+      { to: 'countdown', label: 'Countdown', roles: ALL, icon: <Hourglass className={ICON} /> },
       {
-        to: 'tasks',
-        label: 'Tasks',
+        to: 'responsibilities',
+        label: 'Who does what',
         roles: ALL,
-        icon: <ListChecks className={ICON} />,
-        phase: '5',
+        icon: <UserCheck className={ICON} />,
       },
     ],
   },

@@ -658,6 +658,91 @@ export type Database = {
         }
         Relationships: []
       }
+      responsibilities: {
+        Row: {
+          accountable: string | null
+          activity: string
+          area: string | null
+          consulted: string | null
+          created_at: string
+          deadline: string | null
+          id: string
+          informed: string | null
+          notes: string | null
+          person_name: string | null
+          phone: string | null
+          responsible: string | null
+          seq: number | null
+          sort_order: number
+          source_template_id: number | null
+          status: Database["public"]["Enums"]["task_status"]
+          updated_at: string
+          wedding_id: string
+        }
+        Insert: {
+          accountable?: string | null
+          activity: string
+          area?: string | null
+          consulted?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          informed?: string | null
+          notes?: string | null
+          person_name?: string | null
+          phone?: string | null
+          responsible?: string | null
+          seq?: number | null
+          sort_order?: number
+          source_template_id?: number | null
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          wedding_id: string
+        }
+        Update: {
+          accountable?: string | null
+          activity?: string
+          area?: string | null
+          consulted?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          informed?: string | null
+          notes?: string | null
+          person_name?: string | null
+          phone?: string | null
+          responsible?: string | null
+          seq?: number | null
+          sort_order?: number
+          source_template_id?: number | null
+          status?: Database["public"]["Enums"]["task_status"]
+          updated_at?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "responsibilities_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rsvp_rate_events: {
         Row: {
           bucket: string
@@ -1931,6 +2016,44 @@ export type Database = {
           },
           {
             foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_readiness: {
+        Row: {
+          area: string | null
+          cancelled: number | null
+          completed: number | null
+          in_progress: number | null
+          next_due: string | null
+          overdue: number | null
+          ratio: number | null
+          remaining: number | null
+          task_count: number | null
+          waiting: number | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "wedding_tasks_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"

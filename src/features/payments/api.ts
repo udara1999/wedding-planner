@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
 import { budgetKeys } from '../budget/api';
+import { useWeddingLookup } from '../weddings/lookups';
 import { RECEIPTS_BUCKET, buildReceiptPath } from './receipts';
 import type { PaymentRow, PaymentView } from '../../types/db';
 
@@ -26,18 +27,7 @@ export function usePayments(weddingId: string) {
 }
 
 export function usePaymentMethods(weddingId: string) {
-  return useQuery({
-    queryKey: paymentKeys.methods(weddingId),
-    queryFn: async (): Promise<string[]> => {
-      const res = await supabase
-        .from('wedding_lookups')
-        .select('value, sort_order')
-        .eq('wedding_id', weddingId)
-        .eq('kind', 'PayMethod')
-        .order('sort_order');
-      return unwrap(res).map((r) => r.value);
-    },
-  });
+  return useWeddingLookup(weddingId, 'PayMethod');
 }
 
 export type PaymentInput = Partial<

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase, unwrap } from '../../lib/supabase';
+import { deleteWeddingCascade } from './deleteWedding';
 import type { Database } from '../../types/database.types';
 import type { MemberRole, MyWedding, WeddingRow, WeddingSide } from '../../types/db';
 
@@ -237,4 +238,51 @@ export function useTemplatePending(weddingId: string) {
 export function pendingTotal(row: TemplatePending | null | undefined): number {
   if (!row) return 0;
   return PENDING_SOURCES.reduce((sum, s) => sum + Number(row[s.key] ?? 0), 0);
+}
+
+/**
+ * Delete a wedding and everything under it (see ./deleteWedding for why the
+ * storage purge has to come first, and why zero rows back is a refusal).
+ *
+ * Owner-only, enforced by the weddings_delete policy — the guard below turns
+ * RLS's silent filtering into an error the user actually sees.
+ */
+export function useDeleteWedding() {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (weddingId: string) =>
+      deleteWeddingCascade(weddingId, {
+        async listStoragePaths(id) {
+          // Both columns hold the exact storage key, so this is authoritative
+          // and needs no bucket listing. Read as the owner, before the delete.
+          const [receipts, contracts] = await Promise.all([
+            supabase.from('payments').select('receipt_path').eq('wedding_id', id),
+            supabase.from('vendor_attachments').select('path').eq('wedding_id', id),
+          ]);
+          return {
+            receipts: unwrap(receipts)
+              .map((r) => r.receipt_path)
+              .filter((p): p is string => Boolean(p)),
+            contracts: unwrap(contracts).map((r) => r.path),
+          };
+        },
+        async removeObjects(bucket, paths) {
+          const { error } = await supabase.storage.from(bucket).remove(paths);
+          if (error) throw new Error(`Could not delete the ${bucket}: ${error.message}`);
+        },
+        async deleteWeddingRow(id) {
+          const res = await supabase.from('weddings').delete().eq('id', id).select('id');
+          return unwrap(res).map((r) => r.id);
+        },
+      }),
+    onSuccess: () => {
+      // Every cached query for this wedding now points at rows that are gone,
+      // so the whole cache goes rather than a list of invalidations that would
+      // need updating each time a feature is added.
+      qc.clear();
+      navigate('/', { replace: true });
+    },
+  });
 }

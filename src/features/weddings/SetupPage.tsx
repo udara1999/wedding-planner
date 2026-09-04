@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useUpdateWedding, useWedding } from './api';
 import { TemplateUpdateCard } from './TemplatePending';
+import { DeleteWeddingCard } from './DeleteWeddingCard';
 import { TRADITIONS } from './traditions';
 import type { MyWedding } from '../../types/db';
 import type { WeddingRow } from '../../types/db';
@@ -344,6 +345,17 @@ export function SetupPage() {
       <div className="mt-6">
         <TemplateUpdateCard weddingId={wedding.id} canEdit={wedding.role === 'owner'} />
       </div>
+
+      {/* Owner-only, mirroring the weddings_delete policy. A partner shown this
+          would get a button RLS silently ignores. */}
+      {wedding.role === 'owner' && (
+        <div className="mt-6">
+          <DeleteWeddingCard
+            weddingId={wedding.id}
+            coupleName={`${wedding.bride_name || 'Bride'} & ${wedding.groom_name || 'Groom'}`}
+          />
+        </div>
+      )}
     </Page>
   );
 }

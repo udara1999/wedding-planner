@@ -63,6 +63,9 @@ type BudgetLinePatch = Partial<
     BudgetLineRow,
     | 'name'
     | 'payer'
+    // Setting this moves the line's payments to that vendor: the
+    // budget_lines_vendor_cascade trigger enforces the precedence rule.
+    | 'vendor_id'
     | 'applicability'
     | 'status'
     | 'notes'
@@ -105,6 +108,13 @@ export function useUpdateBudgetLine(weddingId: string) {
         qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) }),
         qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) }),
         qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-totals'] }),
+        // Changing this line's vendor rewrites vendor_id on every payment made
+        // against it — the cascade trigger does that in the database, so the
+        // payment and vendor caches are stale even though nothing here touched
+        // them. Written as literal keys rather than imported: payments/api
+        // already imports budgetKeys from here.
+        qc.invalidateQueries({ queryKey: ['payments', weddingId] }),
+        qc.invalidateQueries({ queryKey: ['vendors', weddingId] }),
       ]);
     },
   });
@@ -136,6 +146,7 @@ export interface NewBudgetLine {
   code: string | null;
   applicability: BudgetLineRow['applicability'];
   payer: string | null;
+  vendor_id: string | null;
   budgeted_minor: number;
 }
 
@@ -157,6 +168,9 @@ export function useCreateBudgetLine(weddingId: string) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
       void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
+      // A new line may already name a vendor, which changes that vendor's
+      // planned totals.
+      void qc.invalidateQueries({ queryKey: ['vendors', weddingId] });
     },
   });
 }

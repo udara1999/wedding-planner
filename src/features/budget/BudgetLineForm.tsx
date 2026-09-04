@@ -6,6 +6,7 @@ import { Trash2 } from 'lucide-react';
 import { useCreateBudgetLine, useDeleteBudgetLine, useUpdateBudgetLine } from './api';
 import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { LinePayments } from './LinePayments';
+import { useVendors } from '../vendors/vendorsApi';
 import {
   currencyDecimals,
   formatMinorAsMajor,
@@ -46,6 +47,7 @@ const schema = z.object({
   category_id: z.string().min(1, 'Pick a category'),
   code: z.string().trim().max(20).optional().nullable(),
   payer: z.string().trim().max(60).optional().nullable(),
+  vendor_id: z.string().optional().nullable(),
   status: z.enum(['not_started', 'in_progress', 'waiting', 'completed', 'cancelled']),
   notes: z.string().trim().max(2000).optional().nullable(),
   budgeted_minor: z.string(),
@@ -62,6 +64,7 @@ const BLANK: FormValues = {
   category_id: '',
   code: '',
   payer: '',
+  vendor_id: '',
   status: 'not_started',
   notes: '',
   budgeted_minor: '',
@@ -95,6 +98,7 @@ export function BudgetLineForm({
   onDone: () => void;
 }) {
   const decimals = currencyDecimals(currency);
+  const vendors = useVendors(weddingId);
   const create = useCreateBudgetLine(weddingId);
   const update = useUpdateBudgetLine(weddingId);
   const remove = useDeleteBudgetLine(weddingId);
@@ -118,6 +122,7 @@ export function BudgetLineForm({
             category_id: line.category_id ?? '',
             code: line.code ?? '',
             payer: line.payer ?? '',
+            vendor_id: line.vendor_id ?? '',
             status: line.status,
             notes: line.notes ?? '',
             budgeted_minor: formatMinorForInput(line.budgeted_minor, decimals),
@@ -148,6 +153,7 @@ export function BudgetLineForm({
         patch: {
           name: values.name,
           payer: values.payer?.trim() || null,
+          vendor_id: values.vendor_id || null,
           status: values.status,
           notes: values.notes?.trim() || null,
           applicability,
@@ -161,6 +167,7 @@ export function BudgetLineForm({
         code: values.code?.trim() || null,
         applicability,
         payer: values.payer?.trim() || null,
+        vendor_id: values.vendor_id || null,
         budgeted_minor: amounts.budgeted_minor ?? 0,
       });
     }
@@ -221,6 +228,30 @@ export function BudgetLineForm({
                   onChange={setApplicability}
                 />
               </div>
+            </Field>
+
+            {/* Who is fulfilling this line. Setting it here is the same link
+                the vendor screen makes from the other side, and it is what
+                lets the payment form fill in "Paid to" by itself. Changing it
+                moves the line's existing payments too — the cascade trigger
+                does that, so the hint is a promise the database keeps. */}
+            <Field
+              label="Vendor"
+              hint={
+                (vendors.data ?? []).length === 0
+                  ? 'No vendors yet. Add one on the Vendors screen and it will appear here.'
+                  : 'Optional. Payments against this line are attributed to them automatically.'
+              }
+            >
+              <Select disabled={!canEdit} {...form.register('vendor_id')}>
+                <option value="">Not decided</option>
+                {(vendors.data ?? []).map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.name}
+                    {v.category ? ` · ${v.category}` : ''}
+                  </option>
+                ))}
+              </Select>
             </Field>
 
             <div className="grid gap-4 sm:grid-cols-2">

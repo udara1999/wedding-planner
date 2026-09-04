@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useParams, Link } from 'react-router-dom';
 import {
+  Armchair,
   CalendarClock,
   ClipboardList,
   CreditCard,
@@ -87,13 +88,7 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
     heading: 'People',
     items: [
       { to: 'guests', label: 'Guests', roles: ALL, icon: <UsersRound className={ICON} /> },
-      {
-        to: 'seating',
-        label: 'Seating',
-        roles: ALL,
-        icon: <UsersRound className={ICON} />,
-        phase: '4',
-      },
+      { to: 'seating', label: 'Seating', roles: ALL, icon: <Armchair className={ICON} /> },
       { to: 'members', label: 'People', roles: COUPLE, icon: <Users className={ICON} /> },
     ],
   },

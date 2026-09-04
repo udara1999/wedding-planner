@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(158);
+select plan(168);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1201,6 +1201,126 @@ select is((select budget_line_count from v_vendor_financials
             where vendor_id = (select v from pv where k='vendor2')),
           2::bigint,
           'The line count is the number of lines, not lines times payments');
+
+-- =============================================================================
+-- Seating (4.8) — 10 assertions
+-- =============================================================================
+-- The interesting assertions here are the two about what is NOT blocked. It is
+-- easy to write a capacity constraint that also refuses a guest's RSVP, and
+-- nobody would notice until a guest could not reply.
+-- =============================================================================
+select tests.become_service_role();
+create temporary table st (k text primary key, v uuid);
+grant select, insert on st to public;
+create temporary table snap (k text primary key, v bigint);
+grant select, insert on snap to public;
+
+select tests.login((select v from ids where k = 'alice'));
+
+with ins as (
+  insert into seating_tables (wedding_id, name, capacity)
+  values ((select v from w where k='a'), 'Top table', 6)
+  returning id
+)
+insert into st select 'top', id from ins;
+
+with ins as (
+  insert into guests (wedding_id, household_name, side, adults_invited, children_invited)
+  values ((select v from w where k='a'), 'Seat test A', 'bride', 4, 0)
+  returning id
+)
+insert into st select 'a', id from ins;
+
+with ins as (
+  insert into guests (wedding_id, household_name, side, adults_invited, children_invited)
+  values ((select v from w where k='a'), 'Seat test B', 'bride', 4, 0)
+  returning id
+)
+insert into st select 'b', id from ins;
+
+with ins as (
+  insert into guests (wedding_id, household_name, side, adults_invited, children_invited)
+  values ((select v from w where k='a'), 'Seat test C', 'bride', 2, 0)
+  returning id
+)
+insert into st select 'c', id from ins;
+
+-- 1. Before anyone replies, a household needs as many chairs as it was
+--    invited for. Planning for the invitation is the only sane default.
+select is((select heads_to_seat from guests where id = (select v from st where k='a')),
+          4,
+          'Chairs needed comes from the invitation until the household replies');
+
+-- 2. An assignment that fits is allowed.
+select lives_ok(
+  $q$ update guests set table_id = (select v from st where k='top')
+       where id = (select v from st where k='a') $q$,
+  'A household that fits can be seated');
+
+-- 3. And one that does not fit is refused. This is the ticket's
+--    "over-capacity blocked".
+select throws_ok(
+  $q$ update guests set table_id = (select v from st where k='top')
+       where id = (select v from st where k='b') $q$);
+
+-- 4. Once they reply, the reply is what counts.
+update guests set rsvp_status = 'accepted', adults_attending = 2, children_attending = 0
+ where id = (select v from st where k='a');
+
+select is((select heads_to_seat from guests where id = (select v from st where k='a')),
+          2,
+          'Chairs needed follows the reply once one has been given');
+
+-- 5. So the same assignment now fits, with no other change.
+select lives_ok(
+  $q$ update guests set table_id = (select v from st where k='top')
+       where id = (select v from st where k='b') $q$,
+  'Freeing seats by an RSVP makes room for the next household');
+
+-- 6. THE ONE THAT MATTERS. A household already seated replies with more people
+--    than expected. That must not be refused: the reply is the fact and the
+--    seating is the plan, so the plan is what gives way. A trigger written on
+--    the whole row instead of `of table_id` would fail here, and it would fail
+--    for a guest on a phone rather than for the couple.
+select lives_ok(
+  $q$ update guests set adults_attending = 4
+       where id = (select v from st where k='a') $q$,
+  'A reply that overflows a table is accepted, not blocked');
+
+-- 7. It is reported instead.
+select is((select over_capacity from v_seating_tables
+            where table_id = (select v from st where k='top')),
+          true,
+          'The table is reported as over capacity so the couple can fix it');
+
+select is((select seated_heads from v_seating_tables
+            where table_id = (select v from st where k='top')),
+          8::bigint,
+          'seated_heads counts people rather than households');
+
+-- 8. A household that has declined needs no chair, and must not sit in the
+--    "still to seat" number forever as work that can never be finished.
+insert into snap
+select 'unseated', unseated_households from v_seating_summary
+ where wedding_id = (select v from w where k='a');
+
+update guests set rsvp_status = 'declined'
+ where id = (select v from st where k='c');
+
+select is((select unseated_households from v_seating_summary
+            where wedding_id = (select v from w where k='a')),
+          (select v from snap where k='unseated') - 1,
+          'A household that declines stops counting as unseated');
+
+-- 9. Deleting a table unseats its households rather than deleting them. The
+--    foreign key says `on delete set null`; this proves nobody changed it.
+delete from seating_tables where id = (select v from st where k='top');
+
+select is((select count(*)::int from guests
+            where id in ((select v from st where k='a'), (select v from st where k='b'))
+              and table_id is null),
+          2,
+          'Deleting a table unseats its households and keeps them on the list');
 
 select * from finish();
 rollback;

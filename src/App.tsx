@@ -16,6 +16,7 @@ import { ContributionsPage } from './features/contributions/ContributionsPage';
 import { ComparePage } from './features/vendors/ComparePage';
 import { VendorsPage } from './features/vendors/VendorsPage';
 import { GuestsPage } from './features/guests/GuestsPage';
+import { SeatingPage } from './features/seating/SeatingPage';
 import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
@@ -154,6 +155,7 @@ export default function App() {
               <Route path="compare" element={<ComparePage />} />
               <Route path="vendors" element={<VendorsPage />} />
               <Route path="guests" element={<GuestsPage />} />
+              <Route path="seating" element={<SeatingPage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

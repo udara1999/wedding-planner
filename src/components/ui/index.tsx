@@ -133,16 +133,19 @@ export function Field({
   error,
   hint,
   htmlFor,
+  className,
   children,
 }: {
   label: string;
   error?: string;
   hint?: string;
   htmlFor?: string;
+  /** For laying the field out in a row — width, flex, grid span. */
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block" htmlFor={htmlFor}>
+    <label className={cn('block', className)} htmlFor={htmlFor}>
       <span className="mb-1.5 block text-[13px] font-medium text-stone-700">{label}</span>
       {children}
       {/* Hint gives way to the error rather than stacking, so the control never

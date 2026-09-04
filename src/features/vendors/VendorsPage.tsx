@@ -242,7 +242,7 @@ export function VendorsPage() {
               />
             ))}
           </div>
-          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone-500">
+          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-[11px] text-stone-500">
             {columns
               .filter((c) => c.vendors.length > 0)
               .map((c) => (
@@ -339,7 +339,7 @@ export function VendorsPage() {
       {cancelled.length > 0 && (
         <Card className="mt-5">
           <CardBody className="pt-4">
-            <p className="mb-2 text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
+            <p className="mb-2 text-xs sm:text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
               Cancelled
             </p>
             <div className="flex flex-wrap gap-2">
@@ -429,7 +429,7 @@ function VendorCard({
               to scan by that is not another line of grey text. */}
           <span
             aria-hidden
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-wine-50 text-[10px] font-semibold tracking-wide text-wine-700 ring-1 ring-wine-100"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-wine-50 text-[11px] sm:text-[10px] font-semibold tracking-wide text-wine-700 ring-1 ring-wine-100"
           >
             {(vendor.category ?? '?').slice(0, 2).toUpperCase()}
           </span>
@@ -451,7 +451,9 @@ function VendorCard({
         {price > 0 && (
           <div className="mt-3">
             <p className="tabular text-base leading-none font-semibold text-stone-900">
-              <span className="mr-1 text-[10px] font-normal text-stone-500">{currency}</span>
+              <span className="mr-1 text-[11px] sm:text-[10px] font-normal text-stone-500">
+                {currency}
+              </span>
               {formatMoney(price, decimals)}
             </p>
             {paid > 0 && (
@@ -465,7 +467,7 @@ function VendorCard({
                     style={{ width: `${Math.round(progress * 100)}%` }}
                   />
                 </div>
-                <p className="tabular mt-1 text-[11px] text-stone-500">
+                <p className="tabular mt-1 text-xs sm:text-[11px] text-stone-500">
                   {formatMoney(paid, decimals)} paid
                   {overpaid ? ' · over' : progress >= 1 ? ' · settled' : ''}
                 </p>
@@ -474,7 +476,7 @@ function VendorCard({
           </div>
         )}
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-stone-500">
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs sm:text-[11px] text-stone-500">
           {vendor.phone ? (
             <span className="flex items-center gap-1">
               <Phone className="size-3" />

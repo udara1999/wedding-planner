@@ -119,7 +119,7 @@ export function DashboardPage() {
               <p className="tabular text-2xl leading-none font-semibold text-wine-800">
                 {Math.abs(days)}
               </p>
-              <p className="mt-0.5 text-[11px] font-medium text-wine-700">
+              <p className="mt-0.5 text-xs sm:text-[11px] font-medium text-wine-700">
                 {days >= 0 ? 'days to go' : 'days ago'}
               </p>
             </div>
@@ -259,7 +259,7 @@ export function DashboardPage() {
                     ))}
                   </ul>
                 )}
-                <div className="mt-3 flex flex-wrap gap-3 border-t border-stone-100 pt-2.5 text-[11px] text-stone-500">
+                <div className="mt-3 flex flex-wrap gap-3 border-t border-stone-100 pt-2.5 text-xs sm:text-[11px] text-stone-500">
                   <Swatch className="bg-stone-200" label="budgeted" />
                   <Swatch className="bg-wine-300" label="forecast" />
                   <Swatch className="bg-wine-700" label="paid" />

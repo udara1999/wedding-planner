@@ -198,7 +198,7 @@ export function CountdownPage() {
                 >
                   <span
                     className={cn(
-                      'flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
+                      'flex size-7 shrink-0 items-center justify-center rounded-full text-xs sm:text-[11px] font-semibold',
                       complete
                         ? 'bg-emerald-50 text-emerald-600'
                         : w.past
@@ -240,7 +240,7 @@ export function CountdownPage() {
                               disabled={!canEdit}
                               onClick={() => setDone.mutate({ id: c.id, done: !c.done })}
                               className={cn(
-                                'focus-ring mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors',
+                                'focus-ring relative before:absolute before:-inset-2.5 before:content-[""] mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors',
                                 c.done
                                   ? 'border-emerald-500 bg-emerald-500 text-white'
                                   : 'border-stone-300 hover:border-emerald-500',
@@ -260,7 +260,7 @@ export function CountdownPage() {
                                 {c.check_text}
                               </span>
                               {c.due_date && (
-                                <span className="block text-[11px] text-stone-500">
+                                <span className="block text-xs sm:text-[11px] text-stone-500">
                                   {describeDue(c.due_date, today)} · {c.due_date}
                                 </span>
                               )}
@@ -268,7 +268,7 @@ export function CountdownPage() {
                             {/* Who is checking it. A countdown item with nobody
                                 against it gets done by whoever remembers. */}
                             <Select
-                              className="w-32 shrink-0"
+                              className="w-full sm:w-32 shrink-0"
                               aria-label={`Who checks: ${c.check_text}`}
                               disabled={!canEdit}
                               value={c.owner ?? ''}

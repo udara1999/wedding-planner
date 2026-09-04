@@ -3,7 +3,10 @@ import { forgotPasswordSchema, newPasswordSchema, signInSchema, signUpSchema } f
 import { describeAuthError } from './auth-errors';
 
 /** Helper: the first error message zod reports for a given field. */
-function errorFor(result: { success: boolean; error?: { issues: readonly unknown[] } }, field: string) {
+function errorFor(
+  result: { success: boolean; error?: { issues: readonly unknown[] } },
+  field: string,
+) {
   if (result.success) return undefined;
   const issues = (result.error?.issues ?? []) as { path: (string | number)[]; message: string }[];
   return issues.find((i) => i.path.join('.') === field)?.message;

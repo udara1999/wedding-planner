@@ -40,9 +40,7 @@ export function VendorBudgetLinks({
     const needle = query.trim().toLowerCase();
     return (lines.data ?? [])
       .filter((l) => l.vendor_id !== vendorId)
-      .filter((l) =>
-        needle ? `${l.code ?? ''} ${l.name}`.toLowerCase().includes(needle) : true,
-      )
+      .filter((l) => (needle ? `${l.code ?? ''} ${l.name}`.toLowerCase().includes(needle) : true))
       .slice(0, 30);
   }, [lines.data, vendorId, query]);
 
@@ -66,7 +64,7 @@ export function VendorBudgetLinks({
       </div>
 
       {money && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Stat
             label={`Forecast from lines (${currency})`}
             value={formatMoney(Number(money.forecast_minor ?? 0), decimals)}
@@ -93,14 +91,19 @@ export function VendorBudgetLinks({
           {gap > 0 ? (
             <>
               Your budget lines add up to{' '}
-              <strong>{formatMoney(gap, decimals)} {currency}</strong> more than this
-              vendor quoted.
+              <strong>
+                {formatMoney(gap, decimals)} {currency}
+              </strong>{' '}
+              more than this vendor quoted.
             </>
           ) : (
             <>
               This vendor quoted{' '}
-              <strong>{formatMoney(Math.abs(gap), decimals)} {currency}</strong> more than
-              the lines you have linked. Something they will charge for may not be budgeted yet.
+              <strong>
+                {formatMoney(Math.abs(gap), decimals)} {currency}
+              </strong>{' '}
+              more than the lines you have linked. Something they will charge for may not be
+              budgeted yet.
             </>
           )}
         </p>
@@ -108,14 +111,14 @@ export function VendorBudgetLinks({
 
       {linked.length === 0 ? (
         <p className="rounded-lg border border-dashed border-stone-200 px-3 py-2.5 text-xs text-stone-500">
-          No budget items linked. That is fine — the vendor still exists, its costs just are not
-          in the budget yet.
+          No budget items linked. That is fine — the vendor still exists, its costs just are not in
+          the budget yet.
         </p>
       ) : (
         <ul className="divide-y divide-stone-100 overflow-hidden rounded-lg border border-stone-200">
           {linked.map((l) => (
             <li key={l.id} className="flex items-center gap-2 px-3 py-2">
-              <span className="w-14 shrink-0 font-mono text-[11px] text-stone-500">
+              <span className="w-14 shrink-0 font-mono text-xs sm:text-[11px] text-stone-500">
                 {l.code ?? '—'}
               </span>
               <span className="min-w-0 flex-1 truncate text-xs text-stone-800">{l.name}</span>
@@ -161,7 +164,7 @@ export function VendorBudgetLinks({
                     onClick={() => link.mutate({ lineId: l.id, vendorId })}
                     className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-stone-50"
                   >
-                    <span className="w-14 shrink-0 font-mono text-[11px] text-stone-500">
+                    <span className="w-14 shrink-0 font-mono text-xs sm:text-[11px] text-stone-500">
                       {l.code ?? '—'}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-xs text-stone-800">{l.name}</span>

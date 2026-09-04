@@ -182,9 +182,7 @@ export function useDeleteAttachment(vendorId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (attachment: VendorAttachmentRow) => {
-      const { error } = await supabase.storage
-        .from(CONTRACTS_BUCKET)
-        .remove([attachment.path]);
+      const { error } = await supabase.storage.from(CONTRACTS_BUCKET).remove([attachment.path]);
       if (error) throw new Error(error.message);
       const res = await supabase
         .from('vendor_attachments')

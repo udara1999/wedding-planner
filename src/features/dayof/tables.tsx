@@ -66,7 +66,7 @@ export function TimelineTable({
             <h3
               className={cn(
                 'mb-1 border-b border-stone-200 pb-1 text-xs font-semibold tracking-wide text-stone-600 uppercase',
-                print && 'text-[10px]',
+                print && 'text-[11px] sm:text-[10px]',
               )}
             >
               {phase}
@@ -109,7 +109,9 @@ export function TimelineTable({
                           />
                         )}
                         {e.notes && !print && (
-                          <span className="block text-[11px] text-stone-500">{e.notes}</span>
+                          <span className="block text-xs sm:text-[11px] text-stone-500">
+                            {e.notes}
+                          </span>
                         )}
                       </td>
                       <td
@@ -145,7 +147,7 @@ export function TimelineTable({
                               onToggleDone?.(e);
                             }}
                             className={cn(
-                              'focus-ring flex size-5 items-center justify-center rounded border',
+                              'focus-ring relative flex size-5 items-center justify-center rounded before:absolute before:-inset-2.5 before:content-[""] border',
                               e.done
                                 ? 'border-emerald-500 bg-emerald-500 text-white'
                                 : 'border-stone-300 hover:border-emerald-500',
@@ -180,7 +182,7 @@ export function ScheduleTable({
   return (
     <table className="w-full text-left">
       <thead>
-        <tr className="border-b border-stone-200 text-[10px] tracking-wide text-stone-500 uppercase">
+        <tr className="border-b border-stone-200 text-[11px] sm:text-[10px] tracking-wide text-stone-500 uppercase">
           <th className="py-1 pr-2 font-semibold">Arrives</th>
           <th className="py-1 pr-2 font-semibold">Vendor</th>
           <th className="py-1 pr-2 font-semibold">Where</th>
@@ -199,7 +201,7 @@ export function ScheduleTable({
             </td>
             <td className={cn('py-1.5 pr-2', print ? 'text-[11px]' : 'text-sm')}>
               <span className="text-stone-900">{v.name}</span>
-              <span className="block text-[11px] text-stone-500">{v.category}</span>
+              <span className="block text-xs sm:text-[11px] text-stone-500">{v.category}</span>
             </td>
             <td className={cn('py-1.5 pr-2 text-stone-500', text)}>{v.where_in_venue}</td>
             <td className={cn('tabular py-1.5 pr-2', text)}>
@@ -215,7 +217,9 @@ export function ScheduleTable({
                 </a>
               )}
               {v.contact_name && (
-                <span className="block text-[11px] text-stone-500">{v.contact_name}</span>
+                <span className="block text-xs sm:text-[11px] text-stone-500">
+                  {v.contact_name}
+                </span>
               )}
             </td>
             <td className={cn('tabular w-16 py-1.5 pr-2 text-stone-500', text)}>
@@ -238,7 +242,7 @@ export function ScheduleTable({
                       title={at ? new Date(at).toLocaleTimeString() : undefined}
                       onClick={() => v.vendor_id && onCheck?.(v.vendor_id, field, !on)}
                       className={cn(
-                        'focus-ring mx-auto flex size-5 items-center justify-center rounded border',
+                        'focus-ring relative mx-auto flex size-5 items-center justify-center rounded before:absolute before:-inset-2.5 before:content-[""] border',
                         on
                           ? 'border-emerald-500 bg-emerald-500 text-white'
                           : 'border-stone-300 hover:border-emerald-500',
@@ -276,7 +280,11 @@ export function ContactTable({ rows, print }: { rows: ContactSheetRow[]; print?:
                   <tr key={`${r.source}-${r.source_id}`} className="border-b border-stone-100">
                     <td className={cn('py-1.5 pr-2', print ? 'text-[11px]' : 'text-sm')}>
                       <span className="text-stone-900">{r.name}</span>
-                      {r.role && <span className="block text-[11px] text-stone-500">{r.role}</span>}
+                      {r.role && (
+                        <span className="block text-xs sm:text-[11px] text-stone-500">
+                          {r.role}
+                        </span>
+                      )}
                     </td>
                     <td className={cn('tabular w-36 py-1.5 pr-2', text)}>
                       {r.no_number ? (
@@ -331,7 +339,7 @@ export function RiskTable({
             <Badge tone={scoreTone(r.score ?? 0)}>{r.score}</Badge>
             <div className="min-w-0 flex-1">
               <p className={cn('text-stone-900', print ? 'text-[11px]' : 'text-sm')}>{r.name}</p>
-              <p className="text-[11px] text-stone-500">
+              <p className="text-xs sm:text-[11px] text-stone-500">
                 {r.area} · {LEVEL_LABEL[r.likelihood]} likelihood · {LEVEL_LABEL[r.impact]} impact
                 {r.owner && ` · ${r.owner}`}
               </p>
@@ -347,7 +355,7 @@ export function RiskTable({
                   onPrevented?.(r);
                 }}
                 className={cn(
-                  'focus-ring mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border',
+                  'focus-ring relative before:absolute before:-inset-2.5 before:content-[""] mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border',
                   r.prevention_done
                     ? 'border-emerald-500 bg-emerald-500 text-white'
                     : 'border-stone-300 hover:border-emerald-500',

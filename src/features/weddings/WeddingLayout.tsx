@@ -267,16 +267,17 @@ export function WeddingLayout() {
             'border-r border-stone-200/80 bg-white',
             // Off-canvas below lg, a normal column above it.
             'fixed inset-y-0 left-0 transition-transform duration-200 lg:static lg:translate-x-0',
+            'pb-[env(safe-area-inset-bottom)]',
             navOpen ? 'translate-x-0 shadow-pop' : '-translate-x-full',
           )}
         >
-          <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3">
+          <div className="flex items-start justify-between gap-2 px-4 pt-[calc(1rem+env(safe-area-inset-top))] pb-3">
             <Link
               to="/"
               className="focus-ring group min-w-0 rounded-lg"
               onClick={() => setNavOpen(false)}
             >
-              <span className="text-[11px] font-medium text-stone-500 group-hover:text-stone-600">
+              <span className="text-xs sm:text-[11px] font-medium text-stone-500 group-hover:text-stone-600">
                 All weddings
               </span>
               <p className="truncate text-[15px] leading-snug font-semibold tracking-tight text-stone-900">
@@ -305,7 +306,7 @@ export function WeddingLayout() {
           <nav className="flex-1 space-y-4 px-2 pb-2">
             {groups.map((group) => (
               <div key={group.heading}>
-                <p className="px-3 pb-1 text-[10px] font-semibold tracking-wider text-stone-500 uppercase">
+                <p className="px-3 pb-1 text-[11px] sm:text-[10px] font-semibold tracking-wider text-stone-500 uppercase">
                   {group.heading}
                 </p>
                 <div className="space-y-0.5">
@@ -333,7 +334,7 @@ export function WeddingLayout() {
                           {item.phase && (
                             <span
                               title={`Arrives in phase ${item.phase}`}
-                              className="rounded bg-stone-100 px-1 text-[10px] text-stone-500"
+                              className="rounded bg-stone-100 px-1 text-[11px] sm:text-[10px] text-stone-500"
                             >
                               P{item.phase}
                             </span>
@@ -363,7 +364,7 @@ export function WeddingLayout() {
         {/* The one scrolling region. min-w-0 stops a wide child widening the
           flex item and reintroducing a horizontal scrollbar. */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <header className="no-print flex items-center gap-3 border-b border-stone-200/80 bg-white/80 px-4 py-2.5 backdrop-blur lg:hidden">
+          <header className="no-print sticky top-0 z-20 flex items-center gap-3 border-b border-stone-200/80 bg-white/90 px-4 pt-[calc(0.625rem+env(safe-area-inset-top))] pb-2.5 backdrop-blur lg:hidden">
             <IconButton label="Open navigation" onClick={() => setNavOpen(true)}>
               <Menu className="size-5" />
             </IconButton>

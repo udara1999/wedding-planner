@@ -20,10 +20,7 @@ export type PickResult =
   | { status: 'ambiguous'; matches: PickableLine[] }
   | { status: 'unknown' };
 
-export function resolveBudgetLine(
-  lines: readonly PickableLine[],
-  query: string,
-): PickResult {
+export function resolveBudgetLine(lines: readonly PickableLine[], query: string): PickResult {
   const needle = query.trim().toLowerCase();
   if (!needle) return { status: 'empty' };
 

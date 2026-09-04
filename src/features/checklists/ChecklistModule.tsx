@@ -236,7 +236,7 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
             />
           </div>
           <Select
-            className="w-40"
+            className="w-full sm:w-40"
             aria-label="Status"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TaskStatus | 'all' | 'open')}
@@ -325,7 +325,7 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
                         <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-stone-600 uppercase">
                           {sec.label}
                         </span>
-                        <span className="tabular shrink-0 text-[11px] text-stone-500">
+                        <span className="tabular shrink-0 text-xs sm:text-[11px] text-stone-500">
                           {done} of {sec.rows.length} done
                         </span>
                       </button>

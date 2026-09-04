@@ -48,7 +48,7 @@ export function ApplicabilitySwitch({
             disabled={disabled || pending}
             onClick={() => !active && onChange(option.value)}
             className={cn(
-              'focus-ring rounded-md px-2 py-1 text-[11px] font-medium transition-all',
+              'focus-ring rounded-md px-2 py-1 text-xs sm:text-[11px] font-medium transition-all',
               active && option.value === 'not_applicable' && 'bg-white text-stone-600 shadow-sm',
               active && option.value !== 'not_applicable' && 'bg-wine-700 text-white shadow-sm',
               !active && 'text-stone-500 hover:text-stone-800',

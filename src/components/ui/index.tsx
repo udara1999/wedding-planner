@@ -208,14 +208,25 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <div className={cn('mb-6 flex flex-wrap items-start justify-between gap-4', className)}>
-      <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight text-stone-900">{title}</h1>
+    <div
+      className={cn(
+        'mb-5 flex flex-wrap items-start justify-between gap-3 sm:mb-6 sm:gap-4',
+        className,
+      )}
+    >
+      <div className="min-w-0 flex-1">
+        <h1 className="text-lg font-semibold tracking-tight text-stone-900 sm:text-xl">{title}</h1>
         {description && (
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-stone-500">{description}</p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {/* Wraps to its own full-width row on a phone rather than squeezing the
+          title into a column of single words, which is what shrink-0 did. */}
+      {actions && (
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
@@ -233,7 +244,7 @@ export function Page({
   return (
     <div
       className={cn(
-        'mx-auto w-full px-5 py-7 sm:px-8',
+        'mx-auto w-full px-4 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-8 sm:pt-7 sm:pb-8',
         width === 'narrow' && 'max-w-3xl',
         width === 'default' && 'max-w-5xl',
         width === 'wide' && 'max-w-[86rem]',
@@ -300,7 +311,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium',
+        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs sm:text-[11px] font-medium',
         'ring-1 ring-inset',
         tone === 'neutral' && 'bg-stone-50 text-stone-600 ring-stone-200',
         tone === 'good' && 'bg-emerald-50 text-emerald-700 ring-emerald-200',
@@ -546,7 +557,7 @@ export function Section({
   return (
     <section className={cn('space-y-3', className)}>
       <div>
-        <h3 className="text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
+        <h3 className="text-xs sm:text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
           {title}
         </h3>
         {description && <p className="mt-0.5 text-xs text-stone-500">{description}</p>}

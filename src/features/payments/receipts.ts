@@ -35,11 +35,7 @@ export function safeFileName(raw: string): string {
 }
 
 /** `<wedding_id>/<payment_id>/<file>` — the wedding id must come first. */
-export function buildReceiptPath(
-  weddingId: string,
-  paymentId: string,
-  fileName: string,
-): string {
+export function buildReceiptPath(weddingId: string, paymentId: string, fileName: string): string {
   return `${weddingId}/${paymentId}/${safeFileName(fileName)}`;
 }
 

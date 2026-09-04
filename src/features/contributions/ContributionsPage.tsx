@@ -174,10 +174,7 @@ export function ContributionsPage() {
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <Stat label={`Agreed (${currency})`} value={formatMoney(totals.agreed, decimals)} />
-        <Stat
-          label={`Received (${currency})`}
-          value={formatMoney(totals.received, decimals)}
-        />
+        <Stat label={`Received (${currency})`} value={formatMoney(totals.received, decimals)} />
         <Stat
           label={`Still to come (${currency})`}
           value={formatMoney(totals.outstanding, decimals)}
@@ -224,7 +221,7 @@ export function ContributionsPage() {
                       <p className="text-sm tabular-nums text-stone-900">
                         {formatMoney(c.received_minor, decimals)}
                       </p>
-                      <p className="text-[11px] tabular-nums text-stone-500">
+                      <p className="text-xs sm:text-[11px] tabular-nums text-stone-500">
                         of {formatMoney(c.agreed_minor, decimals)} {currency}
                       </p>
                     </div>
@@ -333,4 +330,3 @@ export function ContributionsPage() {
     </Page>
   );
 }
-

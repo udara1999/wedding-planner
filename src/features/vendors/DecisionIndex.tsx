@@ -36,9 +36,7 @@ export function DecisionIndex({
   const decisions = useVendorDecisions(weddingId);
 
   const rows = useMemo(() => {
-    const byKey = new Map(
-      (decisions.data ?? []).map((d) => [d.category_key ?? '', d] as const),
-    );
+    const byKey = new Map((decisions.data ?? []).map((d) => [d.category_key ?? '', d] as const));
     return categories.map((c) => ({ category: c, decision: byKey.get(c.key) ?? null }));
   }, [categories, decisions.data]);
 
@@ -62,7 +60,7 @@ export function DecisionIndex({
           <div className="scroll-subtle max-h-80 overflow-y-auto">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-white">
-                <tr className="text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
+                <tr className="text-xs sm:text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
                   <th className="px-5 py-2 text-left">Category</th>
                   <th className="px-2 py-2 text-right">Options</th>
                   <th className="px-2 py-2 text-left">Decision</th>

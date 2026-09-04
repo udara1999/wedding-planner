@@ -19,7 +19,10 @@ export function describeAuthError(raw: string): AuthErrorInfo {
   }
 
   if (/invalid login credentials/i.test(raw)) {
-    return { message: 'That email and password do not match an account.', needsConfirmation: false };
+    return {
+      message: 'That email and password do not match an account.',
+      needsConfirmation: false,
+    };
   }
 
   if (/user already registered|already been registered/i.test(raw)) {
@@ -30,7 +33,10 @@ export function describeAuthError(raw: string): AuthErrorInfo {
   }
 
   if (/rate limit|too many requests/i.test(raw)) {
-    return { message: 'Too many attempts. Wait a minute, then try again.', needsConfirmation: false };
+    return {
+      message: 'Too many attempts. Wait a minute, then try again.',
+      needsConfirmation: false,
+    };
   }
 
   return { message: raw, needsConfirmation: false };

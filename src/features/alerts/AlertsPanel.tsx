@@ -102,7 +102,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
           <div className="space-y-4">
             {bySeverity.map(({ severity, items }) => (
               <div key={severity}>
-                <p className="mb-1.5 flex items-center gap-2 text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
+                <p className="mb-1.5 flex items-center gap-2 text-xs sm:text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
                   <Badge tone={SEVERITY_TONE[severity]}>{SEVERITY_LABEL[severity]}</Badge>
                 </p>
                 <ul className="divide-y divide-stone-100 overflow-hidden rounded-xl border border-stone-200">
@@ -114,7 +114,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
                       >
                         <span
                           className={cn(
-                            'tabular flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold',
+                            'tabular flex size-7 shrink-0 items-center justify-center rounded-full text-xs sm:text-[11px] font-semibold',
                             severity === 'critical'
                               ? 'bg-red-50 text-red-700'
                               : severity === 'high'
@@ -141,7 +141,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
           <div className="mt-4 space-y-3 border-t border-stone-100 pt-4">
             {clear.length > 0 && (
               <div>
-                <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
+                <p className="mb-1.5 text-xs sm:text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
                   Checked, nothing to report
                 </p>
                 <ul className="space-y-1">
@@ -159,7 +159,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
                 like an alert nobody thought of. */}
             {waiting.length > 0 && (
               <div>
-                <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
+                <p className="mb-1.5 text-xs sm:text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
                   Starts closer to the day
                 </p>
                 <ul className="space-y-1">

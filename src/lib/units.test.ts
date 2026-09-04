@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { currencyDecimals, formatCountForInput, formatMinorAsMajor, formatMinorForInput, formatMoney, formatRateAsPercent, formatRateForInput, parseMajorToMinor, parsePercentAsRate } from './units';
+import {
+  currencyDecimals,
+  formatCountForInput,
+  formatMinorAsMajor,
+  formatMinorForInput,
+  formatMoney,
+  formatRateAsPercent,
+  formatRateForInput,
+  parseMajorToMinor,
+  parsePercentAsRate,
+} from './units';
 
 describe('parseMajorToMinor', () => {
   it('converts a whole amount to minor units', () => {

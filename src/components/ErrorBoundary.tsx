@@ -81,7 +81,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             {import.meta.env.DEV && (
-              <pre className="scroll-subtle max-h-40 overflow-auto rounded-lg bg-stone-50 p-3 text-left text-[11px] text-stone-600">
+              <pre className="scroll-subtle max-h-40 overflow-auto rounded-lg bg-stone-50 p-3 text-left text-xs sm:text-[11px] text-stone-600">
                 {error.stack ?? error.message}
               </pre>
             )}

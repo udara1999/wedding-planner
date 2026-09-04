@@ -183,7 +183,7 @@ export function ComparePage() {
                     >
                       {c.label}
                     </span>
-                    <span className="tabular shrink-0 text-[11px] text-stone-500">
+                    <span className="tabular shrink-0 text-xs sm:text-[11px] text-stone-500">
                       {c.questionCount}
                     </span>
                   </button>

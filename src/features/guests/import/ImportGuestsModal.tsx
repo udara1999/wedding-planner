@@ -150,7 +150,7 @@ export function ImportGuestsModal({
                       </option>
                     ))}
                   </Select>
-                  <p className="mt-1 truncate text-[11px] text-stone-500">
+                  <p className="mt-1 truncate text-xs sm:text-[11px] text-stone-500">
                     e.g. {grid[1]?.[i] || '—'}
                   </p>
                 </div>

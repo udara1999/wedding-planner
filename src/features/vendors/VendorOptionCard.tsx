@@ -83,14 +83,14 @@ export function VendorOptionCard({
 
         {/* The comparison figure, given room to be read. */}
         <div className="rounded-xl bg-stone-50 px-3 py-2.5">
-          <p className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">
+          <p className="text-xs sm:text-[11px] font-medium tracking-wide text-stone-500 uppercase">
             {option.negotiated_minor > 0 ? 'Negotiated' : 'Quoted'}
           </p>
           <p className="tabular mt-0.5 text-lg font-semibold text-stone-900">
             <span className="mr-1 text-xs font-normal text-stone-500">{currency}</span>
             {effective > 0 ? formatMoney(effective, decimals) : '—'}
           </p>
-          <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-stone-500">
+          <div className="mt-1 flex flex-wrap gap-x-3 text-xs sm:text-[11px] text-stone-500">
             {negotiatedDown && (
               <span>
                 quoted{' '}
@@ -102,9 +102,7 @@ export function VendorOptionCard({
             {option.deposit_minor > 0 && (
               <span>
                 deposit{' '}
-                <span className="tabular">
-                  {formatMoney(option.deposit_minor, decimals)}
-                </span>
+                <span className="tabular">{formatMoney(option.deposit_minor, decimals)}</span>
               </span>
             )}
           </div>
@@ -169,7 +167,7 @@ export function VendorOptionCard({
             title={option.met_or_visited ? 'Met or visited' : 'Not met yet'}
             onClick={() => onSave({ met_or_visited: !option.met_or_visited })}
             className={cn(
-              'focus-ring flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium',
+              'focus-ring flex items-center gap-1 rounded-md px-2 py-1 text-xs sm:text-[11px] font-medium',
               option.met_or_visited
                 ? 'bg-emerald-50 text-emerald-700'
                 : 'bg-stone-100 text-stone-500 hover:bg-stone-200',

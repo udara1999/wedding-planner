@@ -257,7 +257,7 @@ export function BudgetPage() {
                     >
                       {row.category_label}
                     </span>
-                    <span className="tabular block text-[11px] text-stone-500">
+                    <span className="tabular block text-xs sm:text-[11px] text-stone-500">
                       {money(Number(row.forecast_minor ?? 0))} forecast
                     </span>
                   </button>
@@ -281,7 +281,7 @@ export function BudgetPage() {
               />
             </div>
             <Select
-              className="w-40"
+              className="w-full sm:w-40"
               value={filters.applicability}
               onChange={(e) =>
                 setFilters((f) => ({
@@ -297,7 +297,7 @@ export function BudgetPage() {
             </Select>
             {/* Category filter for narrow screens, where the rail is hidden. */}
             <Select
-              className="w-44 lg:hidden"
+              className="w-full sm:w-44 lg:hidden"
               value={filters.categoryId}
               onChange={(e) => setFilters((f) => ({ ...f, categoryId: e.target.value }))}
             >
@@ -500,7 +500,7 @@ function BudgetRow({
           {line.name}
         </p>
         <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-stone-500">
-          {line.code && <span className="font-mono text-[11px]">{line.code}</span>}
+          {line.code && <span className="font-mono text-xs sm:text-[11px]">{line.code}</span>}
           {line.payer && <span>· {line.payer}</span>}
           {line.status === 'completed' && <Badge tone="good">done</Badge>}
           <PaymentState line={line} totals={totals} decimals={decimals} />
@@ -511,7 +511,7 @@ function BudgetRow({
         <p className={cn('tabular text-sm', muted ? 'text-stone-500' : 'text-stone-900')}>
           {formatMoney(line.forecast_minor, decimals)}
         </p>
-        <p className="tabular text-[11px] text-stone-500">
+        <p className="tabular text-xs sm:text-[11px] text-stone-500">
           of {formatMoney(line.budgeted_minor, decimals)} {currency}
         </p>
       </div>

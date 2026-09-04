@@ -243,7 +243,7 @@ export function GuestsPage() {
             />
           </div>
           <Select
-            className="w-36"
+            className="w-full sm:w-36"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as RsvpStatus | 'all')}
           >
@@ -255,7 +255,7 @@ export function GuestsPage() {
             ))}
           </Select>
           <Select
-            className="w-40"
+            className="w-full sm:w-40"
             aria-label="Group the list by"
             value={groupMode}
             onChange={(e) => {
@@ -274,7 +274,7 @@ export function GuestsPage() {
               would be a control with one useful position. */}
           {!isFamily && (
             <Select
-              className="w-32"
+              className="w-full sm:w-32"
               value={sideFilter}
               onChange={(e) => setSideFilter(e.target.value as WeddingSide | 'all')}
             >
@@ -334,7 +334,7 @@ export function GuestsPage() {
                         <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-stone-600 uppercase">
                           {sec.label}
                         </span>
-                        <span className="tabular shrink-0 text-[11px] text-stone-500">
+                        <span className="tabular shrink-0 text-xs sm:text-[11px] text-stone-500">
                           {sec.households} {sec.households === 1 ? 'household' : 'households'} ·{' '}
                           {sec.invited} invited
                           {sec.attending > 0 && ` · ${sec.attending} coming`}
@@ -412,7 +412,7 @@ function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }
     >
       <span
         aria-hidden
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-wine-50 text-[11px] font-semibold text-wine-700 ring-1 ring-wine-100"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-wine-50 text-xs sm:text-[11px] font-semibold text-wine-700 ring-1 ring-wine-100"
       >
         {initials(guest.household_name)}
       </span>
@@ -435,7 +435,7 @@ function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }
       </div>
 
       {guest.side && (
-        <span className="hidden shrink-0 text-[11px] text-stone-500 sm:inline">
+        <span className="hidden shrink-0 text-xs sm:text-[11px] text-stone-500 sm:inline">
           {SIDE_SHORT[guest.side] ?? guest.side}
         </span>
       )}
@@ -445,11 +445,13 @@ function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }
       <div className="w-20 shrink-0 text-right">
         <p className="tabular text-sm font-semibold text-stone-900">
           {accepted ? attending : invited}
-          <span className="ml-1 text-[11px] font-normal text-stone-500">
+          <span className="ml-1 text-xs sm:text-[11px] font-normal text-stone-500">
             {accepted ? 'coming' : 'invited'}
           </span>
         </p>
-        {fewer && <p className="tabular text-[11px] text-stone-500">of {invited} invited</p>}
+        {fewer && (
+          <p className="tabular text-xs sm:text-[11px] text-stone-500">of {invited} invited</p>
+        )}
       </div>
 
       <Badge tone={RSVP_TONE[guest.rsvp_status]}>{RSVP_LABEL[guest.rsvp_status]}</Badge>

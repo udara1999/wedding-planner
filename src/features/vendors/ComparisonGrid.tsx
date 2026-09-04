@@ -65,28 +65,28 @@ export function ComparisonGrid({
   // created exactly once, and reading a ref during render is the thing that
   // makes that pattern fragile.
   const [queue] = useState(() =>
-      createAutosaveQueue({
-        delay: 600,
-        save: async (key, value) => {
-          const [optionId, questionId] = key.split(':');
-          setSaving((s) => new Set(s).add(key));
-          try {
-            await writeVendorAnswer(weddingId, optionId, Number(questionId), value);
-            setFailed((f) => {
-              const next = new Set(f);
-              next.delete(key);
-              return next;
-            });
-          } finally {
-            setSaving((s) => {
-              const next = new Set(s);
-              next.delete(key);
-              return next;
-            });
-          }
-        },
-        onError: (_error, key) => setFailed((f) => new Set(f).add(key)),
-      }),
+    createAutosaveQueue({
+      delay: 600,
+      save: async (key, value) => {
+        const [optionId, questionId] = key.split(':');
+        setSaving((s) => new Set(s).add(key));
+        try {
+          await writeVendorAnswer(weddingId, optionId, Number(questionId), value);
+          setFailed((f) => {
+            const next = new Set(f);
+            next.delete(key);
+            return next;
+          });
+        } finally {
+          setSaving((s) => {
+            const next = new Set(s);
+            next.delete(key);
+            return next;
+          });
+        }
+      },
+      onError: (_error, key) => setFailed((f) => new Set(f).add(key)),
+    }),
   );
 
   // The AC's "no lost keystrokes on navigation". Unmounting covers navigating
@@ -135,7 +135,7 @@ export function ComparisonGrid({
               <th
                 className={cn(
                   'sticky left-0 z-20 w-72 min-w-72 border-b border-stone-200 bg-white',
-                  'px-4 py-2.5 text-left text-[11px] font-semibold tracking-wider text-stone-500 uppercase',
+                  'px-4 py-2.5 text-left text-xs sm:text-[11px] font-semibold tracking-wider text-stone-500 uppercase',
                 )}
               >
                 Question
@@ -146,7 +146,9 @@ export function ComparisonGrid({
                   className="min-w-56 border-b border-l border-stone-200 bg-white px-3 py-2.5 text-left align-bottom"
                 >
                   <p className="text-[13px] font-semibold text-stone-900">{o.label}</p>
-                  <p className="truncate text-xs text-stone-500">{o.vendor_name || 'No vendor yet'}</p>
+                  <p className="truncate text-xs text-stone-500">
+                    {o.vendor_name || 'No vendor yet'}
+                  </p>
                 </th>
               ))}
             </tr>
@@ -203,7 +205,7 @@ function ChunkOfGroup({
         <td
           colSpan={columns}
           className={cn(
-            'sticky left-0 px-4 py-1.5 text-[11px] font-semibold tracking-wider uppercase',
+            'sticky left-0 px-4 py-1.5 text-xs sm:text-[11px] font-semibold tracking-wider uppercase',
             GROUP_TONE[group],
           )}
         >
@@ -222,7 +224,7 @@ function ChunkOfGroup({
           >
             <span className="block text-[13px] leading-snug text-stone-800">{q.question}</span>
             {q.why_it_matters && (
-              <span className="mt-0.5 flex items-start gap-1 text-[11px] leading-snug text-stone-500">
+              <span className="mt-0.5 flex items-start gap-1 text-xs sm:text-[11px] leading-snug text-stone-500">
                 <HelpCircle className="mt-0.5 size-3 shrink-0" />
                 {q.why_it_matters}
               </span>

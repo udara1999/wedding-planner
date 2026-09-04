@@ -7,7 +7,9 @@ import { z } from 'zod';
 export const MIN_PASSWORD_LENGTH = 8;
 
 const email = z.string().email('Enter a valid email address');
-const newPassword = z.string().min(MIN_PASSWORD_LENGTH, `Use at least ${MIN_PASSWORD_LENGTH} characters`);
+const newPassword = z
+  .string()
+  .min(MIN_PASSWORD_LENGTH, `Use at least ${MIN_PASSWORD_LENGTH} characters`);
 
 /** Sign-in deliberately does not impose the length rule: an older account may predate it. */
 export const signInSchema = z.object({

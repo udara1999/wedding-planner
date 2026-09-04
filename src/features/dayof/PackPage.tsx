@@ -157,7 +157,7 @@ export function PackPage() {
           {date}
           {venue && ` · ${venue}`}
         </p>
-        <p className="mt-1 text-[11px] text-stone-500">
+        <p className="mt-1 text-xs sm:text-[11px] text-stone-500">
           Printed {new Date().toLocaleString()}. Check the app for anything agreed after this.
         </p>
       </header>
@@ -183,7 +183,7 @@ export function PackPage() {
         {data.tables.length === 0 ? (
           <p className="text-xs text-stone-500">No tables set.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 print:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 print:grid-cols-3">
             {data.tables.map((t) => (
               <div
                 key={t.table_id}
@@ -197,7 +197,7 @@ export function PackPage() {
                 </p>
                 <ul className="mt-1 space-y-0.5">
                   {(seated.get(t.table_id ?? '') ?? []).map((name) => (
-                    <li key={name} className="text-[10px] text-stone-600">
+                    <li key={name} className="text-[11px] sm:text-[10px] text-stone-600">
                       {name}
                     </li>
                   ))}
@@ -216,11 +216,11 @@ export function PackPage() {
             <tbody>
               {packItems.map((p) => (
                 <tr key={p.id} className="border-b border-stone-100">
-                  <td className="w-28 py-1 text-[11px] text-stone-500">
+                  <td className="w-28 py-1 text-xs sm:text-[11px] text-stone-500">
                     {String(p.container ?? '')}
                   </td>
-                  <td className="py-1 text-[11px] text-stone-800">{p.name}</td>
-                  <td className="w-10 py-1 text-right text-[11px] text-stone-500">
+                  <td className="py-1 text-xs sm:text-[11px] text-stone-800">{p.name}</td>
+                  <td className="w-10 py-1 text-right text-xs sm:text-[11px] text-stone-500">
                     {String(p.qty ?? '')}
                   </td>
                   <td className="w-8 py-1 text-right">
@@ -235,7 +235,7 @@ export function PackPage() {
 
       <PackSection title="6 · If it goes wrong" count={`${data.risks.length} contingencies`}>
         <RiskTable rows={data.risks.filter((r) => (r.score ?? 0) >= 4)} print />
-        <p className="mt-2 text-[10px] text-stone-500">
+        <p className="mt-2 text-[11px] sm:text-[10px] text-stone-500">
           Only the ones scoring 4 or more are printed. The full list is in the app.
         </p>
       </PackSection>
@@ -261,7 +261,7 @@ function PackSection({
         <span className="text-sm font-semibold tracking-wide text-stone-800 uppercase">
           {title}
         </span>
-        <span className="text-[10px] text-stone-500">{count}</span>
+        <span className="text-[11px] sm:text-[10px] text-stone-500">{count}</span>
       </h2>
       {children}
     </section>

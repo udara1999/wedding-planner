@@ -263,7 +263,7 @@ export function TasksPage() {
           {/* Counts in the picker: the point of a view is to tell you whether
               it is worth switching to, and a bare label cannot. */}
           <Select
-            className="w-44"
+            className="w-full sm:w-44"
             aria-label="Which tasks"
             value={view}
             onChange={(e) => setView(e.target.value as TaskView)}
@@ -276,7 +276,7 @@ export function TasksPage() {
           </Select>
 
           <Select
-            className="w-36"
+            className="w-full sm:w-36"
             aria-label="Owner"
             value={ownerFilter}
             onChange={(e) => setOwnerFilter(e.target.value)}
@@ -291,7 +291,7 @@ export function TasksPage() {
           </Select>
 
           <Select
-            className="w-40"
+            className="w-full sm:w-40"
             aria-label="Area"
             value={areaFilter}
             onChange={(e) => setAreaFilter(e.target.value)}
@@ -305,7 +305,7 @@ export function TasksPage() {
           </Select>
 
           <Select
-            className="w-36"
+            className="w-full sm:w-36"
             aria-label="Group by"
             value={groupBy}
             onChange={(e) => {
@@ -379,7 +379,7 @@ export function TasksPage() {
                                 style={{ width: `${Math.round(ratio * 100)}%` }}
                               />
                             </span>
-                            <span className="tabular w-8 text-right text-[11px] text-stone-500">
+                            <span className="tabular w-8 text-right text-xs sm:text-[11px] text-stone-500">
                               {Math.round(ratio * 100)}%
                             </span>
                           </span>
@@ -387,7 +387,7 @@ export function TasksPage() {
                         {ready && Number(ready.overdue ?? 0) > 0 && (
                           <Badge tone="stop">{ready.overdue} late</Badge>
                         )}
-                        <span className="tabular shrink-0 text-[11px] text-stone-500">
+                        <span className="tabular shrink-0 text-xs sm:text-[11px] text-stone-500">
                           {sec.tasks.length}
                         </span>
                       </button>
@@ -476,7 +476,7 @@ function TaskRowItem({
           onToggle();
         }}
         className={cn(
-          'focus-ring flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors',
+          'focus-ring relative before:absolute before:-inset-2.5 before:content-[""] flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors',
           done
             ? 'border-emerald-500 bg-emerald-500 text-white'
             : 'border-stone-300 hover:border-emerald-500',
@@ -516,10 +516,10 @@ function TaskRowItem({
             <p className={cn('text-xs', late ? 'font-medium text-red-700' : 'text-stone-500')}>
               {relative}
             </p>
-            <p className="tabular text-[11px] text-stone-500">{task.due_date}</p>
+            <p className="tabular text-xs sm:text-[11px] text-stone-500">{task.due_date}</p>
           </>
         ) : (
-          <p className="text-[11px] text-stone-500">no date</p>
+          <p className="text-xs sm:text-[11px] text-stone-500">no date</p>
         )}
       </div>
     </li>

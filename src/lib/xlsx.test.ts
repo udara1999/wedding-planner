@@ -107,9 +107,7 @@ describe('buildXlsx', () => {
     // Excel rejects a whole workbook for one stray control byte, so a note
     // pasted out of a PDF must not be able to break the export.
     const sheet = entries(
-      buildXlsx([
-        { name: 'Ctrl', columns: [{ header: 'H' }], rows: [['badvalue']] },
-      ]),
+      buildXlsx([{ name: 'Ctrl', columns: [{ header: 'H' }], rows: [['badvalue']] }]),
     ).get('xl/worksheets/sheet1.xml')!;
     expect(sheet).toContain('badvalue');
   });

@@ -129,7 +129,7 @@ export function MembersPage() {
                   Copy
                 </Button>
               </div>
-              <p className="mt-2 text-[11px] text-green-800">
+              <p className="mt-2 text-xs sm:text-[11px] text-green-800">
                 Emailing this automatically arrives in Phase 4.10.
               </p>
             </div>

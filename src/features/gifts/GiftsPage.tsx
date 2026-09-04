@@ -154,14 +154,14 @@ export function GiftsPage() {
             <div className="relative">
               <Search className="absolute top-2.5 left-3 size-4 text-stone-500" />
               <Input
-                className="w-56 pl-9"
+                className="w-full sm:w-56 pl-9"
                 placeholder="Find a household"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <Select
-              className="w-52"
+              className="w-full sm:w-52"
               value={filter}
               onChange={(e) => setFilter(e.target.value as Filter)}
             >
@@ -196,15 +196,21 @@ export function GiftsPage() {
             />
           ) : (
             <div className="scroll-subtle -mx-2 overflow-x-auto">
-              <table className="w-full min-w-4xl text-sm">
+              {/* 896px of table on a 375px screen is a lot of sideways
+                  dragging for a job done standing over a pile of envelopes.
+                  The two derived-or-optional columns fold away below sm,
+                  leaving the four actually being filled in. */}
+              <table className="w-full min-w-0 text-sm sm:min-w-4xl">
                 <thead className="text-left text-xs text-stone-500">
                   <tr>
                     <th className="px-2 py-1.5 font-medium">Household</th>
-                    <th className="w-32 px-2 py-1.5 text-right font-medium">Expected</th>
-                    <th className="w-32 px-2 py-1.5 text-right font-medium">Received</th>
-                    <th className="w-28 px-2 py-1.5 text-right font-medium">Difference</th>
-                    <th className="px-2 py-1.5 font-medium">What it was</th>
-                    <th className="w-28 px-2 py-1.5 font-medium">Thank-you</th>
+                    <th className="px-2 py-1.5 text-right font-medium sm:w-32">Expected</th>
+                    <th className="px-2 py-1.5 text-right font-medium sm:w-32">Received</th>
+                    <th className="hidden w-28 px-2 py-1.5 text-right font-medium sm:table-cell">
+                      Difference
+                    </th>
+                    <th className="hidden px-2 py-1.5 font-medium md:table-cell">What it was</th>
+                    <th className="w-24 px-2 py-1.5 font-medium sm:w-28">Thank-you</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
@@ -263,10 +269,10 @@ function GiftRow({
     <tr className={cn(shortfall && guest.gift_received_minor > 0 && 'bg-amber-50/40')}>
       <td className="px-2 py-1.5">
         <p className="truncate text-stone-900">{guest.household_name}</p>
-        <p className="truncate text-[11px] text-stone-500">
+        <p className="truncate text-xs sm:text-[11px] text-stone-500">
           {guest.relationship ?? guest.category ?? '—'}
         </p>
-        {problem && <p className="text-[11px] text-red-700">{problem}</p>}
+        {problem && <p className="text-xs sm:text-[11px] text-red-700">{problem}</p>}
       </td>
       <td className="px-2 py-1.5">
         <Input
@@ -290,7 +296,7 @@ function GiftRow({
           onBlur={(e) => commitMoney('gift_received_minor', e.target.value)}
         />
       </td>
-      <td className="px-2 py-1.5 text-right">
+      <td className="hidden px-2 py-1.5 text-right sm:table-cell">
         {guest.expected_gift_minor === 0 && guest.gift_received_minor === 0 ? (
           <span className="text-stone-500">—</span>
         ) : (
@@ -309,7 +315,7 @@ function GiftRow({
           </span>
         )}
       </td>
-      <td className="px-2 py-1.5">
+      <td className="hidden px-2 py-1.5 md:table-cell">
         <Input
           key={`d-${guest.gift_description ?? ''}`}
           placeholder="Cash, a gift, jewellery…"
@@ -325,7 +331,7 @@ function GiftRow({
         {guest.gift_received_minor === 0 ? (
           // Nothing arrived, so there is nothing to thank anyone for. Offering
           // the tick would invite marking it and losing the follow-up list.
-          <span className="text-[11px] text-stone-500">nothing yet</span>
+          <span className="text-xs sm:text-[11px] text-stone-500">nothing yet</span>
         ) : guest.thank_you_sent ? (
           <button
             type="button"

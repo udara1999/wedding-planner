@@ -13,7 +13,16 @@ import {
   type SignInValues,
   type SignUpValues,
 } from './schemas';
-import { Button, Card, CardBody, CardHeader, CardTitle, Field, Input, Spinner } from '../../components/ui';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  Field,
+  Input,
+  Spinner,
+} from '../../components/ui';
 
 type Mode = 'signin' | 'signup' | 'forgot';
 
@@ -39,10 +48,20 @@ export function SignInPage() {
 
   if (mode === 'signup') return <SignUpForm onDone={() => setMode('signin')} />;
   if (mode === 'forgot') return <ForgotPasswordForm onDone={() => setMode('signin')} />;
-  return <SignInForm onForgot={() => setMode('forgot')} onCreateAccount={() => setMode('signup')} />;
+  return (
+    <SignInForm onForgot={() => setMode('forgot')} onCreateAccount={() => setMode('signup')} />
+  );
 }
 
-function Shell({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function Shell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-full items-center justify-center bg-ivory px-4 py-12">
       {/* A soft wash behind the card: enough to stop a white card on an ivory
@@ -56,7 +75,9 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
           <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-wine-700 text-white shadow-raised">
             <Heart className="size-5" fill="currentColor" />
           </div>
-          <h1 className="text-[22px] font-semibold tracking-tight text-stone-900">Wedding Planner</h1>
+          <h1 className="text-[22px] font-semibold tracking-tight text-stone-900">
+            Wedding Planner
+          </h1>
           <p className="mt-1 text-sm text-stone-500">Plan the whole day in one place.</p>
         </div>
 
@@ -112,7 +133,12 @@ function SignInForm({
     <Shell title="Sign in">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Field label="Email address" error={errors.email?.message}>
-          <Input type="email" autoComplete="email" placeholder="you@example.com" {...register('email')} />
+          <Input
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            {...register('email')}
+          />
         </Field>
 
         <Field label="Password" error={errors.password?.message}>
@@ -143,7 +169,11 @@ function SignInForm({
           <button type="button" onClick={onForgot} className="text-stone-500 hover:text-stone-800">
             Forgot your password?
           </button>
-          <button type="button" onClick={onCreateAccount} className="font-medium text-wine-700 hover:text-wine-800">
+          <button
+            type="button"
+            onClick={onCreateAccount}
+            className="font-medium text-wine-700 hover:text-wine-800"
+          >
             Create an account
           </button>
         </div>
@@ -171,7 +201,9 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
       // SignInPage's redirect takes over; nothing more to show.
       if (needsEmailConfirmation) setConfirmSentTo(values.email);
     } catch (e) {
-      setError(describeAuthError(e instanceof Error ? e.message : 'Could not create your account').message);
+      setError(
+        describeAuthError(e instanceof Error ? e.message : 'Could not create your account').message,
+      );
     }
   }
 
@@ -180,8 +212,8 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
       <Shell title="Confirm your email">
         <div className="space-y-3 text-sm text-stone-700">
           <p>
-            We sent a confirmation link to <strong>{confirmSentTo}</strong>. Open it to finish setting
-            up your account, then sign in.
+            We sent a confirmation link to <strong>{confirmSentTo}</strong>. Open it to finish
+            setting up your account, then sign in.
           </p>
           <Button variant="secondary" size="sm" onClick={onDone}>
             Back to sign in
@@ -195,7 +227,12 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
     <Shell title="Create your account">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Field label="Email address" error={errors.email?.message}>
-          <Input type="email" autoComplete="email" placeholder="you@example.com" {...register('email')} />
+          <Input
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            {...register('email')}
+          />
         </Field>
 
         <Field label="Password" error={errors.password?.message}>
@@ -214,7 +251,11 @@ function SignUpForm({ onDone }: { onDone: () => void }) {
 
         <p className="pt-1 text-center text-xs text-stone-500">
           Already have an account?{' '}
-          <button type="button" onClick={onDone} className="font-medium text-wine-700 hover:text-wine-800">
+          <button
+            type="button"
+            onClick={onDone}
+            className="font-medium text-wine-700 hover:text-wine-800"
+          >
             Sign in
           </button>
         </p>
@@ -240,7 +281,9 @@ function ForgotPasswordForm({ onDone }: { onDone: () => void }) {
       await sendPasswordReset(values.email);
       setSentTo(values.email);
     } catch (e) {
-      setError(describeAuthError(e instanceof Error ? e.message : 'Could not send the link').message);
+      setError(
+        describeAuthError(e instanceof Error ? e.message : 'Could not send the link').message,
+      );
     }
   }
 
@@ -268,7 +311,12 @@ function ForgotPasswordForm({ onDone }: { onDone: () => void }) {
         </p>
 
         <Field label="Email address" error={errors.email?.message}>
-          <Input type="email" autoComplete="email" placeholder="you@example.com" {...register('email')} />
+          <Input
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            {...register('email')}
+          />
         </Field>
 
         {error && <FormError>{error}</FormError>}

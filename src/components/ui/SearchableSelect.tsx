@@ -166,7 +166,7 @@ export function SearchableSelect({
           ) : (
             <span className="flex min-w-0 items-center gap-2">
               {shown.prefix && (
-                <span className="shrink-0 font-mono text-[11px] text-stone-500">
+                <span className="shrink-0 font-mono text-xs sm:text-[11px] text-stone-500">
                   {shown.prefix}
                 </span>
               )}
@@ -228,13 +228,15 @@ export function SearchableSelect({
                     )}
                   >
                     {showPrefixColumn && (
-                      <span className="w-14 shrink-0 font-mono text-[11px] text-stone-500">
+                      <span className="w-14 shrink-0 font-mono text-xs sm:text-[11px] text-stone-500">
                         {option.prefix ?? '—'}
                       </span>
                     )}
                     <span className="min-w-0 flex-1 truncate text-stone-800">{option.label}</span>
                     {option.hint && (
-                      <span className="shrink-0 text-[11px] text-stone-500">{option.hint}</span>
+                      <span className="shrink-0 text-xs sm:text-[11px] text-stone-500">
+                        {option.hint}
+                      </span>
                     )}
                     {isSelected && <Check className="size-3.5 shrink-0 text-wine-600" />}
                   </button>

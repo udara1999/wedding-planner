@@ -130,7 +130,7 @@ export function InvitesModal({
                         />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm text-stone-900">{g.household_name}</p>
-                          <p className="truncate text-[11px] text-stone-500">
+                          <p className="truncate text-xs sm:text-[11px] text-stone-500">
                             {g.phone ?? g.whatsapp ?? 'no phone'}
                             {g.email ? ` · ${g.email}` : ' · no email'}
                           </p>

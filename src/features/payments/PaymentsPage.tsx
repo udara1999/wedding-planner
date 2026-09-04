@@ -297,7 +297,7 @@ export function PaymentsPage() {
               />
             </div>
             <Select
-              className="w-36"
+              className="w-full sm:w-36"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as PaymentStatus | 'all')}
             >
@@ -309,7 +309,7 @@ export function PaymentsPage() {
               ))}
             </Select>
             <Select
-              className="w-44"
+              className="w-full sm:w-44"
               value={stageFilter}
               onChange={(e) => setStageFilter(e.target.value as PaymentStage | 'all')}
             >
@@ -368,7 +368,7 @@ export function PaymentsPage() {
                         <p className="text-sm tabular-nums text-stone-900">
                           {formatMoney(p.amount_paid_minor, decimals)}
                         </p>
-                        <p className="text-[11px] tabular-nums text-stone-500">
+                        <p className="text-xs sm:text-[11px] tabular-nums text-stone-500">
                           of {formatMoney(p.amount_due_minor, decimals)}
                         </p>
                       </div>

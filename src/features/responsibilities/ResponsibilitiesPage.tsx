@@ -159,7 +159,7 @@ export function ResponsibilitiesPage() {
       <Card>
         <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-4 py-3">
           <Select
-            className="w-44"
+            className="w-full sm:w-44"
             aria-label="Area"
             value={areaFilter}
             onChange={(e) => setAreaFilter(e.target.value)}
@@ -208,16 +208,22 @@ export function ResponsibilitiesPage() {
             </div>
           ) : (
             <div className="scroll-subtle overflow-x-auto">
-              <table className="w-full min-w-5xl text-sm">
+              {/* Eight columns and four selects is 1024px, which on a phone
+                  is most of a screen-width of dragging per row. The question
+                  this page exists to answer is "who is named", so Activity,
+                  Person and Phone stay and the four RACI roles fold in from
+                  sm upward — Consulted and Informed last, being the two that
+                  describe who to tell rather than who acts. */}
+              <table className="w-full min-w-0 text-sm lg:min-w-5xl">
                 <thead className="text-left text-xs text-stone-500">
                   <tr>
                     <th className="px-4 py-2 font-medium">Activity</th>
-                    <th className="w-40 px-2 py-2 font-medium">Person</th>
-                    <th className="w-32 px-2 py-2 font-medium">Phone</th>
-                    <th className="w-28 px-2 py-2 font-medium">Does it</th>
-                    <th className="w-28 px-2 py-2 font-medium">Owns it</th>
-                    <th className="w-24 px-2 py-2 font-medium">Consulted</th>
-                    <th className="w-24 px-2 py-2 font-medium">Informed</th>
+                    <th className="px-2 py-2 font-medium sm:w-40">Person</th>
+                    <th className="hidden px-2 py-2 font-medium sm:table-cell sm:w-32">Phone</th>
+                    <th className="hidden w-28 px-2 py-2 font-medium md:table-cell">Does it</th>
+                    <th className="hidden w-28 px-2 py-2 font-medium md:table-cell">Owns it</th>
+                    <th className="hidden w-24 px-2 py-2 font-medium lg:table-cell">Consulted</th>
+                    <th className="hidden w-24 px-2 py-2 font-medium lg:table-cell">Informed</th>
                     <th className="w-10 px-2 py-2" />
                   </tr>
                 </thead>
@@ -293,6 +299,25 @@ function RaciRow({
             if (next && next !== item.activity) onSave({ activity: next });
           }}
         />
+        {/* What the folded columns would have shown, so narrow screens defer
+            the detail rather than losing it. */}
+        <p className="px-3 text-xs sm:text-[11px] text-stone-500 sm:hidden">
+          {[
+            item.phone,
+            item.responsible && `does: ${item.responsible}`,
+            item.accountable && `owns: ${item.accountable}`,
+          ]
+            .filter(Boolean)
+            .join(' · ') || 'no phone or roles set'}
+        </p>
+        <p className="hidden px-3 text-xs sm:text-[11px] text-stone-500 sm:block md:hidden">
+          {[
+            item.responsible && `does: ${item.responsible}`,
+            item.accountable && `owns: ${item.accountable}`,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
       </td>
       <td className="px-2 py-2">
         <Input
@@ -304,7 +329,7 @@ function RaciRow({
           onBlur={(e) => commit('person_name', e.target.value)}
         />
       </td>
-      <td className="px-2 py-2">
+      <td className="hidden px-2 py-2 sm:table-cell">
         <Input
           key={`ph-${item.id}-${item.updated_at}`}
           placeholder="—"
@@ -317,7 +342,14 @@ function RaciRow({
           the same cast as everywhere else, with free text preserved when the
           template used something more specific than the list has. */}
       {(['responsible', 'accountable', 'consulted', 'informed'] as const).map((field) => (
-        <td key={field} className="px-2 py-2">
+        <td
+          key={field}
+          className={cn(
+            'hidden px-2 py-2',
+            // Does it / Owns it from md; Consulted / Informed only from lg.
+            field === 'responsible' || field === 'accountable' ? 'md:table-cell' : 'lg:table-cell',
+          )}
+        >
           <Select
             aria-label={field}
             disabled={!canEdit}

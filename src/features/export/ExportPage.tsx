@@ -154,7 +154,7 @@ export function ExportPage() {
               <li key={s.name} className="flex items-center gap-2 text-sm text-stone-600">
                 <FileSpreadsheet className="size-3.5 shrink-0 text-stone-500" />
                 <span className="min-w-0 flex-1 truncate">{s.name}</span>
-                <span className="tabular shrink-0 text-[11px] text-stone-500">
+                <span className="tabular shrink-0 text-xs sm:text-[11px] text-stone-500">
                   {s.rows.length} {s.rows.length === 1 ? 'row' : 'rows'}
                 </span>
               </li>

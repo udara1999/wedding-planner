@@ -393,7 +393,7 @@ function Attachments({
       {canEdit && (
         <div className="mt-2 flex items-center gap-2">
           <Select
-            className="w-32"
+            className="w-full sm:w-32"
             value={kind}
             onChange={(e) => setKind(e.target.value as AttachmentKind)}
           >

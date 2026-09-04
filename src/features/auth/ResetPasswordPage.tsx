@@ -6,7 +6,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from './AuthProvider';
 import { describeAuthError } from './auth-errors';
 import { newPasswordSchema, type NewPasswordValues } from './schemas';
-import { Button, Card, CardBody, CardHeader, CardTitle, Field, Input, Spinner } from '../../components/ui';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardTitle,
+  Field,
+  Input,
+  Spinner,
+} from '../../components/ui';
 
 /**
  * Landing point for the emailed recovery link. The link carries tokens that the
@@ -30,7 +39,9 @@ export function ResetPasswordPage() {
       await updatePassword(values.password);
       setDone(true);
     } catch (e) {
-      setError(describeAuthError(e instanceof Error ? e.message : 'Could not save the password').message);
+      setError(
+        describeAuthError(e instanceof Error ? e.message : 'Could not save the password').message,
+      );
     }
   }
 
@@ -80,7 +91,15 @@ export function ResetPasswordPage() {
   );
 }
 
-function Shell({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function Shell({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-full items-center justify-center bg-ivory px-4 py-12">
       {/* A soft wash behind the card: enough to stop a white card on an ivory
@@ -94,7 +113,9 @@ function Shell({ title, subtitle, children }: { title: string; subtitle?: string
           <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-2xl bg-wine-700 text-white shadow-raised">
             <Heart className="size-5" fill="currentColor" />
           </div>
-          <h1 className="text-[22px] font-semibold tracking-tight text-stone-900">Wedding Planner</h1>
+          <h1 className="text-[22px] font-semibold tracking-tight text-stone-900">
+            Wedding Planner
+          </h1>
           <p className="mt-1 text-sm text-stone-500">Plan the whole day in one place.</p>
         </div>
 

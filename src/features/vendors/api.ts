@@ -239,10 +239,7 @@ export function useVendorDecisions(weddingId: string) {
   return useQuery({
     queryKey: ['vendors', weddingId, 'decisions'] as const,
     queryFn: async (): Promise<VendorDecisionView[]> => {
-      const res = await supabase
-        .from('v_vendor_decisions')
-        .select('*')
-        .eq('wedding_id', weddingId);
+      const res = await supabase.from('v_vendor_decisions').select('*').eq('wedding_id', weddingId);
       return unwrap(res);
     },
   });

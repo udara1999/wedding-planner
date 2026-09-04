@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(110);
+select plan(114);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -782,6 +782,38 @@ select throws_ok(
         (select id from vendor_options
           where wedding_id = (select v from w where k='a')
             and category_key = 'photographer')) $q$);
+
+-- =============================================================================
+-- 20. Vendor attachments (3.8) — 4 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+insert into vendor_attachments (wedding_id, vendor_id, kind, file_name, path)
+select (select v from w where k='a'), v.id, 'contract', 'contract.pdf',
+       (select v from w where k='a')::text || '/' || v.id::text || '/contract.pdf'
+  from vendors v
+ where v.wedding_id = (select v from w where k='a') and v.name = 'Studio Lanka';
+
+select is((select count(*)::int from vendor_attachments
+             where wedding_id = (select v from w where k='a')), 1,
+          'The couple can attach a contract to a vendor');
+
+-- A contract carries prices, so it follows the money boundary rather than the
+-- ops one: a coordinator sees the vendor through v_vendors_ops but not this.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from vendor_attachments
+             where wedding_id = (select v from w where k='a')), 0,
+          'A coordinator cannot see a vendor contract');
+
+select is((select count(*)::int from pg_policies
+             where schemaname = 'storage' and tablename = 'objects'
+               and policyname like 'contracts_%'), 4,
+          'All four contract policies are installed on storage.objects');
+
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from vendor_attachments
+             where wedding_id = (select v from w where k='a')), 0,
+          'A stranger cannot see another wedding''s contracts');
 
 select * from finish();
 rollback;

@@ -457,6 +457,71 @@ export type Database = {
           },
         ]
       }
+      vendor_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          kind: Database["public"]["Enums"]["attachment_kind"]
+          path: string
+          size_bytes: number | null
+          uploaded_by: string | null
+          vendor_id: string
+          wedding_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          kind?: Database["public"]["Enums"]["attachment_kind"]
+          path: string
+          size_bytes?: number | null
+          uploaded_by?: string | null
+          vendor_id: string
+          wedding_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["attachment_kind"]
+          path?: string
+          size_bytes?: number | null
+          uploaded_by?: string | null
+          vendor_id?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_attachments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_decisions: {
         Row: {
           category_key: string
@@ -1543,6 +1608,7 @@ export type Database = {
     }
     Enums: {
       applicability: "required" | "optional" | "not_applicable"
+      attachment_kind: "quote" | "contract" | "invoice" | "other"
       member_role: "owner" | "partner" | "family" | "coordinator" | "viewer"
       payment_stage:
         | "booking_deposit"
@@ -1707,6 +1773,7 @@ export const Constants = {
   public: {
     Enums: {
       applicability: ["required", "optional", "not_applicable"],
+      attachment_kind: ["quote", "contract", "invoice", "other"],
       member_role: ["owner", "partner", "family", "coordinator", "viewer"],
       payment_stage: [
         "booking_deposit",

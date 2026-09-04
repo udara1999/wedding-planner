@@ -76,7 +76,7 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
   {
     heading: 'People & vendors',
     items: [
-      { to: 'vendors', label: 'Vendors', roles: ALL, icon: <Store className={ICON} />, phase: '3' },
+      { to: 'vendors', label: 'Vendors', roles: ALL, icon: <Store className={ICON} /> },
       {
         to: 'compare',
         label: 'Compare vendors',

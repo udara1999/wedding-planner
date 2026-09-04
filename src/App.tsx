@@ -14,6 +14,7 @@ import { BudgetPage } from './features/budget/BudgetPage';
 import { PaymentsPage } from './features/payments/PaymentsPage';
 import { ContributionsPage } from './features/contributions/ContributionsPage';
 import { ComparePage } from './features/vendors/ComparePage';
+import { VendorsPage } from './features/vendors/VendorsPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
 
@@ -145,6 +146,7 @@ export default function App() {
               <Route path="payments" element={<PaymentsPage />} />
               <Route path="contributions" element={<ContributionsPage />} />
               <Route path="compare" element={<ComparePage />} />
+              <Route path="vendors" element={<VendorsPage />} />
               <Route path="*" element={<NotBuiltYet />} />
             </Route>
 

@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(114);
+select plan(120);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -814,6 +814,68 @@ select tests.login((select v from ids where k = 'stranger'));
 select is((select count(*)::int from vendor_attachments
              where wedding_id = (select v from w where k='a')), 0,
           'A stranger cannot see another wedding''s contracts');
+
+-- =============================================================================
+-- 21. A vendor's money comes from its budget lines — 6 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- Point two jewellery lines at the vendor recorded earlier.
+update budget_lines
+   set vendor_id = (select id from vendors
+                     where wedding_id = (select v from w where k='a')
+                       and name = 'Studio Lanka')
+ where wedding_id = (select v from w where k='a')
+   and code in ('BG077', 'BG082');
+
+select is((select budget_line_count::int from v_vendor_financials
+             where vendor_id = (select id from vendors
+                                 where wedding_id = (select v from w where k='a')
+                                   and name = 'Studio Lanka')),
+          2,
+          'A vendor knows how many budget lines it fulfils');
+
+select is((select forecast_minor::bigint from v_vendor_financials
+             where vendor_id = (select id from vendors
+                                 where wedding_id = (select v from w where k='a')
+                                   and name = 'Studio Lanka')),
+          (select sum(forecast_minor)::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a')
+               and code in ('BG077', 'BG082')),
+          'The vendor forecast is the sum of its lines, not a second figure');
+
+select is((select paid_minor::bigint from v_vendor_financials
+             where vendor_id = (select id from vendors
+                                 where wedding_id = (select v from w where k='a')
+                                   and name = 'Studio Lanka')),
+          (select sum(paid_minor)::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a')
+               and code in ('BG077', 'BG082')),
+          'Payments reach the vendor through its lines');
+
+-- A payment carries no vendor of its own; it is resolved through the line, so
+-- the two can never disagree.
+select is((select vendor_id from v_payments
+             where wedding_id = (select v from w where k='a') and code = 'PY-DRAFT'),
+          (select vendor_id from budget_lines
+             where wedding_id = (select v from w where k='a') and code = 'BG077'),
+          'A payment resolves its vendor through its budget line');
+
+select is((select count(*)::int from information_schema.columns
+             where table_name = 'payments' and column_name = 'vendor_id'), 0,
+          'The payments table no longer carries a second path to a vendor');
+
+-- A vendor with no lines linked is not an error, just an unallocated quote.
+select tests.login((select v from ids where k = 'alice'));
+insert into vendors (wedding_id, category, name, quoted_minor)
+values ((select v from w where k='a'), 'Cake', 'Unlinked Cakes', 50000);
+
+select is((select budget_line_count::int from v_vendor_financials
+             where vendor_id = (select id from vendors
+                                 where wedding_id = (select v from w where k='a')
+                                   and name = 'Unlinked Cakes')),
+          0,
+          'A vendor with no budget lines is allowed, and reads as zero');
 
 select * from finish();
 rollback;

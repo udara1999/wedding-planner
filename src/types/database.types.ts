@@ -164,6 +164,13 @@ export type Database = {
             foreignKeyName: "budget_lines_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -279,7 +286,6 @@ export type Database = {
           refundable: boolean
           stage: Database["public"]["Enums"]["payment_stage"] | null
           updated_at: string
-          vendor_id: string | null
           wedding_id: string
         }
         Insert: {
@@ -301,7 +307,6 @@ export type Database = {
           refundable?: boolean
           stage?: Database["public"]["Enums"]["payment_stage"] | null
           updated_at?: string
-          vendor_id?: string | null
           wedding_id: string
         }
         Update: {
@@ -323,7 +328,6 @@ export type Database = {
           refundable?: boolean
           stage?: Database["public"]["Enums"]["payment_stage"] | null
           updated_at?: string
-          vendor_id?: string | null
           wedding_id?: string
         }
         Relationships: [
@@ -339,20 +343,6 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_lines"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "v_vendors_ops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
           {
@@ -496,6 +486,13 @@ export type Database = {
             foreignKeyName: "vendor_attachments_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_attachments_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -554,6 +551,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "vendor_options"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
           },
           {
             foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
@@ -1234,6 +1238,13 @@ export type Database = {
             foreignKeyName: "budget_lines_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -1285,55 +1296,28 @@ export type Database = {
           vendor_id: string | null
           wedding_id: string | null
         }
-        Insert: {
-          amount_due_minor?: number | null
-          amount_paid_minor?: number | null
-          balance_minor?: never
-          budget_line_id?: string | null
-          code?: string | null
-          created_at?: string | null
-          due_date?: string | null
-          id?: string | null
-          method?: string | null
-          notes?: string | null
-          paid_by?: string | null
-          paid_on?: string | null
-          raised_on?: string | null
-          receipt_location?: string | null
-          receipt_path?: string | null
-          reference?: string | null
-          refundable?: boolean | null
-          stage?: Database["public"]["Enums"]["payment_stage"] | null
-          status?: never
-          updated_at?: string | null
-          vendor_id?: string | null
-          wedding_id?: string | null
-        }
-        Update: {
-          amount_due_minor?: number | null
-          amount_paid_minor?: number | null
-          balance_minor?: never
-          budget_line_id?: string | null
-          code?: string | null
-          created_at?: string | null
-          due_date?: string | null
-          id?: string | null
-          method?: string | null
-          notes?: string | null
-          paid_by?: string | null
-          paid_on?: string | null
-          raised_on?: string | null
-          receipt_location?: string | null
-          receipt_path?: string | null
-          reference?: string | null
-          refundable?: boolean | null
-          stage?: Database["public"]["Enums"]["payment_stage"] | null
-          status?: never
-          updated_at?: string | null
-          vendor_id?: string | null
-          wedding_id?: string | null
-        }
         Relationships: [
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendors_ops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_budget_line_id_fkey"
             columns: ["budget_line_id"]
@@ -1346,20 +1330,6 @@ export type Database = {
             columns: ["budget_line_id"]
             isOneToOne: false
             referencedRelation: "v_budget_lines"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "v_vendors_ops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
             referencedColumns: ["id"]
           },
           {
@@ -1412,6 +1382,13 @@ export type Database = {
             foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
             columns: ["recorded_vendor_id"]
             isOneToOne: false
+            referencedRelation: "v_vendor_financials"
+            referencedColumns: ["vendor_id"]
+          },
+          {
+            foreignKeyName: "vendor_decisions_recorded_vendor_id_fkey"
+            columns: ["recorded_vendor_id"]
+            isOneToOne: false
             referencedRelation: "v_vendors_ops"
             referencedColumns: ["id"]
           },
@@ -1431,6 +1408,36 @@ export type Database = {
           },
           {
             foreignKeyName: "vendor_options_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_vendor_financials: {
+        Row: {
+          allocation_gap_minor: number | null
+          budget_line_count: number | null
+          budgeted_minor: number | null
+          forecast_minor: number | null
+          outstanding_minor: number | null
+          overpaid_minor: number | null
+          paid_minor: number | null
+          vendor_id: string | null
+          vendor_price_minor: number | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
             referencedRelation: "weddings"

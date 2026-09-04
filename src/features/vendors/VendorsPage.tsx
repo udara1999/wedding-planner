@@ -5,7 +5,9 @@ import {
   useCreateVendor,
   useDeleteVendor,
   useUpdateVendor,
+  useVendorFinancials,
   useVendors,
+  type VendorFinancials,
 } from './vendorsApi';
 import { VendorDetail } from './VendorDetail';
 import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
@@ -55,6 +57,7 @@ export function VendorsPage() {
   const create = useCreateVendor(wedding.id);
   const update = useUpdateVendor(wedding.id);
   const remove = useDeleteVendor(wedding.id);
+  const financials = useVendorFinancials(wedding.id);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -144,6 +147,7 @@ export function VendorsPage() {
                     currency={currency}
                     decimals={decimals}
                     canEdit={canEdit}
+                    money={financials.data?.get(vendor.id)}
                     onOpen={() => setSelectedId(vendor.id)}
                     onStatus={(status) => update.mutate({ id: vendor.id, patch: { status } })}
                   />
@@ -212,6 +216,7 @@ function VendorCard({
   currency,
   decimals,
   canEdit,
+  money,
   onOpen,
   onStatus,
 }: {
@@ -219,10 +224,16 @@ function VendorCard({
   currency: string;
   decimals: number;
   canEdit: boolean;
+  money?: VendorFinancials;
   onOpen: () => void;
   onStatus: (status: VendorStatus) => void;
 }) {
-  const price = vendor.negotiated_minor || vendor.quoted_minor;
+  // Prefer what the linked budget lines forecast over the figure typed on the
+  // vendor: the lines are where payments actually land.
+  const lineCount = Number(money?.budget_line_count ?? 0);
+  const forecast = Number(money?.forecast_minor ?? 0);
+  const paid = Number(money?.paid_minor ?? 0);
+  const price = lineCount > 0 ? forecast : vendor.negotiated_minor || vendor.quoted_minor;
   return (
     <Card className="p-3 transition-shadow hover:shadow-raised">
       <button type="button" onClick={onOpen} className="focus-ring block w-full rounded-lg text-left">
@@ -231,10 +242,18 @@ function VendorCard({
         {price > 0 && (
           <p className="tabular mt-1 text-xs text-stone-700">
             {formatMinorAsMajor(price, decimals)} {currency}
+            {lineCount > 0 && paid > 0 && (
+              <span className="text-stone-400">
+                {' '}
+                · {formatMinorAsMajor(paid, decimals)} paid
+              </span>
+            )}
           </p>
         )}
         <div className="mt-1.5 flex flex-wrap items-center gap-1">
           {vendor.contract_signed && <Badge tone="good">signed</Badge>}
+          {lineCount > 0 && <Badge tone="neutral">{lineCount} budget lines</Badge>}
+          {Number(money?.overpaid_minor ?? 0) > 0 && <Badge tone="stop">overpaid</Badge>}
           {vendor.phone && (
             <span className="flex items-center gap-1 text-[11px] text-stone-400">
               <Phone className="size-3" />

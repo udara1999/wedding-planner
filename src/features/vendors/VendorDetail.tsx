@@ -8,6 +8,7 @@ import {
   type AttachmentKind,
   type VendorInput,
 } from './vendorsApi';
+import { VendorBudgetLinks } from './VendorBudgetLinks';
 import { formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
 import type { VendorRow } from '../../types/db';
 import {
@@ -139,7 +140,11 @@ export function VendorDetail({
 
       <div className="grid gap-3 sm:grid-cols-3">
         {MONEY.map(([key, label]) => (
-          <Field key={key} label={`${label} (${currency})`}>
+          <Field
+            key={key}
+            label={`${label} (${currency})`}
+            hint={key === 'quoted_minor' ? 'What they asked for their package.' : undefined}
+          >
             <Input
               inputMode="decimal"
               value={form[key]}
@@ -227,6 +232,14 @@ export function VendorDetail({
           )}
         </div>
       )}
+
+      <VendorBudgetLinks
+        weddingId={weddingId}
+        vendorId={vendor.id}
+        currency={currency}
+        decimals={decimals}
+        canEdit={canEdit}
+      />
 
       <Attachments vendorId={vendor.id} weddingId={weddingId} canEdit={canEdit} />
     </div>

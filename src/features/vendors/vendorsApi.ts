@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
 import { buildReceiptPath } from '../payments/receipts';
-import type { Tables } from '../../types/database.types';
+import type { Database, Tables } from '../../types/database.types';
 import type { VendorRow, VendorStatus } from '../../types/db';
 
 export type VendorAttachmentRow = Tables<'vendor_attachments'>;
@@ -196,6 +196,69 @@ export function useDeleteAttachment(vendorId: string) {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: vendorListKeys.attachments(vendorId) });
+    },
+  });
+}
+
+/* ------------------------------------------------- money, and linked lines */
+
+export type VendorFinancials = Database['public']['Views']['v_vendor_financials']['Row'];
+
+/**
+ * A vendor's totals, derived from the budget lines it fulfils rather than
+ * typed a second time on the vendor itself.
+ */
+export function useVendorFinancials(weddingId: string) {
+  return useQuery({
+    queryKey: ['vendors', weddingId, 'financials'] as const,
+    queryFn: async (): Promise<Map<string, VendorFinancials>> => {
+      const res = await supabase
+        .from('v_vendor_financials')
+        .select('*')
+        .eq('wedding_id', weddingId);
+      return new Map(unwrap(res).map((r) => [r.vendor_id as string, r]));
+    },
+  });
+}
+
+/** Every budget line, with whichever vendor it is currently pointed at. */
+export function useLinkableBudgetLines(weddingId: string) {
+  return useQuery({
+    queryKey: ['vendors', weddingId, 'linkable-lines'] as const,
+    queryFn: async () => {
+      const res = await supabase
+        .from('budget_lines')
+        .select('id, code, name, vendor_id, budgeted_minor, forecast_minor')
+        .eq('wedding_id', weddingId)
+        .order('sort_order');
+      return unwrap(res);
+    },
+  });
+}
+
+/**
+ * Point a budget line at a vendor, or clear it.
+ *
+ * The link lives on the budget line — one vendor fulfils many lines — so this
+ * is an update to the line rather than to anything on the vendor.
+ */
+export function useLinkBudgetLine(weddingId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ lineId, vendorId }: { lineId: string; vendorId: string | null }) => {
+      const res = await supabase
+        .from('budget_lines')
+        .update({ vendor_id: vendorId })
+        .eq('id', lineId)
+        .select('id');
+      const rows = unwrap(res);
+      if (rows.length === 0) throw new Error('That budget line could not be linked.');
+      return rows[0];
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'financials'] });
+      void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'linkable-lines'] });
+      void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'lines'] });
     },
   });
 }

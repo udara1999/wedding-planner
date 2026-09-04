@@ -1772,6 +1772,40 @@ export type Database = {
           },
         ]
       }
+      v_gift_summary: {
+        Row: {
+          expected_minor: number | null
+          households_expected: number | null
+          households_received: number | null
+          received_minor: number | null
+          still_expected_minor: number | null
+          thank_yous_pending: number | null
+          wedding_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_seating_summary"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_payments: {
         Row: {
           amount_due_minor: number | null

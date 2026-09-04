@@ -5,6 +5,7 @@ import {
   CalendarClock,
   ClipboardList,
   CreditCard,
+  Gift,
   HandCoins,
   LayoutDashboard,
   ListChecks,
@@ -82,6 +83,9 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
         roles: MONEY,
         icon: <HandCoins className={ICON} />,
       },
+      // Gifts sit with the money rather than with the guests: they are the
+      // other source of incoming cash, and they feed the dashboard's net cost.
+      { to: 'gifts', label: 'Gifts', roles: MONEY, icon: <Gift className={ICON} /> },
     ],
   },
   {

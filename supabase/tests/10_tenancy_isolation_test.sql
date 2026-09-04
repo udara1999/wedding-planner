@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(168);
+select plan(175);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1321,6 +1321,71 @@ select is((select count(*)::int from guests
               and table_id is null),
           2,
           'Deleting a table unseats its households and keeps them on the list');
+
+-- =============================================================================
+-- The gift ledger (4.9) — 7 assertions
+-- =============================================================================
+-- Two properties are worth proving here. That the placeholders ticket 2.8 left
+-- as literal zeros are actually gone — a view can keep returning 0 forever and
+-- look perfectly healthy. And that a generous household never offsets a
+-- missing one, which is the difference between a useful follow-up figure and a
+-- reassuring lie.
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+insert into snap
+select 'net_cost', net_cost_after_gifts_minor from v_wedding_financials
+ where wedding_id = (select v from w where k='a');
+
+-- One household gives more than expected, one gives nothing. Netted, they
+-- would report nothing outstanding.
+insert into guests (wedding_id, household_name, side,
+                    adults_invited, expected_gift_minor, gift_received_minor,
+                    thank_you_sent)
+values ((select v from w where k='a'), 'Gift generous', 'bride', 2, 10000, 15000, false),
+       ((select v from w where k='a'), 'Gift missing',  'groom', 2, 10000, 0,     false);
+
+select is((select expected_minor from v_gift_summary
+            where wedding_id = (select v from w where k='a')),
+          20000::bigint,
+          'Expected gifts sum across households');
+
+select is((select received_minor from v_gift_summary
+            where wedding_id = (select v from w where k='a')),
+          15000::bigint,
+          'Received gifts sum across households');
+
+select is((select still_expected_minor from v_gift_summary
+            where wedding_id = (select v from w where k='a')),
+          10000::bigint,
+          'A household that gave more does not offset one that gave nothing');
+
+select is((select thank_yous_pending from v_gift_summary
+            where wedding_id = (select v from w where k='a')),
+          1::bigint,
+          'Only a household whose gift arrived and who has not been thanked counts');
+
+-- The 2.8 placeholders. A literal 0 in a view is invisible until something
+-- asserts it is no longer there.
+select is((select expected_gifts_minor from v_wedding_financials
+            where wedding_id = (select v from w where k='a')),
+          20000::bigint,
+          'v_wedding_financials reports gifts rather than 2.8''s placeholder zero');
+
+select is((select net_cost_after_gifts_minor from v_wedding_financials
+            where wedding_id = (select v from w where k='a')),
+          (select v from snap where k='net_cost') - 20000,
+          'Net cost falls by the gifts expected, per the workbook''s D39');
+
+-- Gifts are read from `guests`, which 4.3 scopes by side. So a family member's
+-- gift total is their own side's, not the wedding's. That is the policy
+-- working, and it means the figure differs by reader — which is exactly why it
+-- is asserted rather than assumed.
+select tests.login((select v from ids where k = 'brides_mum'));
+select is((select expected_minor from v_gift_summary
+            where wedding_id = (select v from w where k='a')),
+          10000::bigint,
+          'A family member sees only their own side''s gifts, by the same RLS as the guest list');
 
 select * from finish();
 rollback;

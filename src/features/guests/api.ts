@@ -73,6 +73,10 @@ export type GuestInput = Partial<
     | 'transport_type'
     | 'expected_gift_minor'
     | 'gift_received_minor'
+    // Ticket 4.9. A gift belongs to the household that gave it, so the ledger
+    // writes these through the same guest patch as everything else.
+    | 'gift_description'
+    | 'thank_you_sent'
     | 'notes'
   >
 >;

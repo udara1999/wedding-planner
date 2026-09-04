@@ -1,0 +1,12 @@
+# Everything here is private except the landing page. See src/lib/seo.ts
+# for why /rsvp/ in particular must never be indexed.
+User-agent: *
+Disallow: /rsvp/
+Disallow: /w/
+Disallow: /new
+Disallow: /invite
+Disallow: /signin
+Disallow: /auth/
+Allow: /$
+
+Sitemap: http://localhost:5173/sitemap.xml

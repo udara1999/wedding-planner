@@ -22,7 +22,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(9);
+select plan(11);
 
 select tests.become_service_role();
 
@@ -93,6 +93,23 @@ select is((select count(*)::int from weddings where id = (select v from w where 
           'the wedding still exists after the partner tried to delete it');
 select ok(tests.wedding_scoped_rows((select v from w where k = 'a')) > 0,
           'and none of its data was touched');
+
+-- ------------------------------------------- the guard still does its real job
+-- The reason app.protect_last_owner() exists: an owner walking away from a
+-- wedding that carries on would leave it with nobody able to administer it.
+-- That must still be refused, or fixing the cascade would have broken it.
+select tests.login((select v from ids where k = 'owner'));
+select throws_ok(
+  format('delete from wedding_members where wedding_id = %L and user_id = %L',
+         (select v from w where k = 'a'), (select v from ids where k = 'owner')),
+  'Cannot remove the last owner of a wedding',
+  'the last owner still cannot remove themselves from a surviving wedding');
+
+select tests.become_service_role();
+select is((select count(*)::int from wedding_members
+           where wedding_id = (select v from w where k = 'a')
+             and user_id = (select v from ids where k = 'owner')), 1,
+          'and they are still a member');
 
 -- ------------------------------------------------------- the owner can delete
 select tests.login((select v from ids where k = 'owner'));

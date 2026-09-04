@@ -114,7 +114,7 @@ function Shell({
             <Heart className="size-5" fill="currentColor" />
           </div>
           <h1 className="text-[22px] font-semibold tracking-tight text-stone-900">
-            Wedding Planner
+            MangalaHub
           </h1>
           <p className="mt-1 text-sm text-stone-500">Plan the whole day in one place.</p>
         </div>

@@ -22,7 +22,7 @@ import { useEffect } from 'react';
  * the rest.
  */
 
-const DEFAULT_TITLE = 'Sri Lankan Wedding Planner';
+const DEFAULT_TITLE = 'MangalaHub';
 
 function setMeta(selector: string, attr: 'name' | 'property', key: string, content: string) {
   let tag = document.head.querySelector<HTMLMetaElement>(selector);

@@ -1,4 +1,4 @@
-# Wedding Planner
+# MangalaHub
 
 Multi-tenant wedding planning app. React + TypeScript on the front, Supabase (Postgres + RLS) on the back, no custom server.
 

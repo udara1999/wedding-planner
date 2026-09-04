@@ -28,7 +28,7 @@ import { Badge, Button, Card, CardBody, cn } from '../../components/ui';
  */
 export function LandingPage() {
   useHead({
-    title: 'Sri Lankan Wedding Planner — budget, guests, RSVPs and the day itself',
+    title: 'MangalaHub — Sri Lankan wedding planner, poruwa to reception',
     description:
       'Plan a Sri Lankan wedding in one place: a poruwa checklist, a budget that tracks quoted against actual, guest lists with RSVP links, vendor comparisons, and a day-of pack you can print and run without a signal.',
     index: true,
@@ -49,7 +49,7 @@ export function LandingPage() {
               <Flower2 className="size-4" />
             </span>
             <span className="text-sm font-semibold tracking-tight text-stone-900">
-              Wedding Planner
+              MangalaHub
             </span>
           </span>
           <Link

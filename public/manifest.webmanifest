@@ -1,6 +1,6 @@
 {
-  "name": "Wedding planner",
-  "short_name": "Wedding",
+  "name": "MangalaHub — Sri Lankan wedding planner",
+  "short_name": "MangalaHub",
   "description": "Plan a Sri Lankan wedding, and run the day itself without a signal.",
   "start_url": "/",
   "scope": "/",

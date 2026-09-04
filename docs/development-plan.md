@@ -1,4 +1,4 @@
-# Wedding Planner SaaS — Requirements & Development Plan
+# MangalaHub — Requirements & Development Plan
 
 **Source of truth for requirements:** `Sri Lankan Wedding Master Planner.xlsx` (27 sheets, 6,120 formulas)
 **Stack:** React + TypeScript (Vite) · Supabase (Postgres, Auth, RLS, Storage, Edge Functions) · no custom server

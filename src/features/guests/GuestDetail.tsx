@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { useState as useReactState } from 'react';
+import { Check, Copy, Trash2 } from 'lucide-react';
 import type { GuestInput, GuestRow, RsvpStatus } from './api';
 import type { WeddingSide } from '../../types/db';
 import { formatCountForInput } from '../../lib/units';
@@ -237,6 +238,13 @@ export function GuestDetail({
             </Field>
           </Section>
 
+          <Section
+            title="Invitation link"
+            description="Their own link — it identifies this household and nothing else. Send it by WhatsApp or email."
+          >
+            <RsvpLink token={guest.rsvp_token} />
+          </Section>
+
           <Section title="Notes">
             <Textarea
               rows={3}
@@ -276,5 +284,35 @@ export function GuestDetail({
         </div>
       )}
     </>
+  );
+}
+
+/**
+ * The tokenised RSVP URL for one household (ticket 4.6).
+ *
+ * Read-only and copyable rather than editable: the token is the credential, and
+ * a typo in it would silently produce a link that finds nothing.
+ */
+function RsvpLink({ token }: { token: string }) {
+  const [copied, setCopied] = useReactState(false);
+  const url = `${window.location.origin}/rsvp/${token}`;
+
+  return (
+    <div className="flex items-center gap-2">
+      <Input readOnly value={url} className="font-mono text-xs" onFocus={(e) => e.target.select()} />
+      <Button
+        size="sm"
+        variant="secondary"
+        icon={copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        onClick={() => {
+          void navigator.clipboard.writeText(url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          });
+        }}
+      >
+        {copied ? 'Copied' : 'Copy'}
+      </Button>
+    </div>
   );
 }

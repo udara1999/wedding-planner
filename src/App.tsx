@@ -16,6 +16,7 @@ import { ContributionsPage } from './features/contributions/ContributionsPage';
 import { ComparePage } from './features/vendors/ComparePage';
 import { VendorsPage } from './features/vendors/VendorsPage';
 import { GuestsPage } from './features/guests/GuestsPage';
+import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
 
@@ -110,6 +111,10 @@ export default function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public and unauthenticated: no RequireAuth, no wedding shell.
+                A guest reaching this has no account and never will. */}
+            <Route path="/rsvp/:token" element={<PublicRsvpPage />} />
+
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/auth/reset" element={<ResetPasswordPage />} />

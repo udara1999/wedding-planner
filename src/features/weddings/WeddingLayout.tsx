@@ -82,7 +82,6 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
         label: 'Compare vendors',
         roles: COUPLE,
         icon: <ClipboardList className={ICON} />,
-        phase: '3',
       },
       {
         to: 'guests',

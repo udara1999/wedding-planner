@@ -435,6 +435,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vendor_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "v_vendor_questions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vendor_answers_wedding_id_fkey"
             columns: ["wedding_id"]
             isOneToOne: false
@@ -1306,6 +1313,15 @@ export type Database = {
           },
         ]
       }
+      v_vendor_categories: {
+        Row: {
+          category_key: string | null
+          category_label: string | null
+          locale: string | null
+          question_count: number | null
+        }
+        Relationships: []
+      }
       v_vendor_decisions: {
         Row: {
           agreed_price_minor: number | null
@@ -1356,6 +1372,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_vendor_questions: {
+        Row: {
+          category_key: string | null
+          category_label: string | null
+          group: Database["public"]["Enums"]["vendor_question_group"] | null
+          id: number | null
+          locale: string | null
+          question: string | null
+          seq: number | null
+          why_it_matters: string | null
+        }
+        Insert: {
+          category_key?: string | null
+          category_label?: string | null
+          group?: Database["public"]["Enums"]["vendor_question_group"] | null
+          id?: number | null
+          locale?: string | null
+          question?: string | null
+          seq?: number | null
+          why_it_matters?: string | null
+        }
+        Update: {
+          category_key?: string | null
+          category_label?: string | null
+          group?: Database["public"]["Enums"]["vendor_question_group"] | null
+          id?: number | null
+          locale?: string | null
+          question?: string | null
+          seq?: number | null
+          why_it_matters?: string | null
+        }
+        Relationships: []
       }
       v_vendors_ops: {
         Row: {

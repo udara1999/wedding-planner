@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { AlertTriangle, CalendarClock, Phone, Plus, Printer, ShieldAlert } from 'lucide-react';
+import {
+  AlertTriangle,
+  CalendarClock,
+  Clock3,
+  Phone,
+  Plus,
+  Printer,
+  ShieldAlert,
+} from 'lucide-react';
 import {
   LEVELS,
   clock,
@@ -19,6 +27,7 @@ import {
 import { ContactTable, RiskTable, ScheduleTable, TimelineTable } from './tables';
 import { useVendors } from '../vendors/vendorsApi';
 import { useOwnerOptions } from '../weddings/lookups';
+import { useWedding } from '../weddings/api';
 import type { Applicability, MyWedding } from '../../types/db';
 import {
   Badge,
@@ -73,6 +82,10 @@ export function TimelinePage() {
   const { wedding, canEdit } = useDayRole();
   const events = useTimeline(wedding.id);
   const conflicts = useTimelineConflicts(wedding.id);
+  // my_weddings() does not carry the ceremony time, and the whole timeline
+  // hangs off it.
+  const detail = useWedding(wedding.id);
+  const ceremonyTime = detail.data?.ceremony_time?.slice(0, 5) ?? null;
   const vendors = useVendors(wedding.id);
   const update = useUpdateTimelineEvent(wedding.id);
   const create = useCreateTimelineEvent(wedding.id);
@@ -100,7 +113,7 @@ export function TimelinePage() {
     <Page width="wide">
       <PageHeader
         title="Day timeline"
-        description="Phase by phase, with end times worked out rather than typed. Tick things off as they happen."
+        description="Phase by phase, hung off the ceremony time. End times are worked out, not typed."
         actions={
           <div className="flex items-center gap-2">
             <PrintLink />
@@ -138,6 +151,39 @@ export function TimelinePage() {
           hint={clashes.length > 0 ? 'same vendor, person or room' : 'nothing contends'}
         />
       </div>
+
+      {/* Where the clock comes from. Without this the timeline looks like a
+          fixed schedule somebody has to edit by hand, which is what it was. */}
+      {ceremonyTime ? (
+        <p className="mb-5 flex flex-wrap items-center gap-2 rounded-xl bg-stone-50 px-4 py-2.5 text-sm text-stone-600">
+          <Clock3 className="size-4 shrink-0 text-stone-500" />
+          <span className="flex-1">
+            Built around a <span className="font-medium text-stone-800">{ceremonyTime}</span>{' '}
+            ceremony. Change that on Setup and the whole day moves with it — except any event whose
+            time you have set by hand.
+          </span>
+          <Link
+            to="../setup"
+            className="focus-ring rounded text-xs text-wine-700 underline underline-offset-2"
+          >
+            Change the time
+          </Link>
+        </p>
+      ) : (
+        <p className="mb-5 flex flex-wrap items-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+          <Clock3 className="size-4 shrink-0" />
+          <span className="flex-1">
+            No ceremony time set, so this is the template's own 19:00 running order. Set your
+            ceremony time and the whole day shifts to fit.
+          </span>
+          <Link
+            to="../setup"
+            className="focus-ring rounded text-xs font-medium text-wine-700 underline underline-offset-2"
+          >
+            Set it on Setup
+          </Link>
+        </p>
+      )}
 
       {clashes.length > 0 && (
         <Card className="mb-5 border-amber-200">
@@ -255,12 +301,26 @@ function TimelineModal({
                 ))}
               </Select>
             </Field>
-            <Field label="Starts">
+            <Field
+              label="Starts"
+              hint={
+                event.starts_at_overridden
+                  ? 'Pinned — it will not move if the ceremony time changes.'
+                  : 'Follows the ceremony time.'
+              }
+            >
               <Input
                 type="time"
                 disabled={!canEdit}
                 value={event.starts_at?.slice(0, 5) ?? ''}
-                onChange={(e) => onSave({ starts_at: e.target.value || null })}
+                onChange={(e) =>
+                  onSave({
+                    starts_at: e.target.value || null,
+                    // Setting a time by hand pins it, the same promise
+                    // due_date_overridden makes for dates.
+                    starts_at_overridden: Boolean(e.target.value),
+                  })
+                }
               />
             </Field>
             <Field label="Minutes" hint="The end time follows from this.">
@@ -335,6 +395,21 @@ function TimelineModal({
             </Select>
           </Field>
         </Section>
+
+        {event.starts_at_overridden && canEdit && event.offset_minutes !== null && (
+          <Section
+            title="This time is pinned"
+            description="Everything else on the day shifts when the ceremony time changes. This event will not."
+          >
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onSave({ starts_at_overridden: false })}
+            >
+              Let it follow the ceremony time again
+            </Button>
+          </Section>
+        )}
 
         <Section title="Notes">
           <Textarea

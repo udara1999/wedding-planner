@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(257);
+select plan(266);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -2132,6 +2132,99 @@ select is((select count(*)::int from v_template_pending
             where wedding_id = (select v from w where k='a')),
           0,
           'A stranger gets no pending row for a wedding that is not theirs');
+
+-- =============================================================================
+-- The day timeline follows the ceremony time — 9 assertions
+-- =============================================================================
+-- Reported: the timeline did not match the wedding time and changing the time
+-- did not move it. The template stored absolute times from the source
+-- workbook, whose poruwa was at 19:00, so every wedding got a 19:00 day.
+--
+-- This is the same mistake 1.7 already fixed one level up for dates, and these
+-- assertions are the ones that were missing there too: that a seeded time is
+-- derived, that changing the anchor moves it, and that a hand-set time is left
+-- alone.
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+create temporary table tt (k text primary key, v uuid);
+grant select, insert on tt to public;
+
+insert into tt
+select 'w', public.create_wedding('Timing', 'Test', current_date + 120, 'LKR', 'Asia/Colombo');
+
+-- The ceremony time is set BEFORE seeding, which is the ordinary order: a
+-- couple fills in Setup and then the plan is built.
+update weddings set ceremony_time = '16:00' where id = (select v from tt where k='w');
+select public.seed_wedding((select v from tt where k='w'));
+
+-- The template's own anchor is 19:00, so a 16:00 ceremony shifts everything
+-- three hours earlier. The ceremony-phase event that IS the anchor lands
+-- exactly on the ceremony time.
+select is((select min(starts_at) from timeline_events
+            where wedding_id = (select v from tt where k='w') and phase = 'Ceremony'),
+          '16:00'::time,
+          'The ceremony phase starts at the ceremony time, not the template''s 19:00');
+
+select is((select starts_at from timeline_events
+            where wedding_id = (select v from tt where k='w') and phase = 'Setup'
+            order by sort_order limit 1),
+          '04:00'::time,
+          'And setup shifts with it — twelve hours before a 16:00 ceremony');
+
+-- Past midnight is the reason offsets are stored in minutes rather than as
+-- times: the closing walkthrough is 315 minutes after the ceremony, which at
+-- 19:00 is 00:15 and at 16:00 is 21:15.
+select is((select max(offset_minutes) from timeline_events
+            where wedding_id = (select v from tt where k='w')),
+          315,
+          'The last event is 315 minutes after the ceremony');
+
+select is((select starts_at from timeline_events
+            where wedding_id = (select v from tt where k='w')
+            order by offset_minutes desc limit 1),
+          '21:15'::time,
+          'Which is 21:15 for a 16:00 ceremony, with no midnight wrap needed');
+
+-- The reported behaviour: change the time, the day moves.
+update weddings set ceremony_time = '19:30' where id = (select v from tt where k='w');
+
+select is((select min(starts_at) from timeline_events
+            where wedding_id = (select v from tt where k='w') and phase = 'Ceremony'),
+          '19:30'::time,
+          'Changing the ceremony time moves the whole timeline');
+
+-- And now the wrap matters: 315 minutes after 19:30 is 00:45 the next morning.
+select is((select starts_at from timeline_events
+            where wedding_id = (select v from tt where k='w')
+            order by offset_minutes desc limit 1),
+          '00:45'::time,
+          'An event past midnight wraps rather than clamping at 23:59');
+
+-- ends_at is generated, so it follows without anything else being written.
+select is((select ends_at from timeline_events
+            where wedding_id = (select v from tt where k='w') and phase = 'Ceremony'
+            order by offset_minutes limit 1),
+          '19:35'::time,
+          'The generated end time follows the new start');
+
+-- R9 again, one level down: a time somebody set by hand is theirs.
+update timeline_events set starts_at = '12:00', starts_at_overridden = true
+ where wedding_id = (select v from tt where k='w')
+   and phase = 'Setup' and sort_order = 1;
+
+update weddings set ceremony_time = '10:00' where id = (select v from tt where k='w');
+
+select is((select starts_at from timeline_events
+            where wedding_id = (select v from tt where k='w')
+              and phase = 'Setup' and sort_order = 1),
+          '12:00'::time,
+          'A hand-set event time survives the ceremony moving');
+
+select is((select min(starts_at) from timeline_events
+            where wedding_id = (select v from tt where k='w') and phase = 'Ceremony'),
+          '10:00'::time,
+          'While everything not pinned still moves');
 
 select * from finish();
 rollback;

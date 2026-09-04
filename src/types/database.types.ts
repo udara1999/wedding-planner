@@ -3679,11 +3679,13 @@ export type Database = {
           location: string | null
           name: string
           notes: string | null
+          offset_minutes: number | null
           phase: string | null
           seq: number | null
           sort_order: number
           source_template_id: number | null
           starts_at: string | null
+          starts_at_overridden: boolean
           updated_at: string
           vendor_id: string | null
           wedding_id: string
@@ -3699,11 +3701,13 @@ export type Database = {
           location?: string | null
           name: string
           notes?: string | null
+          offset_minutes?: number | null
           phase?: string | null
           seq?: number | null
           sort_order?: number
           source_template_id?: number | null
           starts_at?: string | null
+          starts_at_overridden?: boolean
           updated_at?: string
           vendor_id?: string | null
           wedding_id: string
@@ -3719,11 +3723,13 @@ export type Database = {
           location?: string | null
           name?: string
           notes?: string | null
+          offset_minutes?: number | null
           phase?: string | null
           seq?: number | null
           sort_order?: number
           source_template_id?: number | null
           starts_at?: string | null
+          starts_at_overridden?: boolean
           updated_at?: string
           vendor_id?: string | null
           wedding_id?: string

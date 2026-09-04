@@ -13,6 +13,10 @@ export type TimelineInput = Partial<
     TimelineRow,
     | 'phase'
     | 'starts_at'
+    // Set together with starts_at: a time entered by hand is pinned, and the
+    // retime trigger skips it when the ceremony moves.
+    | 'starts_at_overridden'
+    | 'offset_minutes'
     | 'duration_minutes'
     | 'name'
     | 'who'

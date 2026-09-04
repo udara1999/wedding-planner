@@ -9,4 +9,4 @@ Disallow: /signin
 Disallow: /auth/
 Allow: /$
 
-Sitemap: https://weddinghub.udaraprabath.com/sitemap.xml
+Sitemap: https://mangalahub.udaraprabath.com/sitemap.xml

@@ -71,7 +71,9 @@ export function PublicRsvpPage() {
             <div
               className={cn(
                 'mx-auto flex size-12 items-center justify-center rounded-full',
-                outcome.attending ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-500',
+                outcome.attending
+                  ? 'bg-emerald-50 text-emerald-600'
+                  : 'bg-stone-100 text-stone-500',
               )}
             >
               {outcome.attending ? <Check className="size-6" /> : <Heart className="size-6" />}
@@ -201,7 +203,17 @@ function RsvpForm({
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => setAttending(true)}
+            onClick={() => {
+              setAttending(true);
+              // A household that declined last time is carrying zeros. Saying
+              // "we will be there" and then meeting a disabled button with
+              // nothing explaining why is a dead end, so accepting fills in
+              // what they were invited for and they adjust down from there.
+              if (adults + children === 0) {
+                setAdults(maxAdults);
+                setChildren(maxChildren);
+              }
+            }}
             className={cn(
               'focus-ring rounded-xl border px-3 py-4 text-sm font-medium transition-colors',
               attending === true
@@ -229,12 +241,27 @@ function RsvpForm({
 
         {attending && (
           <div className="space-y-4 border-t border-stone-100 pt-4">
-            <Stepper label="Adults" value={adults} max={maxAdults} onChange={setAdults} />
+            <p className="text-sm text-stone-500">
+              How many of you can come? Up to {maxAdults + maxChildren}, and at least one — if
+              nobody can make it, choose “Sadly cannot come” instead.
+            </p>
+            {/* The floor is on the TOTAL, not on adults. A household invited
+                for two adults and a child might be sending only the child with
+                someone else's family, and a minimum of one adult would make
+                that unanswerable. */}
+            <Stepper
+              label="Adults"
+              value={adults}
+              max={maxAdults}
+              min={children > 0 ? 0 : 1}
+              onChange={setAdults}
+            />
             {maxChildren > 0 && (
               <Stepper
                 label="Children"
                 value={children}
                 max={maxChildren}
+                min={adults > 0 ? 0 : 1}
                 onChange={setChildren}
               />
             )}
@@ -285,7 +312,7 @@ function RsvpForm({
               size="lg"
               className="w-full"
               loading={submit.isPending}
-              disabled={!challengeReady}
+              disabled={!challengeReady || (attending && adults + children < 1)}
               onClick={() => send(attending)}
             >
               {attending ? 'Send our reply' : 'Send our apologies'}
@@ -337,25 +364,30 @@ function Stepper({
   label,
   value,
   max,
+  min = 0,
   onChange,
 }: {
   label: string;
   value: number;
   max: number;
+  /** Set so a household cannot accept for nobody; see the caller. */
+  min?: number;
   onChange: (next: number) => void;
 }) {
   return (
     <div className="flex items-center justify-between">
       <div>
         <p className="text-sm font-medium text-stone-800">{label}</p>
-        <p className="text-xs text-stone-400">{max} invited</p>
+        <p className="text-xs text-stone-400">
+          {max} invited{min > 0 && max > 0 ? ' · at least one of you' : ''}
+        </p>
       </div>
       <div className="flex items-center gap-1">
         <button
           type="button"
           aria-label={`One fewer ${label.toLowerCase()}`}
-          disabled={value <= 0}
-          onClick={() => onChange(Math.max(0, value - 1))}
+          disabled={value <= min}
+          onClick={() => onChange(Math.max(min, value - 1))}
           className="focus-ring flex size-10 items-center justify-center rounded-lg border border-stone-200 text-stone-600 disabled:opacity-40"
         >
           <Minus className="size-4" />
@@ -394,7 +426,9 @@ function Toggle({
       onClick={() => onChange(!value)}
       className={cn(
         'focus-ring flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm transition-colors',
-        value ? 'border-wine-300 bg-wine-50 text-wine-800' : 'border-stone-200 bg-white text-stone-700',
+        value
+          ? 'border-wine-300 bg-wine-50 text-wine-800'
+          : 'border-stone-200 bg-white text-stone-700',
       )}
     >
       {label}

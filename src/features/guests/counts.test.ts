@@ -27,10 +27,7 @@ describe('countGuests', () => {
   });
 
   it('counts households and heads separately', () => {
-    const c = countGuests([
-      guest({ total_invited: 4 }),
-      guest({ total_invited: 3 }),
-    ]);
+    const c = countGuests([guest({ total_invited: 4 }), guest({ total_invited: 3 })]);
     expect(c.households).toBe(2);
     expect(c.invited).toBe(7);
   });

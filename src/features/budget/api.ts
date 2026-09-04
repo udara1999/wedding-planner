@@ -4,6 +4,8 @@ import type {
   BudgetByCategory,
   BudgetCategoryRow,
   BudgetLineRow,
+  PaymentStage,
+  PaymentStatus,
   WeddingFinancials,
 } from '../../types/db';
 
@@ -223,7 +225,31 @@ export interface LineTotals {
   paidMinor: number;
   outstandingMinor: number;
   overpaidMinor: number;
+  /** How many payments have been recorded against this line. */
+  paymentCount: number;
+  /**
+   * The most urgent status among them, or null when there are none. A line
+   * with an overdue instalment and three settled ones is an overdue line —
+   * showing the settled ones would bury the only state worth acting on.
+   */
+  urgentStatus: PaymentStatus | null;
+  /** The stages actually paid, in the order the workbook lists them. */
+  paidStages: PaymentStage[];
 }
+
+/** The workbook's PayStage order, so "advance, final" never reads "final, advance". */
+const STAGE_ORDER: PaymentStage[] = [
+  'booking_deposit',
+  'advance',
+  'progress_payment',
+  'final_payment',
+  'extra_overtime',
+  'refundable_deposit',
+  'refund_received',
+];
+
+/** Most urgent first. Anything absent from this list cannot outrank a member. */
+const STATUS_URGENCY: PaymentStatus[] = ['overdue', 'due', 'due_soon', 'not_due', 'draft', 'paid'];
 
 /**
  * Payment totals per line, from v_budget_lines.
@@ -236,20 +262,51 @@ export function useBudgetLineTotals(weddingId: string) {
   return useQuery({
     queryKey: ['budget', weddingId, 'line-totals'] as const,
     queryFn: async (): Promise<Map<string, LineTotals>> => {
-      const res = await supabase
-        .from('v_budget_lines')
-        .select('id, paid_minor, outstanding_minor, overpaid_minor')
-        .eq('wedding_id', weddingId);
-      const rows = unwrap(res);
+      const [lines, payments] = await Promise.all([
+        supabase
+          .from('v_budget_lines')
+          .select('id, paid_minor, outstanding_minor, overpaid_minor')
+          .eq('wedding_id', weddingId),
+        // Read rather than recomputed: `status` depends on current_date, so it
+        // only exists in the view. Deriving it here would be a second
+        // implementation of the six-state rule.
+        supabase
+          .from('v_payments')
+          .select('budget_line_id, status, stage, amount_paid_minor')
+          .eq('wedding_id', weddingId)
+          .not('budget_line_id', 'is', null),
+      ]);
+
+      const byLine = new Map<string, { statuses: PaymentStatus[]; stages: PaymentStage[] }>();
+      for (const p of unwrap(payments)) {
+        const key = p.budget_line_id as string;
+        const entry = byLine.get(key) ?? { statuses: [], stages: [] };
+        if (p.status) entry.statuses.push(p.status as PaymentStatus);
+        // A stage counts as paid only if money actually moved against it.
+        if (p.stage && Number(p.amount_paid_minor ?? 0) > 0) {
+          entry.stages.push(p.stage as PaymentStage);
+        }
+        byLine.set(key, entry);
+      }
+
       return new Map(
-        rows.map((r) => [
-          r.id as string,
-          {
-            paidMinor: Number(r.paid_minor ?? 0),
-            outstandingMinor: Number(r.outstanding_minor ?? 0),
-            overpaidMinor: Number(r.overpaid_minor ?? 0),
-          },
-        ]),
+        unwrap(lines).map((r) => {
+          const id = r.id as string;
+          const entry = byLine.get(id);
+          const statuses = entry?.statuses ?? [];
+          return [
+            id,
+            {
+              paidMinor: Number(r.paid_minor ?? 0),
+              outstandingMinor: Number(r.outstanding_minor ?? 0),
+              overpaidMinor: Number(r.overpaid_minor ?? 0),
+              paymentCount: statuses.length,
+              urgentStatus:
+                STATUS_URGENCY.find((candidate) => statuses.includes(candidate)) ?? null,
+              paidStages: STAGE_ORDER.filter((stage) => entry?.stages.includes(stage)),
+            },
+          ];
+        }),
       );
     },
   });

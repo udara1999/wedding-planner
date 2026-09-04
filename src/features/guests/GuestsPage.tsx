@@ -1,15 +1,29 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { FileUp, Plus, Search, Send, UsersRound } from 'lucide-react';
+import {
+  BedDouble,
+  Car,
+  ChevronDown,
+  FileUp,
+  Mail,
+  Phone,
+  Plus,
+  Search,
+  Send,
+  UserCheck,
+  UsersRound,
+} from 'lucide-react';
 import {
   useCreateGuest,
   useDeleteGuest,
+  useGuestGroups,
   useGuests,
   useUpdateGuest,
   type GuestRow,
   type RsvpStatus,
 } from './api';
 import { countGuests } from './counts';
+import { groupGuests, type GroupMode } from './grouping';
 import { currencyDecimals } from '../../lib/units';
 import { GuestDetail } from './GuestDetail';
 import { ImportGuestsModal } from './import/ImportGuestsModal';
@@ -55,6 +69,7 @@ export function GuestsPage() {
   const isFamily = wedding.role === 'family';
 
   const guests = useGuests(wedding.id);
+  const groupRefs = useGuestGroups(wedding.id);
   const create = useCreateGuest(wedding.id);
   const update = useUpdateGuest(wedding.id);
   const remove = useDeleteGuest(wedding.id);
@@ -63,6 +78,8 @@ export function GuestsPage() {
   const [statusFilter, setStatusFilter] = useState<RsvpStatus | 'all'>('all');
   const [sideFilter, setSideFilter] = useState<WeddingSide | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [groupMode, setGroupMode] = useState<GroupMode>('group');
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [importing, setImporting] = useState(false);
   const [inviting, setInviting] = useState(false);
 
@@ -83,6 +100,20 @@ export function GuestsPage() {
   }, [guests.data, search, statusFilter, sideFilter]);
 
   const counts = useMemo(() => countGuests(visible), [visible]);
+
+  const sections = useMemo(
+    () =>
+      groupGuests(
+        visible,
+        (groupRefs.data ?? []).map((g) => ({
+          id: g.id,
+          name: g.name,
+          sort_order: g.sort_order,
+        })),
+        groupMode,
+      ),
+    [visible, groupRefs.data, groupMode],
+  );
   const selected = (guests.data ?? []).find((g) => g.id === selectedId) ?? null;
 
   if (guests.isLoading) {
@@ -166,15 +197,19 @@ export function GuestsPage() {
       {/* Ticket 4.4. Households and heads side by side, because they answer
           different questions and are easy to confuse. */}
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* The total guest count first. It is the number everyone asks for —
+            the caterer, the venue, the couple's parents — and it used to be a
+            hint under the household count. */}
         <Stat
-          label="Households"
-          value={counts.households}
+          label="Guests invited"
+          value={counts.invited}
           icon={<UsersRound className="size-3.5" />}
-          hint={`${counts.invited} people invited`}
+          hint={`${counts.households} ${counts.households === 1 ? 'household' : 'households'}`}
         />
         <Stat
           label="Coming"
           value={counts.attending}
+          icon={<UserCheck className="size-3.5" />}
           tone="good"
           hint={`${counts.accepted} households accepted`}
         />
@@ -214,6 +249,22 @@ export function GuestsPage() {
               </option>
             ))}
           </Select>
+          <Select
+            className="w-40"
+            aria-label="Group the list by"
+            value={groupMode}
+            onChange={(e) => {
+              setGroupMode(e.target.value as GroupMode);
+              // Section keys mean something different in each mode, so a
+              // collapsed set carried across would collapse the wrong things.
+              setCollapsed(new Set());
+            }}
+          >
+            <option value="group">By group</option>
+            <option value="category">By category</option>
+            <option value="side">By side</option>
+            <option value="none">One flat list</option>
+          </Select>
           {/* A family member only ever receives their own side, so the filter
               would be a control with one useful position. */}
           {!isFamily && (
@@ -248,11 +299,53 @@ export function GuestsPage() {
               />
             </div>
           ) : (
-            <ul className="divide-y divide-stone-100">
-              {visible.map((g) => (
-                <GuestRowItem key={g.id} guest={g} onOpen={() => setSelectedId(g.id)} />
-              ))}
-            </ul>
+            <div>
+              {sections.map((sec) => {
+                const isCollapsed = collapsed.has(sec.key);
+                return (
+                  <section key={sec.key}>
+                    {/* One flat list needs no heading; it would be a header
+                        saying "All households" above all the households. */}
+                    {groupMode !== 'none' && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCollapsed((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(sec.key)) next.delete(sec.key);
+                            else next.add(sec.key);
+                            return next;
+                          })
+                        }
+                        className="focus-ring sticky top-0 z-10 flex w-full items-center gap-2 border-y border-stone-100 bg-stone-50/95 px-4 py-2 text-left backdrop-blur"
+                      >
+                        <ChevronDown
+                          className={cn(
+                            'size-3.5 shrink-0 text-stone-400 transition-transform',
+                            isCollapsed && '-rotate-90',
+                          )}
+                        />
+                        <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-stone-600 uppercase">
+                          {sec.label}
+                        </span>
+                        <span className="tabular shrink-0 text-[11px] text-stone-400">
+                          {sec.households} {sec.households === 1 ? 'household' : 'households'} ·{' '}
+                          {sec.invited} invited
+                          {sec.attending > 0 && ` · ${sec.attending} coming`}
+                        </span>
+                      </button>
+                    )}
+                    {!isCollapsed && (
+                      <ul className="divide-y divide-stone-100">
+                        {sec.guests.map((g) => (
+                          <GuestRowItem key={g.id} guest={g} onOpen={() => setSelectedId(g.id)} />
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
           )}
           <div className="px-4 py-3">
             <InlineError error={create.error ?? update.error ?? remove.error} />
@@ -288,36 +381,71 @@ export function GuestsPage() {
   );
 }
 
+/** Two letters from the household name, so a long list has something to scan by. */
+function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
+const SIDE_SHORT: Record<string, string> = { bride: 'bride', groom: 'groom', both: 'shared' };
+
 function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }) {
+  const accepted = guest.rsvp_status === 'accepted';
+  const invited = guest.total_invited ?? 0;
+  const attending = guest.total_attending ?? 0;
+  // Only worth pointing out when they are actually coming with fewer people
+  // than were invited; before a reply it is not information.
+  const fewer = accepted && attending < invited;
+
   return (
     <li
       onClick={onOpen}
-      className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/70"
+      className="group flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-stone-50/70"
     >
-      <button
-        type="button"
-        onClick={onOpen}
-        className="focus-ring min-w-0 flex-1 rounded-lg text-left"
+      <span
+        aria-hidden
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-wine-50 text-[11px] font-semibold text-wine-700 ring-1 ring-wine-100"
       >
-        <p className="flex items-center gap-1.5 truncate text-sm text-stone-900">
+        {initials(guest.household_name)}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-1.5 truncate text-sm font-medium text-stone-900">
           {guest.household_name}
           {guest.vip && <Badge tone="gold">VIP</Badge>}
         </p>
-        <p className="truncate text-xs text-stone-400">
-          {[guest.relationship, guest.category, guest.city].filter(Boolean).join(' · ') || '—'}
+        <p className="mt-0.5 flex items-center gap-2 truncate text-xs text-stone-400">
+          {[guest.relationship, guest.category, guest.city].filter(Boolean).join(' · ') ||
+            'no details yet'}
+          {/* Icons rather than words: they are secondary facts, and spelling
+              them out crowded out the name. */}
+          {guest.phone && <Phone className="size-3 shrink-0 text-stone-300" />}
+          {guest.email && <Mail className="size-3 shrink-0 text-stone-300" />}
+          {guest.needs_room && <BedDouble className="size-3 shrink-0 text-stone-300" />}
+          {guest.needs_transport && <Car className="size-3 shrink-0 text-stone-300" />}
         </p>
-      </button>
-
-      <div className="shrink-0 text-right">
-        <p className="tabular text-sm text-stone-900">
-          {guest.rsvp_status === 'accepted' ? guest.total_attending : '—'}
-        </p>
-        <p className="tabular text-[11px] text-stone-400">of {guest.total_invited} invited</p>
       </div>
 
       {guest.side && (
-        <span className={cn('shrink-0 text-[11px]', 'text-stone-400')}>{guest.side}</span>
+        <span className="hidden shrink-0 text-[11px] text-stone-400 sm:inline">
+          {SIDE_SHORT[guest.side] ?? guest.side}
+        </span>
       )}
+
+      {/* Heads, given the emphasis. Everything on this screen is eventually a
+          question about how many people are coming. */}
+      <div className="w-20 shrink-0 text-right">
+        <p className="tabular text-sm font-semibold text-stone-900">
+          {accepted ? attending : invited}
+          <span className="ml-1 text-[11px] font-normal text-stone-400">
+            {accepted ? 'coming' : 'invited'}
+          </span>
+        </p>
+        {fewer && <p className="tabular text-[11px] text-stone-400">of {invited} invited</p>}
+      </div>
+
       <Badge tone={RSVP_TONE[guest.rsvp_status]}>{RSVP_LABEL[guest.rsvp_status]}</Badge>
     </li>
   );

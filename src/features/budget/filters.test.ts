@@ -53,9 +53,9 @@ describe('matchesFilters', () => {
     expect(matchesFilters(line({ category_id: 'cat-venue', applicability: 'required' }), f)).toBe(
       true,
     );
-    expect(
-      matchesFilters(line({ category_id: 'cat-venue', applicability: 'optional' }), f),
-    ).toBe(false);
+    expect(matchesFilters(line({ category_id: 'cat-venue', applicability: 'optional' }), f)).toBe(
+      false,
+    );
   });
 });
 

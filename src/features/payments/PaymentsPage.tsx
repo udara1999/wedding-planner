@@ -15,7 +15,7 @@ import {
 import { BudgetLinePicker } from './BudgetLinePicker';
 import { ReceiptField } from './ReceiptField';
 import { STAGES, STATUS_LABEL, STATUS_TONE } from './status';
-import { useBudgetLines } from '../budget/api';
+import { useBudgetLines, usePayerOptions } from '../budget/api';
 import { useVendors } from '../vendors/vendorsApi';
 import {
   currencyDecimals,
@@ -41,9 +41,6 @@ import {
   Spinner,
   Stat,
 } from '../../components/ui';
-
-
-
 
 const schema = z.object({
   stage: z.enum([
@@ -88,6 +85,11 @@ export function PaymentsPage() {
   const payments = usePayments(wedding.id);
   const lines = useBudgetLines(wedding.id);
   const methods = usePaymentMethods(wedding.id);
+  // The same list the budget line's "Who pays" uses — Bride, Groom, Couple,
+  // the two families. Two fields naming the same set of people should not
+  // offer different answers, and a free-text one drifts into "Bride's family"
+  // beside "Brides Family" within a week.
+  const payers = usePayerOptions(wedding.id);
   const create = useCreatePayment(wedding.id);
   const update = useUpdatePayment(wedding.id);
   const remove = useDeletePayment(wedding.id);
@@ -115,7 +117,16 @@ export function PaymentsPage() {
   // choice that would be silently overruled on save.
   const lineVendorId = (lines.data ?? []).find((l) => l.id === lineId)?.vendor_id ?? null;
 
+
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: BLANK });
+  // Derived from the stored row rather than from form.watch, which the React
+  // Compiler cannot memoise. It only ever matters for a value already saved:
+  // one entered before this field was a list, or seeded by a tradition whose
+  // lookups have since changed.
+  const editingPaidBy =
+    (payments.data ?? []).find((p) => p.id === editingId)?.paid_by ?? null;
+  const paidByOrphan =
+    editingPaidBy && !(payers.data ?? []).includes(editingPaidBy) ? editingPaidBy : null;
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -398,7 +409,11 @@ export function PaymentsPage() {
           </CardHeader>
           <CardBody>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <Field label="Budget line" hint="Type its code or part of its name." error={lineError ?? undefined}>
+              <Field
+                label="Budget line"
+                hint="Type its code or part of its name."
+                error={lineError ?? undefined}
+              >
                 <BudgetLinePicker
                   lines={pickable}
                   value={lineId}
@@ -452,7 +467,10 @@ export function PaymentsPage() {
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={`Amount due (${currency})`} error={form.formState.errors.amount_due?.message}>
+                <Field
+                  label={`Amount due (${currency})`}
+                  error={form.formState.errors.amount_due?.message}
+                >
                   <Input
                     inputMode="decimal"
                     placeholder="0.00"
@@ -488,7 +506,18 @@ export function PaymentsPage() {
                   </Select>
                 </Field>
                 <Field label="Paid by">
-                  <Input disabled={!canEdit} {...form.register('paid_by')} />
+                  <Select disabled={!canEdit} {...form.register('paid_by')}>
+                    <option value="">Not recorded</option>
+                    {(payers.data ?? []).map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                    {/* A value saved before this was a list, or seeded from a
+                        tradition whose lookups have since changed, must still
+                        show as itself rather than snapping to "Not recorded". */}
+                    {paidByOrphan && <option value={paidByOrphan}>{paidByOrphan}</option>}
+                  </Select>
                 </Field>
               </div>
 
@@ -527,4 +556,3 @@ export function PaymentsPage() {
     </Page>
   );
 }
-

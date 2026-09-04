@@ -225,8 +225,8 @@ export function GuestDetail({
                 extra guest. The public RSVP form in 4.5 refuses it outright. */}
             {overAttending && (
               <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                More people are attending than were invited. Allowed here, but the household
-                cannot do that through the public RSVP link.
+                More people are attending than were invited. Allowed here, but the household cannot
+                do that through the public RSVP link.
               </p>
             )}
             <Field label="Dietary needs">
@@ -299,7 +299,12 @@ function RsvpLink({ token }: { token: string }) {
 
   return (
     <div className="flex items-center gap-2">
-      <Input readOnly value={url} className="font-mono text-xs" onFocus={(e) => e.target.select()} />
+      <Input
+        readOnly
+        value={url}
+        className="font-mono text-xs"
+        onFocus={(e) => e.target.select()}
+      />
       <Button
         size="sm"
         variant="secondary"

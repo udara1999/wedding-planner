@@ -14,15 +14,7 @@ import {
   parseMajorToMinor,
 } from '../../lib/units';
 import type { Applicability, BudgetCategoryRow, BudgetLineRow, TaskStatus } from '../../types/db';
-import {
-  Button,
-  Field,
-  InlineError,
-  Input,
-  Section,
-  Select,
-  Textarea,
-} from '../../components/ui';
+import { Button, Field, InlineError, Input, Section, Select, Textarea } from '../../components/ui';
 
 const STATUSES: { value: TaskStatus; label: string }[] = [
   { value: 'not_started', label: 'Not started' },

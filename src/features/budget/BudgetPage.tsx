@@ -15,7 +15,7 @@ import { BudgetLineForm } from './BudgetLineForm';
 import { EMPTY_FILTERS, matchesFilters, summarise, type BudgetFilters } from './filters';
 import { useSeedWedding } from '../weddings/api';
 import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
-import type { Applicability, BudgetLineRow, MyWedding } from '../../types/db';
+import type { Applicability, BudgetLineRow, MyWedding, PaymentStage } from '../../types/db';
 import {
   Badge,
   Button,
@@ -158,28 +158,30 @@ export function BudgetPage() {
         />
 
         <div className="grid gap-3 sm:grid-cols-3">
-        <Stat
-          label={`Budgeted (${currency})`}
-          value={money(summary.budgetedMinor)}
-          icon={<Wallet className="size-3.5" />}
-          hint={`${summary.count} lines in view`}
-        />
-        <Stat
-          label={`Forecast (${currency})`}
-          value={money(summary.forecastMinor)}
-          tone="accent"
-          hint={
-            summary.notApplicableCount > 0
-              ? `${summary.notApplicableCount} not applicable, excluded`
-              : undefined
-          }
-        />
-        <Stat
-          label={`Variance (${currency})`}
-          value={money(summary.varianceMinor)}
-          tone={summary.varianceMinor > 0 ? 'bad' : summary.varianceMinor < 0 ? 'good' : 'flat'}
-          hint={summary.varianceMinor > 0 ? 'Forecast is over budget' : 'Forecast is within budget'}
-        />
+          <Stat
+            label={`Budgeted (${currency})`}
+            value={money(summary.budgetedMinor)}
+            icon={<Wallet className="size-3.5" />}
+            hint={`${summary.count} lines in view`}
+          />
+          <Stat
+            label={`Forecast (${currency})`}
+            value={money(summary.forecastMinor)}
+            tone="accent"
+            hint={
+              summary.notApplicableCount > 0
+                ? `${summary.notApplicableCount} not applicable, excluded`
+                : undefined
+            }
+          />
+          <Stat
+            label={`Variance (${currency})`}
+            value={money(summary.varianceMinor)}
+            tone={summary.varianceMinor > 0 ? 'bad' : summary.varianceMinor < 0 ? 'good' : 'flat'}
+            hint={
+              summary.varianceMinor > 0 ? 'Forecast is over budget' : 'Forecast is within budget'
+            }
+          />
         </div>
       </div>
 
@@ -332,7 +334,10 @@ export function BudgetPage() {
         title={editing ? editing.name : 'Add a budget line'}
         subtitle={
           editing
-            ? [editing.code, (categories.data ?? []).find((c) => c.id === editing.category_id)?.label]
+            ? [
+                editing.code,
+                (categories.data ?? []).find((c) => c.id === editing.category_id)?.label,
+              ]
                 .filter(Boolean)
                 .join(' · ')
             : 'It joins the category you choose and counts towards its forecast.'
@@ -353,6 +358,78 @@ export function BudgetPage() {
       </Modal>
     </Page>
   );
+}
+
+/** Short enough to sit inside a badge next to "paid". */
+const STAGE_SHORT: Record<PaymentStage, string> = {
+  booking_deposit: 'deposit',
+  advance: 'advance',
+  progress_payment: 'instalment',
+  final_payment: 'final',
+  extra_overtime: 'extra',
+  refundable_deposit: 'refundable',
+  refund_received: 'refunded',
+};
+
+/**
+ * Where a line stands on being paid, said in words.
+ *
+ * The row used to show an amount — "45,000 paid" — which answers a question
+ * nobody was asking: the amount is already in the columns to the right. What
+ * you want from a list of forty lines is which ones need attention, so this
+ * leads with the state and with the urgency of the payments behind it. An
+ * overdue instalment outranks three settled ones, because it is the only one
+ * that needs doing today.
+ */
+function PaymentState({
+  line,
+  totals,
+  decimals,
+}: {
+  line: BudgetLineRow;
+  totals?: LineTotals;
+  decimals: number;
+}) {
+  // A not-applicable line forecasts zero, so "nothing paid" would read as a
+  // to-do item for something deliberately struck off.
+  if (line.applicability === 'not_applicable') return null;
+
+  const paid = totals?.paidMinor ?? 0;
+  const overpaid = totals?.overpaidMinor ?? 0;
+  const outstanding = totals?.outstandingMinor ?? 0;
+  const urgent = totals?.urgentStatus ?? null;
+
+  // Overpaying used to be invisible: outstanding floors at zero, so the excess
+  // showed up nowhere at all.
+  if (overpaid > 0) {
+    return <Badge tone="stop">overpaid by {formatMinorAsMajor(overpaid, decimals)}</Badge>;
+  }
+
+  // An overdue or imminent payment is the headline whatever else is true of
+  // the line, including one that is otherwise fully covered.
+  if (urgent === 'overdue') return <Badge tone="stop">payment overdue</Badge>;
+  if (urgent === 'due') return <Badge tone="warn">payment due</Badge>;
+  if (urgent === 'due_soon') return <Badge tone="gold">due within a month</Badge>;
+
+  const lastStage = totals?.paidStages.at(-1);
+
+  if (paid > 0 && outstanding === 0) {
+    return <Badge tone="good">paid{lastStage ? ` · ${STAGE_SHORT[lastStage]}` : ''}</Badge>;
+  }
+
+  if (paid > 0) {
+    return (
+      <Badge tone="accent">
+        {lastStage ? `${STAGE_SHORT[lastStage]} paid` : 'part paid'} ·{' '}
+        {formatMinorAsMajor(outstanding, decimals)} to go
+      </Badge>
+    );
+  }
+
+  // Nothing paid and something to pay. Quiet rather than alarming: most lines
+  // look like this for most of the planning.
+  if ((line.forecast_minor ?? 0) > 0) return <Badge tone="neutral">nothing paid</Badge>;
+  return null;
 }
 
 function BudgetRow({
@@ -383,7 +460,11 @@ function BudgetRow({
       onClick={onSelect}
       className="group flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/70"
     >
-      <button type="button" onClick={onSelect} className="focus-ring min-w-0 flex-1 rounded-lg text-left">
+      <button
+        type="button"
+        onClick={onSelect}
+        className="focus-ring min-w-0 flex-1 rounded-lg text-left"
+      >
         <p
           className={cn(
             'truncate text-sm',
@@ -396,20 +477,7 @@ function BudgetRow({
           {line.code && <span className="font-mono text-[11px]">{line.code}</span>}
           {line.payer && <span>· {line.payer}</span>}
           {line.status === 'completed' && <Badge tone="good">done</Badge>}
-          {/* Overpaying used to be invisible: outstanding floors at zero, so the
-              excess showed up nowhere at all. */}
-          {totals && totals.overpaidMinor > 0 && (
-            <Badge tone="stop">
-              overpaid by {formatMinorAsMajor(totals.overpaidMinor, decimals)}
-            </Badge>
-          )}
-          {totals && totals.paidMinor > 0 && totals.overpaidMinor === 0 && (
-            <Badge tone={totals.outstandingMinor === 0 ? 'good' : 'neutral'}>
-              {totals.outstandingMinor === 0
-                ? 'settled'
-                : `${formatMinorAsMajor(totals.paidMinor, decimals)} paid`}
-            </Badge>
-          )}
+          <PaymentState line={line} totals={totals} decimals={decimals} />
         </p>
       </button>
 

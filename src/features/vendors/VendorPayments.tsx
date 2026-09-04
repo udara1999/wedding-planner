@@ -37,7 +37,9 @@ export function VendorPayments({
       title="Payments"
       description="Recorded on the payments screen and attributed here — this panel never holds a figure of its own."
     >
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* Two by two rather than four across. These sit in one column of a
+          modal, and at four across the amounts wrapped mid-number. */}
+      <div className="grid grid-cols-2 gap-3">
         <Figure label="Paid" value={formatMinorAsMajor(paid, decimals)} currency={currency} />
         <Figure
           label="Still due"
@@ -78,34 +80,50 @@ export function VendorPayments({
           appear here automatically.
         </p>
       ) : (
-        <ul className="mt-3 divide-y divide-stone-100 rounded-xl border border-stone-200">
+        <ul className="mt-3 space-y-2">
           {rows.map((p) => {
             const status = (p.status ?? 'not_due') as PaymentStatus;
+            // Every column of a view is nullable in the generated types.
+            const settled = (p.amount_paid_minor ?? 0) >= (p.amount_due_minor ?? 0);
             return (
-              <li key={p.id} className="flex items-center gap-3 px-3 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-stone-900">
-                    {p.stage ? STAGE_LABEL[p.stage] : 'Payment'}
-                  </p>
-                  <p className="truncate text-xs text-stone-400">
-                    {p.paid_on
-                      ? `paid ${p.paid_on}`
-                      : p.due_date
-                        ? `due ${p.due_date}`
-                        : 'no date set'}
-                    {p.method ? ` · ${p.method}` : ''}
-                    {p.reference ? ` · ${p.reference}` : ''}
-                  </p>
+              <li key={p.id} className="rounded-xl border border-stone-200 bg-white px-3.5 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-stone-900">
+                      {p.stage ? STAGE_LABEL[p.stage] : 'Payment'}
+                    </p>
+                    <p className="mt-0.5 text-xs text-stone-400">
+                      {p.paid_on
+                        ? `paid ${p.paid_on}`
+                        : p.due_date
+                          ? `due ${p.due_date}`
+                          : 'no date set'}
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="tabular text-base font-semibold text-stone-900">
+                      <span className="mr-1 text-[11px] font-normal text-stone-400">
+                        {currency}
+                      </span>
+                      {formatMinorAsMajor(p.amount_paid_minor, decimals)}
+                    </p>
+                    {/* Only when it differs. "of 50,000" under "50,000" is
+                        noise on every settled row. */}
+                    {!settled && (
+                      <p className="tabular text-[11px] text-stone-400">
+                        of {formatMinorAsMajor(p.amount_due_minor, decimals)}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="tabular text-sm text-stone-900">
-                    {formatMinorAsMajor(p.amount_paid_minor, decimals)}
-                  </p>
-                  <p className="tabular text-[11px] text-stone-400">
-                    of {formatMinorAsMajor(p.amount_due_minor, decimals)}
-                  </p>
+
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-stone-100 pt-2 text-[11px] text-stone-400">
+                  <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
+                  {p.method && <span>{p.method}</span>}
+                  {p.reference && <span className="font-mono">{p.reference}</span>}
+                  {p.paid_by && <span>by {p.paid_by}</span>}
+                  {!p.budget_line_id && <span className="text-amber-700">no budget line</span>}
                 </div>
-                <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
               </li>
             );
           })}

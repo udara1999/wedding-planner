@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(148);
+select plan(158);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -936,11 +936,23 @@ select is((select count(*)::int from information_schema.role_table_grants
           'anon has no grant of any kind on the guests table');
 
 -- =============================================================================
--- 23. Public RSVP as a genuinely anonymous caller (4.5) — 10 assertions
+-- 23. The public RSVP surface (4.5) and its guard (4.7) — 21 assertions
 -- =============================================================================
--- These run as `anon`, which is the whole point: the plan calls this the one
--- genuinely risky surface, so it is exercised as the actual attacker role
--- rather than as a logged-in user pretending.
+-- The shape of this section changed with 4.7. anon used to call these RPCs
+-- directly, and that was the point of testing as anon. It no longer can: the
+-- grants were revoked so that every caller goes through the rsvp Edge Function,
+-- which applies Turnstile and rate limits first.
+--
+-- So there are now two things to prove, and the second is the one that would
+-- rot quietly. That anon is refused — otherwise the limits are advisory and a
+-- script can simply skip them. And that the RPCs still behave correctly for the
+-- role that does call them, which is the service role the function holds.
+--
+-- The behavioural assertions therefore run as the service role. That is a real
+-- reduction in what they prove, and it is why the refusals are asserted as
+-- grants rather than inferred from an error: a `throws_ok` alone would keep
+-- passing if the function started failing for some unrelated reason.
+-- =============================================================================
 select tests.become_service_role();
 
 create temporary table tok (k text primary key, v uuid);
@@ -950,9 +962,36 @@ select 'household', rsvp_token from guests
  where wedding_id = (select v from w where k='a')
    and household_name = 'Bride side household';
 
-select tests.logout();
+-- 1. The 4.7 guarantee: the Edge Function is the only route in.
+select is(has_function_privilege('anon', 'public.rsvp_lookup(uuid)', 'execute'),
+          false,
+          'anon cannot execute rsvp_lookup — the Edge Function is the only route');
 
--- 1. The read path.
+select is(has_function_privilege('anon',
+            'public.rsvp_submit(uuid, int, int, text, boolean, boolean, text, text)',
+            'execute'),
+          false,
+          'anon cannot execute rsvp_submit, so the rate limits cannot be skipped');
+
+select is(has_function_privilege('anon',
+            'public.rsvp_rate_take(text, int, interval)', 'execute'),
+          false,
+          'anon cannot call the limiter and burn someone else''s bucket');
+
+-- 2. And the refusal is real, not just a missing grant on paper.
+select tests.logout();
+select throws_ok(
+  $q$ select * from public.rsvp_lookup((select v from tok where k='household')) $q$);
+
+-- 3. Nothing behind the functions is reachable either. Unchanged by 4.7, and
+--    still the assertion that matters most on this surface.
+select throws_ok($q$ select count(*) from guests $q$);
+select throws_ok($q$ select count(*) from rsvp_submissions $q$);
+select throws_ok($q$ select count(*) from rsvp_rate_events $q$);
+
+-- 4. The read path, as the role the function actually uses.
+select tests.become_service_role();
+
 select is((select count(*)::int from public.rsvp_lookup((select v from tok where k='household'))),
           1,
           'A valid token returns exactly one household');
@@ -961,23 +1000,19 @@ select is((select household_name from public.rsvp_lookup((select v from tok wher
           'Bride side household',
           'The lookup returns the right household');
 
--- 2. An unknown token is silent, not an error: a distinguishable failure is an
---    oracle for anyone guessing.
+-- An unknown token is silent, not an error: a distinguishable failure is an
+-- oracle for anyone guessing.
 select is((select count(*)::int from public.rsvp_lookup(gen_random_uuid())), 0,
           'An unknown token returns no rows rather than raising');
 
--- 3. anon cannot reach the tables behind those functions.
-select throws_ok($q$ select count(*) from guests $q$);
-select throws_ok($q$ select count(*) from rsvp_submissions $q$);
-
--- 4. The write path, within what the household was invited for (4 adults + 1
---    child).
+-- 5. The write path, within what the household was invited for (4 adults + 1
+--    child), now carrying the caller hint 4.7 records.
 select lives_ok(
   $q$ select public.rsvp_submit((select v from tok where k='household'),
-                                3, 1, 'no pork', true, false, 'see you there') $q$,
+                                3, 1, 'no pork', true, false, 'see you there',
+                                'abc123hash') $q$,
   'A household can reply through the public function');
 
-select tests.become_service_role();
 select is((select rsvp_status::text from guests
              where rsvp_token = (select v from tok where k='household')),
           'accepted',
@@ -989,21 +1024,44 @@ select is((select count(*)::int from rsvp_submissions
           1,
           'Every accepted submission is recorded for audit');
 
--- 5. The control §4.5 names: a public form cannot invent guests.
-select tests.logout();
+select is((select client_hint from rsvp_submissions
+             where guest_id = (select id from guests
+                                where rsvp_token = (select v from tok where k='household'))),
+          'abc123hash',
+          'The audit row records who submitted, as a salted hash');
+
+-- 6. The control §4.5 names: a public form cannot invent guests. Still enforced
+--    in the RPC, not in the Edge Function, so a bug in the function cannot
+--    inflate a head count.
 select throws_ok(
   $q$ select public.rsvp_submit((select v from tok where k='household'), 40, 0) $q$);
 
--- 6. Nobody coming is a decline, not a silent nothing.
+-- 7. Nobody coming is a decline, not a silent nothing.
 select lives_ok(
   $q$ select public.rsvp_submit((select v from tok where k='household'), 0, 0) $q$,
   'A household can decline by replying with nobody attending');
 
-select tests.become_service_role();
 select is((select rsvp_status::text from guests
              where rsvp_token = (select v from tok where k='household')),
           'declined',
           'Replying with nobody coming marks the household declined');
+
+-- 8. The limiter itself (4.7). Two units in the bucket, then refusal.
+select is(public.rsvp_rate_take('test:bucket', 2, interval '1 hour'), true,
+          'The first attempt in a bucket is allowed');
+
+select is(public.rsvp_rate_take('test:bucket', 2, interval '1 hour'), true,
+          'The second attempt is still inside a limit of two');
+
+select is(public.rsvp_rate_take('test:bucket', 2, interval '1 hour'), false,
+          'The third attempt is refused');
+
+-- The property that makes the limiter hold rather than leak: a refused attempt
+-- costs the caller a unit too. Counting only what it allowed would let someone
+-- sit on the boundary indefinitely.
+select is((select count(*)::int from rsvp_rate_events where bucket = 'test:bucket'),
+          3,
+          'A refused attempt is recorded, so sitting on the limit does not work');
 
 -- =============================================================================
 -- The vendor precedence rule  (20260904000100)

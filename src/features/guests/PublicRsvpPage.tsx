@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Check, Heart, Loader2, Minus, Plus, X } from 'lucide-react';
 import { useRsvpLookup, useRsvpSubmit, type RsvpHousehold } from './rsvpApi';
+import { useTurnstile } from './turnstile';
 import { Button, Card, CardBody, Field, Input, Textarea, cn } from '../../components/ui';
 
 /**
@@ -120,6 +121,16 @@ function RsvpForm({
   onDone: (outcome: { attending: boolean; people: number }) => void;
 }) {
   const submit = useRsvpSubmit(token);
+  // Destructured rather than kept as one object: the ref must not be read
+  // through the same value the render reads `ready` from.
+  const {
+    enabled: challengeEnabled,
+    ready: challengeReady,
+    failed: challengeFailed,
+    token: challengeToken,
+    containerRef: challengeRef,
+    reset: resetChallenge,
+  } = useTurnstile();
   const replied = household.rsvp_status === 'accepted' || household.rsvp_status === 'declined';
 
   // Initial state derived from what they said last time, so changing one detail
@@ -153,10 +164,14 @@ function RsvpForm({
         needsRoom: isAttending ? needsRoom : false,
         needsTransport: isAttending ? needsTransport : false,
         message,
+        turnstileToken: challengeToken,
       },
       {
         onSuccess: () =>
           onDone({ attending: isAttending, people: isAttending ? adults + children : 0 }),
+        // A Turnstile token is single-use. Without a reset, correcting an
+        // answer after a rejected submit would fail on a spent token.
+        onError: () => resetChallenge(),
       },
     );
   }
@@ -254,6 +269,12 @@ function RsvpForm({
               />
             </Field>
 
+            {/* Ticket 4.7. Rendered only when a site key is configured; the
+                Edge Function's rate limits apply either way. */}
+            {challengeEnabled && !challengeFailed && (
+              <div ref={challengeRef} className="flex justify-center" />
+            )}
+
             {submit.error && (
               <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
                 {submit.error instanceof Error ? submit.error.message : 'Something went wrong'}
@@ -264,6 +285,7 @@ function RsvpForm({
               size="lg"
               className="w-full"
               loading={submit.isPending}
+              disabled={!challengeReady}
               onClick={() => send(attending)}
             >
               {attending ? 'Send our reply' : 'Send our apologies'}

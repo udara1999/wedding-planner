@@ -36,3 +36,11 @@ enable_confirmations = true
 [inbucket]
 enabled = true
 port = 54324
+
+# Ticket 4.7. The guard in front of the public RSVP RPCs.
+#
+# verify_jwt stays ON: guests have no account, but the browser sends the
+# project's anon key, which keeps the endpoint off the open internet without
+# asking a guest to sign in. It is one barrier among several, not the barrier.
+[functions.rsvp]
+verify_jwt = true

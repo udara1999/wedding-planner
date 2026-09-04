@@ -269,7 +269,8 @@ export function SetupPage() {
             error={form.formState.errors.total_budget_minor?.message}
             hint="The ceiling every forecast is measured against."
           >
-            <Input inputMode="decimal" disabled={!canEdit} {...form.register('total_budget_minor')} />
+            <Input inputMode="decimal"
+                placeholder="0.00" disabled={!canEdit} {...form.register('total_budget_minor')} />
           </Field>
           <Two>
             <Field
@@ -277,14 +278,16 @@ export function SetupPage() {
               error={form.formState.errors.contingency_pct?.message}
               hint="Held back for overruns. Max 50."
             >
-              <Input inputMode="decimal" disabled={!canEdit} {...form.register('contingency_pct')} />
+              <Input inputMode="decimal"
+                placeholder="0" disabled={!canEdit} {...form.register('contingency_pct')} />
             </Field>
             <Field
               label="Guest buffer %"
               error={form.formState.errors.guest_buffer_pct?.message}
               hint="Extra head count catered for. Max 50."
             >
-              <Input inputMode="decimal" disabled={!canEdit} {...form.register('guest_buffer_pct')} />
+              <Input inputMode="decimal"
+                placeholder="0" disabled={!canEdit} {...form.register('guest_buffer_pct')} />
             </Field>
           </Two>
         </Section>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Search, UsersRound } from 'lucide-react';
+import { FileUp, Plus, Search, UsersRound } from 'lucide-react';
 import {
   useCreateGuest,
   useDeleteGuest,
@@ -11,6 +11,7 @@ import {
 } from './api';
 import { countGuests } from './counts';
 import { GuestDetail } from './GuestDetail';
+import { ImportGuestsModal } from './import/ImportGuestsModal';
 import type { MyWedding, WeddingSide } from '../../types/db';
 import {
   Badge,
@@ -60,6 +61,7 @@ export function GuestsPage() {
   const [statusFilter, setStatusFilter] = useState<RsvpStatus | 'all'>('all');
   const [sideFilter, setSideFilter] = useState<WeddingSide | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -112,20 +114,38 @@ export function GuestsPage() {
         }
         actions={
           canEdit && (
-            <Button
-              icon={<Plus className="size-4" />}
-              loading={create.isPending}
-              onClick={() =>
-                create.mutate(
-                  { household_name: 'New household', adults_invited: 2 },
-                  { onSuccess: (row) => setSelectedId(row.id) },
-                )
-              }
-            >
-              Add household
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Ticket 4.2. Retyping a guest list is the single most tedious
+                  part of setting up, so the import sits next to Add rather
+                  than being buried in a settings screen. */}
+              <Button
+                variant="secondary"
+                icon={<FileUp className="size-4" />}
+                onClick={() => setImporting(true)}
+              >
+                Import
+              </Button>
+              <Button
+                icon={<Plus className="size-4" />}
+                loading={create.isPending}
+                onClick={() =>
+                  create.mutate(
+                    { household_name: 'New household', adults_invited: 2 },
+                    { onSuccess: (row) => setSelectedId(row.id) },
+                  )
+                }
+              >
+                Add household
+              </Button>
+            </div>
           )
         }
+      />
+
+      <ImportGuestsModal
+        weddingId={wedding.id}
+        open={importing}
+        onClose={() => setImporting(false)}
       />
 
       {/* Ticket 4.4. Households and heads side by side, because they answer
@@ -215,11 +235,7 @@ export function GuestsPage() {
           ) : (
             <ul className="divide-y divide-stone-100">
               {visible.map((g) => (
-                <GuestRowItem
-                  key={g.id}
-                  guest={g}
-                  onOpen={() => setSelectedId(g.id)}
-                />
+                <GuestRowItem key={g.id} guest={g} onOpen={() => setSelectedId(g.id)} />
               ))}
             </ul>
           )}
@@ -235,7 +251,9 @@ export function GuestsPage() {
         title={selected?.household_name ?? ''}
         subtitle={selected?.relationship ?? undefined}
         badge={
-          selected && <Badge tone={RSVP_TONE[selected.rsvp_status]}>{RSVP_LABEL[selected.rsvp_status]}</Badge>
+          selected && (
+            <Badge tone={RSVP_TONE[selected.rsvp_status]}>{RSVP_LABEL[selected.rsvp_status]}</Badge>
+          )
         }
       >
         {selected && (
@@ -261,7 +279,11 @@ function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }
       onClick={onOpen}
       className="flex cursor-pointer items-center gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/70"
     >
-      <button type="button" onClick={onOpen} className="focus-ring min-w-0 flex-1 rounded-lg text-left">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="focus-ring min-w-0 flex-1 rounded-lg text-left"
+      >
         <p className="flex items-center gap-1.5 truncate text-sm text-stone-900">
           {guest.household_name}
           {guest.vip && <Badge tone="gold">VIP</Badge>}

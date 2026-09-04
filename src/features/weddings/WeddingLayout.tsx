@@ -242,131 +242,141 @@ export function WeddingLayout() {
      * while a long budget scrolls — previously the whole page scrolled and took
      * the navigation with it.
      */
-    <div className="flex h-full overflow-hidden bg-ivory">
-      {/* Backdrop for the mobile drawer. */}
-      {navOpen && (
-        <button
-          aria-label="Close navigation"
-          className="fixed inset-0 z-30 bg-stone-900/25 backdrop-blur-[1px] lg:hidden"
-          onClick={() => setNavOpen(false)}
-        />
-      )}
-
-      <aside
-        className={cn(
-          'no-print scroll-subtle z-40 flex h-full w-64 shrink-0 flex-col overflow-y-auto',
-          'border-r border-stone-200/80 bg-white',
-          // Off-canvas below lg, a normal column above it.
-          'fixed inset-y-0 left-0 transition-transform duration-200 lg:static lg:translate-x-0',
-          navOpen ? 'translate-x-0 shadow-pop' : '-translate-x-full',
-        )}
+    <>
+      {/* Ticket 9.7. Fifteen nav items before the page content is a lot of
+          tabbing on every navigation. Visible only when focused. */}
+      <a
+        href="#main"
+        className="focus-ring sr-only rounded-lg bg-wine-700 px-3 py-2 text-sm font-medium text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
       >
-        <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3">
-          <Link
-            to="/"
-            className="focus-ring group min-w-0 rounded-lg"
+        Skip to the page
+      </a>
+      <div className="flex h-full overflow-hidden bg-ivory">
+        {/* Backdrop for the mobile drawer. */}
+        {navOpen && (
+          <button
+            aria-label="Close navigation"
+            className="fixed inset-0 z-30 bg-stone-900/25 backdrop-blur-[1px] lg:hidden"
             onClick={() => setNavOpen(false)}
-          >
-            <span className="text-[11px] font-medium text-stone-400 group-hover:text-stone-600">
-              All weddings
-            </span>
-            <p className="truncate text-[15px] leading-snug font-semibold tracking-tight text-stone-900">
+          />
+        )}
+
+        <aside
+          className={cn(
+            'no-print scroll-subtle z-40 flex h-full w-64 shrink-0 flex-col overflow-y-auto',
+            'border-r border-stone-200/80 bg-white',
+            // Off-canvas below lg, a normal column above it.
+            'fixed inset-y-0 left-0 transition-transform duration-200 lg:static lg:translate-x-0',
+            navOpen ? 'translate-x-0 shadow-pop' : '-translate-x-full',
+          )}
+        >
+          <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-3">
+            <Link
+              to="/"
+              className="focus-ring group min-w-0 rounded-lg"
+              onClick={() => setNavOpen(false)}
+            >
+              <span className="text-[11px] font-medium text-stone-500 group-hover:text-stone-600">
+                All weddings
+              </span>
+              <p className="truncate text-[15px] leading-snug font-semibold tracking-tight text-stone-900">
+                {wedding.bride_name} &amp; {wedding.groom_name}
+              </p>
+            </Link>
+            <IconButton
+              label="Close navigation"
+              className="lg:hidden"
+              size="sm"
+              onClick={() => setNavOpen(false)}
+            >
+              <X className="size-4" />
+            </IconButton>
+          </div>
+
+          <div className="mx-4 mb-3 flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2">
+            <Badge tone="gold">{wedding.role}</Badge>
+            {typeof days === 'number' && (
+              <span className="tabular text-xs text-stone-500">
+                {days >= 0 ? `${days} days to go` : `${Math.abs(days)} days ago`}
+              </span>
+            )}
+          </div>
+
+          <nav className="flex-1 space-y-4 px-2 pb-2">
+            {groups.map((group) => (
+              <div key={group.heading}>
+                <p className="px-3 pb-1 text-[10px] font-semibold tracking-wider text-stone-500 uppercase">
+                  {group.heading}
+                </p>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.to === ''}
+                      onClick={() => setNavOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          'focus-ring group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+                          isActive
+                            ? 'bg-wine-50 font-medium text-wine-800'
+                            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900',
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <span className={isActive ? 'text-wine-600' : 'text-stone-500'}>
+                            {item.icon}
+                          </span>
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {item.phase && (
+                            <span
+                              title={`Arrives in phase ${item.phase}`}
+                              className="rounded bg-stone-100 px-1 text-[10px] text-stone-500"
+                            >
+                              P{item.phase}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          <div className="border-t border-stone-100 p-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              icon={<LogOut className="size-4" />}
+              onClick={() => void signOut()}
+            >
+              Sign out
+            </Button>
+          </div>
+        </aside>
+
+        {/* The one scrolling region. min-w-0 stops a wide child widening the
+          flex item and reintroducing a horizontal scrollbar. */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <header className="no-print flex items-center gap-3 border-b border-stone-200/80 bg-white/80 px-4 py-2.5 backdrop-blur lg:hidden">
+            <IconButton label="Open navigation" onClick={() => setNavOpen(true)}>
+              <Menu className="size-5" />
+            </IconButton>
+            <p className="truncate text-sm font-semibold text-stone-900">
               {wedding.bride_name} &amp; {wedding.groom_name}
             </p>
-          </Link>
-          <IconButton
-            label="Close navigation"
-            className="lg:hidden"
-            size="sm"
-            onClick={() => setNavOpen(false)}
-          >
-            <X className="size-4" />
-          </IconButton>
+          </header>
+
+          <main id="main" tabIndex={-1} className="scroll-subtle min-w-0 flex-1 overflow-y-auto">
+            <Outlet context={{ wedding }} />
+          </main>
         </div>
-
-        <div className="mx-4 mb-3 flex items-center gap-2 rounded-lg bg-stone-50 px-3 py-2">
-          <Badge tone="gold">{wedding.role}</Badge>
-          {typeof days === 'number' && (
-            <span className="tabular text-xs text-stone-500">
-              {days >= 0 ? `${days} days to go` : `${Math.abs(days)} days ago`}
-            </span>
-          )}
-        </div>
-
-        <nav className="flex-1 space-y-4 px-2 pb-2">
-          {groups.map((group) => (
-            <div key={group.heading}>
-              <p className="px-3 pb-1 text-[10px] font-semibold tracking-wider text-stone-400 uppercase">
-                {group.heading}
-              </p>
-              <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === ''}
-                    onClick={() => setNavOpen(false)}
-                    className={({ isActive }) =>
-                      cn(
-                        'focus-ring group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
-                        isActive
-                          ? 'bg-wine-50 font-medium text-wine-800'
-                          : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900',
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <span className={isActive ? 'text-wine-600' : 'text-stone-400'}>
-                          {item.icon}
-                        </span>
-                        <span className="flex-1 truncate">{item.label}</span>
-                        {item.phase && (
-                          <span
-                            title={`Arrives in phase ${item.phase}`}
-                            className="rounded bg-stone-100 px-1 text-[10px] text-stone-400"
-                          >
-                            P{item.phase}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-          ))}
-        </nav>
-
-        <div className="border-t border-stone-100 p-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start"
-            icon={<LogOut className="size-4" />}
-            onClick={() => void signOut()}
-          >
-            Sign out
-          </Button>
-        </div>
-      </aside>
-
-      {/* The one scrolling region. min-w-0 stops a wide child widening the
-          flex item and reintroducing a horizontal scrollbar. */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="no-print flex items-center gap-3 border-b border-stone-200/80 bg-white/80 px-4 py-2.5 backdrop-blur lg:hidden">
-          <IconButton label="Open navigation" onClick={() => setNavOpen(true)}>
-            <Menu className="size-5" />
-          </IconButton>
-          <p className="truncate text-sm font-semibold text-stone-900">
-            {wedding.bride_name} &amp; {wedding.groom_name}
-          </p>
-        </header>
-
-        <main className="scroll-subtle min-w-0 flex-1 overflow-y-auto">
-          <Outlet context={{ wedding }} />
-        </main>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase, unwrap } from '../../lib/supabase';
 import type { MemberRole, MyWedding, WeddingRow, WeddingSide } from '../../types/db';
 
@@ -140,7 +141,9 @@ export function useRevokeInvitation(weddingId: string) {
       // refused: the statement succeeds and touches nothing. Zero rows back
       // therefore means "not permitted", and must not look like success.
       if (rows.length === 0) {
-        throw new Error('That invitation could not be revoked — it may already have been accepted.');
+        throw new Error(
+          'That invitation could not be revoked — it may already have been accepted.',
+        );
       }
       return invitationId;
     },
@@ -173,6 +176,29 @@ export function useSeedWedding() {
       // Touches nearly everything, so invalidate broadly rather than trying to
       // enumerate what a seed affects.
       void qc.invalidateQueries();
+    },
+  });
+}
+
+/**
+ * Ticket 9.3. Creates a wedding with plausible data already in it.
+ *
+ * Navigates straight into it on success: the requirement is a populated
+ * dashboard in under two minutes, and leaving somebody on a list with one new
+ * row spends most of that on them working out what happened.
+ */
+export function useCreateDemoWedding() {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  return useMutation({
+    mutationFn: async (): Promise<string> => {
+      const { data, error } = await supabase.rpc('create_demo_wedding');
+      if (error) throw new Error(error.message);
+      return data as string;
+    },
+    onSuccess: async (weddingId) => {
+      await qc.invalidateQueries({ queryKey: ['my-weddings'] });
+      navigate(`/w/${weddingId}`);
     },
   });
 }

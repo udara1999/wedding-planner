@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { CalendarDays, LogOut, Plus } from 'lucide-react';
-import { useMyWeddings } from './api';
+import { CalendarDays, LogOut, Plus, Sparkles } from 'lucide-react';
+import { useMyWeddings, useCreateDemoWedding } from './api';
 import { useAuth } from '../auth/AuthProvider';
 import {
   Badge,
@@ -9,6 +9,7 @@ import {
   CardBody,
   EmptyState,
   ErrorState,
+  InlineError,
   Page,
   PageHeader,
   Skeleton,
@@ -24,6 +25,7 @@ const roleTone = {
 
 export function WeddingListPage() {
   const { data, isLoading, error, refetch } = useMyWeddings();
+  const demo = useCreateDemoWedding();
   const { signOut, user } = useAuth();
 
   return (
@@ -51,17 +53,42 @@ export function WeddingListPage() {
       )}
       {error && <ErrorState error={error} onRetry={() => void refetch()} />}
 
+      {/* Ticket 9.3: "a populated dashboard in under 2 minutes". Creating an
+          empty wedding cannot meet that however fast it is — seeding brings in
+          93 unstarted tasks and every figure reads zero. So the second option
+          exists, and it is offered as an equal rather than hidden as a demo
+          link, because somebody deciding whether this is worth their evening
+          needs to see it with something in it. */}
       {data && data.length === 0 && (
-        <EmptyState
-          icon={<CalendarDays className="size-5" />}
-          title="No weddings yet"
-          description="Create one to get started. You will be able to invite your partner, family and coordinator afterwards."
-          action={
-            <Link to="/new">
-              <Button icon={<Plus className="size-4" />}>Create a wedding</Button>
-            </Link>
-          }
-        />
+        <div className="space-y-4">
+          <EmptyState
+            icon={<CalendarDays className="size-5" />}
+            title="No weddings yet"
+            description="Start with your own, or look around one that is already filled in. You can invite your partner, family and coordinator afterwards."
+            action={
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Link to="/new">
+                  <Button icon={<Plus className="size-4" />}>Create a wedding</Button>
+                </Link>
+                <Button
+                  variant="secondary"
+                  icon={<Sparkles className="size-4" />}
+                  loading={demo.isPending}
+                  onClick={() => demo.mutate()}
+                >
+                  Show me a filled-in one
+                </Button>
+              </div>
+            }
+          />
+          <div className="mx-auto max-w-md">
+            <InlineError error={demo.error} />
+            <p className="text-center text-xs text-stone-500">
+              The example is a real wedding in your account with made-up details — vendors part
+              booked, one payment overdue, some guests yet to reply. Change it, or delete it.
+            </p>
+          </div>
+        </div>
       )}
 
       {data && data.length > 0 && (
@@ -83,7 +110,7 @@ export function WeddingListPage() {
                           })
                         : 'Date not set'}
                       {typeof w.days_to_go === 'number' && w.days_to_go >= 0 && (
-                        <span className="text-stone-400"> · {w.days_to_go} days to go</span>
+                        <span className="text-stone-500"> · {w.days_to_go} days to go</span>
                       )}
                     </p>
                   </div>

@@ -224,7 +224,7 @@ export function DashboardPage() {
               </CardHeader>
               <CardBody>
                 {chartRows.rows.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-stone-400">No budget lines yet.</p>
+                  <p className="py-6 text-center text-sm text-stone-500">No budget lines yet.</p>
                 ) : (
                   <ul className="scroll-subtle max-h-80 space-y-2.5 overflow-y-auto pr-1">
                     {chartRows.rows.map((c) => (
@@ -259,7 +259,7 @@ export function DashboardPage() {
                     ))}
                   </ul>
                 )}
-                <div className="mt-3 flex flex-wrap gap-3 border-t border-stone-100 pt-2.5 text-[11px] text-stone-400">
+                <div className="mt-3 flex flex-wrap gap-3 border-t border-stone-100 pt-2.5 text-[11px] text-stone-500">
                   <Swatch className="bg-stone-200" label="budgeted" />
                   <Swatch className="bg-wine-300" label="forecast" />
                   <Swatch className="bg-wine-700" label="paid" />
@@ -284,7 +284,7 @@ export function DashboardPage() {
               </CardHeader>
               <CardBody>
                 {(readiness.data ?? []).length === 0 ? (
-                  <p className="py-6 text-center text-sm text-stone-400">No tasks yet.</p>
+                  <p className="py-6 text-center text-sm text-stone-500">No tasks yet.</p>
                 ) : (
                   <ul className="scroll-subtle max-h-80 space-y-2.5 overflow-y-auto pr-1">
                     {(readiness.data ?? [])

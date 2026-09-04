@@ -216,7 +216,7 @@ export function ContributionsPage() {
                       onClick={() => startEdit(c)}
                     >
                       <p className="truncate text-sm text-stone-900">{c.contributor_name}</p>
-                      <p className="truncate text-xs text-stone-400">
+                      <p className="truncate text-xs text-stone-500">
                         {[c.relationship, c.purpose].filter(Boolean).join(' · ') || '—'}
                       </p>
                     </button>
@@ -224,7 +224,7 @@ export function ContributionsPage() {
                       <p className="text-sm tabular-nums text-stone-900">
                         {formatMoney(c.received_minor, decimals)}
                       </p>
-                      <p className="text-[11px] tabular-nums text-stone-400">
+                      <p className="text-[11px] tabular-nums text-stone-500">
                         of {formatMoney(c.agreed_minor, decimals)} {currency}
                       </p>
                     </div>

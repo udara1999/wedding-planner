@@ -234,7 +234,7 @@ export function GuestsPage() {
       <Card>
         <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-4 py-3">
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-500" />
             <Input
               className="pl-9"
               placeholder="Search a household, relationship or town"
@@ -327,14 +327,14 @@ export function GuestsPage() {
                       >
                         <ChevronDown
                           className={cn(
-                            'size-3.5 shrink-0 text-stone-400 transition-transform',
+                            'size-3.5 shrink-0 text-stone-500 transition-transform',
                             isCollapsed && '-rotate-90',
                           )}
                         />
                         <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-stone-600 uppercase">
                           {sec.label}
                         </span>
-                        <span className="tabular shrink-0 text-[11px] text-stone-400">
+                        <span className="tabular shrink-0 text-[11px] text-stone-500">
                           {sec.households} {sec.households === 1 ? 'household' : 'households'} ·{' '}
                           {sec.invited} invited
                           {sec.attending > 0 && ` · ${sec.attending} coming`}
@@ -422,20 +422,20 @@ function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }
           {guest.household_name}
           {guest.vip && <Badge tone="gold">VIP</Badge>}
         </p>
-        <p className="mt-0.5 flex items-center gap-2 truncate text-xs text-stone-400">
+        <p className="mt-0.5 flex items-center gap-2 truncate text-xs text-stone-500">
           {[guest.relationship, guest.category, guest.city].filter(Boolean).join(' · ') ||
             'no details yet'}
           {/* Icons rather than words: they are secondary facts, and spelling
               them out crowded out the name. */}
-          {guest.phone && <Phone className="size-3 shrink-0 text-stone-300" />}
-          {guest.email && <Mail className="size-3 shrink-0 text-stone-300" />}
-          {guest.needs_room && <BedDouble className="size-3 shrink-0 text-stone-300" />}
-          {guest.needs_transport && <Car className="size-3 shrink-0 text-stone-300" />}
+          {guest.phone && <Phone className="size-3 shrink-0 text-stone-500" />}
+          {guest.email && <Mail className="size-3 shrink-0 text-stone-500" />}
+          {guest.needs_room && <BedDouble className="size-3 shrink-0 text-stone-500" />}
+          {guest.needs_transport && <Car className="size-3 shrink-0 text-stone-500" />}
         </p>
       </div>
 
       {guest.side && (
-        <span className="hidden shrink-0 text-[11px] text-stone-400 sm:inline">
+        <span className="hidden shrink-0 text-[11px] text-stone-500 sm:inline">
           {SIDE_SHORT[guest.side] ?? guest.side}
         </span>
       )}
@@ -445,11 +445,11 @@ function GuestRowItem({ guest, onOpen }: { guest: GuestRow; onOpen: () => void }
       <div className="w-20 shrink-0 text-right">
         <p className="tabular text-sm font-semibold text-stone-900">
           {accepted ? attending : invited}
-          <span className="ml-1 text-[11px] font-normal text-stone-400">
+          <span className="ml-1 text-[11px] font-normal text-stone-500">
             {accepted ? 'coming' : 'invited'}
           </span>
         </p>
-        {fewer && <p className="tabular text-[11px] text-stone-400">of {invited} invited</p>}
+        {fewer && <p className="tabular text-[11px] text-stone-500">of {invited} invited</p>}
       </div>
 
       <Badge tone={RSVP_TONE[guest.rsvp_status]}>{RSVP_LABEL[guest.rsvp_status]}</Badge>

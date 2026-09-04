@@ -205,7 +205,7 @@ export function CountdownPage() {
                           ? 'bg-red-50 text-red-600'
                           : w.started
                             ? 'bg-wine-100 text-wine-700'
-                            : 'bg-stone-100 text-stone-400',
+                            : 'bg-stone-100 text-stone-500',
                     )}
                   >
                     {complete ? <Check className="size-3.5" /> : `${w.total - w.done}`}
@@ -214,7 +214,7 @@ export function CountdownPage() {
                     <span className="block truncate text-sm font-semibold text-stone-900">
                       {w.label}
                     </span>
-                    <span className="block truncate text-xs text-stone-400">
+                    <span className="block truncate text-xs text-stone-500">
                       {w.done} of {w.total} checked
                       {w.starts && ` · ${describeDue(w.starts, today) ?? w.starts}`}
                     </span>
@@ -227,7 +227,7 @@ export function CountdownPage() {
                 {!isCollapsed && (
                   <CardBody className="border-t border-stone-100 px-0 pt-0 pb-0">
                     {items.length === 0 ? (
-                      <p className="px-5 py-3 text-xs text-stone-400">
+                      <p className="px-5 py-3 text-xs text-stone-500">
                         Everything in this window is ticked.
                       </p>
                     ) : (
@@ -253,14 +253,14 @@ export function CountdownPage() {
                                 className={cn(
                                   'block text-sm',
                                   c.done
-                                    ? 'text-stone-400 line-through decoration-stone-300'
+                                    ? 'text-stone-500 line-through decoration-stone-300'
                                     : 'text-stone-800',
                                 )}
                               >
                                 {c.check_text}
                               </span>
                               {c.due_date && (
-                                <span className="block text-[11px] text-stone-400">
+                                <span className="block text-[11px] text-stone-500">
                                   {describeDue(c.due_date, today)} · {c.due_date}
                                 </span>
                               )}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { AlertCircle, Loader2, X } from 'lucide-react';
@@ -81,7 +81,7 @@ export function IconButton({
    ========================================================================== */
 const control =
   'w-full rounded-lg border border-stone-200 bg-white text-sm text-stone-900 shadow-sm ' +
-  'transition-[border-color,box-shadow] placeholder:text-stone-400 ' +
+  'transition-[border-color,box-shadow] placeholder:text-stone-500 ' +
   'focus:border-wine-500 focus:ring-2 focus:ring-wine-500/25 focus:outline-none ' +
   'disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-500 ' +
   'aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus:ring-red-500/25';
@@ -97,21 +97,15 @@ export const Textarea = ({
   <textarea className={cn(control, 'min-h-20 px-3 py-2', className)} {...props} />
 );
 
-export const Select = ({
-  className,
-  ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement>) => (
+export const Select = ({ className, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
   <div className="relative">
-    <select
-      className={cn(control, 'h-9.5 appearance-none pr-9 pl-3', className)}
-      {...props}
-    />
+    <select className={cn(control, 'h-9.5 appearance-none pr-9 pl-3', className)} {...props} />
     {/* An inline SVG rather than an icon component: a pointer-events-none
         decoration should not be a React subtree that can capture clicks. */}
     <svg
       aria-hidden
       viewBox="0 0 20 20"
-      className="pointer-events-none absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-stone-400"
+      className="pointer-events-none absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-stone-500"
     >
       <path
         d="M6 8l4 4 4-4"
@@ -286,7 +280,7 @@ export function Stat({
       >
         {value}
       </p>
-      {hint && <p className="mt-0.5 text-xs text-stone-400">{hint}</p>}
+      {hint && <p className="mt-0.5 text-xs text-stone-500">{hint}</p>}
     </div>
   );
 }
@@ -368,7 +362,7 @@ export function EmptyState({
   return (
     <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50/50 px-6 py-12 text-center">
       {icon && (
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-white text-stone-400 shadow-card">
+        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-white text-stone-500 shadow-card">
           {icon}
         </div>
       )}
@@ -440,14 +434,54 @@ export function Modal({
   size?: 'md' | 'lg' | 'full';
   children: React.ReactNode;
 }) {
-  // Escape closes it, which a mouse-only close button does not give you.
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Ticket 9.7. Escape closes it, Tab stays inside it, and focus goes back
+   * where it came from.
+   *
+   * Without the trap, tabbing out of an open dialog lands on the page behind —
+   * which a sighted mouse user never notices and a keyboard user cannot
+   * recover from, because the thing they are now typing into is covered by an
+   * overlay.
+   */
   useEffect(() => {
     if (!open) return;
+
+    const previous = document.activeElement as HTMLElement | null;
+    // The panel itself, so a screen reader announces the dialog rather than
+    // whatever control happens to be first.
+    panelRef.current?.focus();
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable || focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
+
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      // Back to the row or button that opened it, not to the top of the page.
+      previous?.focus?.();
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -460,8 +494,11 @@ export function Modal({
         onClick={onClose}
       />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
         className={cn(
           'relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-pop',
           size === 'md' && 'max-w-2xl',
@@ -509,7 +546,7 @@ export function Section({
   return (
     <section className={cn('space-y-3', className)}>
       <div>
-        <h3 className="text-[11px] font-semibold tracking-wider text-stone-400 uppercase">
+        <h3 className="text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
           {title}
         </h3>
         {description && <p className="mt-0.5 text-xs text-stone-500">{description}</p>}

@@ -366,7 +366,7 @@ function Attachments({
         <ul className="divide-y divide-stone-100 overflow-hidden rounded-lg border border-stone-200">
           {(list.data ?? []).map((a) => (
             <li key={a.id} className="flex items-center gap-2 px-3 py-2">
-              <FileText className="size-4 shrink-0 text-stone-400" />
+              <FileText className="size-4 shrink-0 text-stone-500" />
               <button
                 type="button"
                 onClick={() => void open(a.path)}

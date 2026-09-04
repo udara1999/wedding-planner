@@ -70,7 +70,7 @@ export function TimelineTable({
               )}
             >
               {phase}
-              <span className="ml-2 font-normal text-stone-400">
+              <span className="ml-2 font-normal text-stone-500">
                 {clock(rows[0]?.starts_at)}–{clock(rows.at(-1)?.ends_at)}
               </span>
             </h3>
@@ -85,7 +85,7 @@ export function TimelineTable({
                       className={cn(
                         'border-b border-stone-100 align-top',
                         onOpen && 'cursor-pointer hover:bg-stone-50/70',
-                        muted && 'text-stone-400',
+                        muted && 'text-stone-500',
                         clashing.has(e.id) && !muted && 'bg-amber-50/60',
                       )}
                     >
@@ -96,7 +96,7 @@ export function TimelineTable({
                         )}
                       >
                         <span className="font-medium text-stone-800">{clock(e.starts_at)}</span>
-                        {e.ends_at && <span className="text-stone-400">–{clock(e.ends_at)}</span>}
+                        {e.ends_at && <span className="text-stone-500">–{clock(e.ends_at)}</span>}
                       </td>
                       <td className={cn('py-1.5 pr-2', print ? 'text-[11px]' : 'text-sm')}>
                         <span className={cn(muted && 'line-through decoration-stone-300')}>
@@ -109,7 +109,7 @@ export function TimelineTable({
                           />
                         )}
                         {e.notes && !print && (
-                          <span className="block text-[11px] text-stone-400">{e.notes}</span>
+                          <span className="block text-[11px] text-stone-500">{e.notes}</span>
                         )}
                       </td>
                       <td
@@ -128,7 +128,7 @@ export function TimelineTable({
                       >
                         {e.location}
                         {vendorName(e.vendor_id) && (
-                          <span className="block text-stone-400">{vendorName(e.vendor_id)}</span>
+                          <span className="block text-stone-500">{vendorName(e.vendor_id)}</span>
                         )}
                       </td>
                       <td className="w-10 py-1.5 text-right">
@@ -199,7 +199,7 @@ export function ScheduleTable({
             </td>
             <td className={cn('py-1.5 pr-2', print ? 'text-[11px]' : 'text-sm')}>
               <span className="text-stone-900">{v.name}</span>
-              <span className="block text-[11px] text-stone-400">{v.category}</span>
+              <span className="block text-[11px] text-stone-500">{v.category}</span>
             </td>
             <td className={cn('py-1.5 pr-2 text-stone-500', text)}>{v.where_in_venue}</td>
             <td className={cn('tabular py-1.5 pr-2', text)}>
@@ -215,7 +215,7 @@ export function ScheduleTable({
                 </a>
               )}
               {v.contact_name && (
-                <span className="block text-[11px] text-stone-400">{v.contact_name}</span>
+                <span className="block text-[11px] text-stone-500">{v.contact_name}</span>
               )}
             </td>
             <td className={cn('tabular w-16 py-1.5 pr-2 text-stone-500', text)}>
@@ -276,7 +276,7 @@ export function ContactTable({ rows, print }: { rows: ContactSheetRow[]; print?:
                   <tr key={`${r.source}-${r.source_id}`} className="border-b border-stone-100">
                     <td className={cn('py-1.5 pr-2', print ? 'text-[11px]' : 'text-sm')}>
                       <span className="text-stone-900">{r.name}</span>
-                      {r.role && <span className="block text-[11px] text-stone-400">{r.role}</span>}
+                      {r.role && <span className="block text-[11px] text-stone-500">{r.role}</span>}
                     </td>
                     <td className={cn('tabular w-36 py-1.5 pr-2', text)}>
                       {r.no_number ? (
@@ -331,7 +331,7 @@ export function RiskTable({
             <Badge tone={scoreTone(r.score ?? 0)}>{r.score}</Badge>
             <div className="min-w-0 flex-1">
               <p className={cn('text-stone-900', print ? 'text-[11px]' : 'text-sm')}>{r.name}</p>
-              <p className="text-[11px] text-stone-400">
+              <p className="text-[11px] text-stone-500">
                 {r.area} · {LEVEL_LABEL[r.likelihood]} likelihood · {LEVEL_LABEL[r.impact]} impact
                 {r.owner && ` · ${r.owner}`}
               </p>

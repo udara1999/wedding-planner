@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(229);
+select plan(239);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1857,6 +1857,113 @@ select is((select count(*)::int from information_schema.columns
                                   'cost_minor', 'vendor_price_minor')),
           0,
           'The arrival board exposes no price column of any kind');
+
+-- =============================================================================
+-- Phase 9: reconciliation, entitlement and the demo — 10 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- ------------------------------------------------------------ 9.1 the figures
+-- A clean wedding to assert against, so the arithmetic is not buried under
+-- everything the earlier sections did to wedding A.
+create temporary table rc (k text primary key, v uuid);
+grant select, insert on rc to public;
+
+insert into rc
+select 'w', public.create_wedding('Recon', 'Test', current_date + 60, 'LKR', 'Asia/Colombo');
+
+-- One line, one payment part paid, one contribution received, one gift
+-- received, two guests coming. Every figure below follows from these.
+insert into budget_lines (wedding_id, name, budgeted_minor, actual_minor,
+                          refundable_deposit_minor)
+values ((select v from rc where k='w'), 'Hall', 100000, 100000, 20000);
+
+insert into payments (wedding_id, budget_line_id, amount_due_minor, amount_paid_minor)
+select (select v from rc where k='w'), id, 100000, 60000
+  from budget_lines where wedding_id = (select v from rc where k='w');
+
+insert into contributions (wedding_id, contributor, agreed_minor, received_minor)
+values ((select v from rc where k='w'), 'Parents', 50000, 30000);
+
+insert into guests (wedding_id, household_name, adults_invited, rsvp_status,
+                    adults_attending, gift_received_minor)
+values ((select v from rc where k='w'), 'A', 2, 'accepted', 2, 5000),
+       ((select v from rc where k='w'), 'B', 2, 'pending', 0, 0);
+
+-- True cost is the final bill: 60,000 spent plus 40,000 still owed. NOT the
+-- forecast, and not just what has been paid.
+select is((select true_cost_minor from v_reconciliation
+            where wedding_id = (select v from rc where k='w')),
+          100000::bigint,
+          'True cost is what has gone out plus what is still owed');
+
+-- Net cost subtracts money RECEIVED only: 100,000 - 30,000 - 5,000.
+select is((select net_cost_minor from v_reconciliation
+            where wedding_id = (select v from rc where k='w')),
+          65000::bigint,
+          'Net cost subtracts contributions and gifts actually received');
+
+-- The 20,000 deposit is reported, never netted off — until it is back it is
+-- money the couple does not have.
+select is((select refundable_out_minor from v_reconciliation
+            where wedding_id = (select v from rc where k='w')),
+          20000::bigint,
+          'Refundable deposits are reported separately, not deducted');
+
+-- Two heads coming, so 100,000 / 2. Divided by who CAME, not who was invited.
+select is((select cost_per_guest_minor from v_reconciliation
+            where wedding_id = (select v from rc where k='w')),
+          50000::bigint,
+          'Cost per guest divides by the heads who accepted');
+
+-- Nobody coming means no cost per guest. Reporting zero would read as free.
+update guests set rsvp_status = 'declined', adults_attending = 0
+ where wedding_id = (select v from rc where k='w');
+
+select is((select cost_per_guest_minor from v_reconciliation
+            where wedding_id = (select v from rc where k='w')),
+          null,
+          'With nobody coming there is no cost per guest, rather than zero');
+
+-- Money-only, like every other financial view. §4.6 again.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from v_reconciliation
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'A coordinator cannot read the reconciliation figures');
+
+-- ------------------------------------------------------------ 9.4 entitlement
+select tests.login((select v from ids where k = 'alice'));
+
+-- The wedding created above is 60 days out, so inside the free window.
+select is((select payment_due from v_entitlement
+            where wedding_id = (select v from rc where k='w')),
+          false,
+          'Nothing is owed while the wedding is more than 30 days away');
+
+update weddings set wedding_date = current_date + 10
+ where id = (select v from rc where k='w');
+
+select is((select payment_due from v_entitlement
+            where wedding_id = (select v from rc where k='w')),
+          true,
+          'Inside 30 days, and unpaid, payment is due');
+
+-- Nothing in the app writes this table; the service role does. So the write
+-- being refused here IS the intended behaviour.
+select throws_ok(
+  $q$ insert into wedding_billing (wedding_id, state)
+      values ((select v from rc where k='w'), 'paid') $q$);
+
+select tests.become_service_role();
+insert into wedding_billing (wedding_id, state, paid_at)
+values ((select v from rc where k='w'), 'paid', now());
+
+select tests.login((select v from ids where k = 'alice'));
+select is((select payment_due from v_entitlement
+            where wedding_id = (select v from rc where k='w')),
+          false,
+          'Once recorded as paid, nothing is owed');
 
 select * from finish();
 rollback;

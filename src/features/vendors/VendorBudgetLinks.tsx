@@ -115,7 +115,7 @@ export function VendorBudgetLinks({
         <ul className="divide-y divide-stone-100 overflow-hidden rounded-lg border border-stone-200">
           {linked.map((l) => (
             <li key={l.id} className="flex items-center gap-2 px-3 py-2">
-              <span className="w-14 shrink-0 font-mono text-[11px] text-stone-400">
+              <span className="w-14 shrink-0 font-mono text-[11px] text-stone-500">
                 {l.code ?? '—'}
               </span>
               <span className="min-w-0 flex-1 truncate text-xs text-stone-800">{l.name}</span>
@@ -141,7 +141,7 @@ export function VendorBudgetLinks({
       {picking && canEdit && (
         <div className="rounded-lg border border-stone-200">
           <div className="relative border-b border-stone-100">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-stone-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-stone-500" />
             <Input
               className="border-0 pl-9 shadow-none focus:ring-0"
               placeholder="Search a budget line by name or code"
@@ -161,7 +161,7 @@ export function VendorBudgetLinks({
                     onClick={() => link.mutate({ lineId: l.id, vendorId })}
                     className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-stone-50"
                   >
-                    <span className="w-14 shrink-0 font-mono text-[11px] text-stone-400">
+                    <span className="w-14 shrink-0 font-mono text-[11px] text-stone-500">
                       {l.code ?? '—'}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-xs text-stone-800">{l.name}</span>

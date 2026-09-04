@@ -218,7 +218,7 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
       <Card>
         <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-4 py-3">
           <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-500" />
             <Input
               className="pl-9"
               placeholder={`Search ${config.title.toLowerCase()}`}
@@ -287,14 +287,14 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
                       >
                         <ChevronDown
                           className={cn(
-                            'size-3.5 shrink-0 text-stone-400 transition-transform',
+                            'size-3.5 shrink-0 text-stone-500 transition-transform',
                             isCollapsed && '-rotate-90',
                           )}
                         />
                         <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-stone-600 uppercase">
                           {sec.label}
                         </span>
-                        <span className="tabular shrink-0 text-[11px] text-stone-400">
+                        <span className="tabular shrink-0 text-[11px] text-stone-500">
                           {done} of {sec.rows.length} done
                         </span>
                       </button>
@@ -390,12 +390,12 @@ function ChecklistRowItem({
         <p
           className={cn(
             'truncate text-sm',
-            muted ? 'text-stone-400 line-through decoration-stone-300' : 'text-stone-900',
+            muted ? 'text-stone-500 line-through decoration-stone-300' : 'text-stone-900',
           )}
         >
           {row.name}
         </p>
-        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 truncate text-xs text-stone-400">
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 truncate text-xs text-stone-500">
           {listFields.map((f) => {
             const text = formatValue(f, row[f.key], decimals);
             return text ? <span key={f.key}>{text}</span> : null;
@@ -736,7 +736,7 @@ function RecordModal({
       </div>
 
       {problem && <p className="mt-4 text-xs text-red-700">{problem}</p>}
-      {saving && <p className="mt-4 text-xs text-stone-400">Saving…</p>}
+      {saving && <p className="mt-4 text-xs text-stone-500">Saving…</p>}
     </Modal>
   );
 }

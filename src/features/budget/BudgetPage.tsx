@@ -230,7 +230,7 @@ export function BudgetPage() {
               )}
             >
               <span>All categories</span>
-              <span className="tabular text-xs text-stone-400">{(lines.data ?? []).length}</span>
+              <span className="tabular text-xs text-stone-500">{(lines.data ?? []).length}</span>
             </button>
 
             <div className="mt-1 space-y-0.5">
@@ -257,7 +257,7 @@ export function BudgetPage() {
                     >
                       {row.category_label}
                     </span>
-                    <span className="tabular block text-[11px] text-stone-400">
+                    <span className="tabular block text-[11px] text-stone-500">
                       {money(Number(row.forecast_minor ?? 0))} forecast
                     </span>
                   </button>
@@ -272,7 +272,7 @@ export function BudgetPage() {
               it filters, and saves a whole row of vertical space. */}
           <div className="flex flex-wrap items-center gap-2 border-b border-stone-100 px-4 py-3">
             <div className="relative min-w-0 flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-500" />
               <Input
                 className="pl-9"
                 placeholder="Search a line name or code, e.g. necklace or BG077"
@@ -494,12 +494,12 @@ function BudgetRow({
         <p
           className={cn(
             'truncate text-sm',
-            muted ? 'text-stone-400 line-through decoration-stone-300' : 'text-stone-900',
+            muted ? 'text-stone-500 line-through decoration-stone-300' : 'text-stone-900',
           )}
         >
           {line.name}
         </p>
-        <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-stone-400">
+        <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-stone-500">
           {line.code && <span className="font-mono text-[11px]">{line.code}</span>}
           {line.payer && <span>· {line.payer}</span>}
           {line.status === 'completed' && <Badge tone="good">done</Badge>}
@@ -508,10 +508,10 @@ function BudgetRow({
       </button>
 
       <div className="shrink-0 text-right">
-        <p className={cn('tabular text-sm', muted ? 'text-stone-400' : 'text-stone-900')}>
+        <p className={cn('tabular text-sm', muted ? 'text-stone-500' : 'text-stone-900')}>
           {formatMoney(line.forecast_minor, decimals)}
         </p>
-        <p className="tabular text-[11px] text-stone-400">
+        <p className="tabular text-[11px] text-stone-500">
           of {formatMoney(line.budgeted_minor, decimals)} {currency}
         </p>
       </div>

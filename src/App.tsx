@@ -33,6 +33,7 @@ import { ExportPage } from './features/export/ExportPage';
 import { PublicRsvpPage } from './features/guests/PublicRsvpPage';
 import { supabase } from './lib/supabase';
 import { Spinner } from './components/ui';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,76 +123,78 @@ function AcceptInvitePage() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public and unauthenticated: no RequireAuth, no wedding shell.
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              {/* Public and unauthenticated: no RequireAuth, no wedding shell.
                 A guest reaching this has no account and never will. */}
-            <Route path="/rsvp/:token" element={<PublicRsvpPage />} />
+              <Route path="/rsvp/:token" element={<PublicRsvpPage />} />
 
-            <Route path="/signin" element={<SignInPage />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/auth/reset" element={<ResetPasswordPage />} />
-            <Route path="/invite" element={<AcceptInvitePage />} />
+              <Route path="/signin" element={<SignInPage />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/auth/reset" element={<ResetPasswordPage />} />
+              <Route path="/invite" element={<AcceptInvitePage />} />
 
-            <Route
-              path="/"
-              element={
-                <RequireAuth>
-                  <WeddingListPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/new"
-              element={
-                <RequireAuth>
-                  <CreateWeddingPage />
-                </RequireAuth>
-              }
-            />
+              <Route
+                path="/"
+                element={
+                  <RequireAuth>
+                    <WeddingListPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/new"
+                element={
+                  <RequireAuth>
+                    <CreateWeddingPage />
+                  </RequireAuth>
+                }
+              />
 
-            <Route
-              path="/w/:weddingId"
-              element={
-                <RequireAuth>
-                  <WeddingLayout />
-                </RequireAuth>
-              }
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="setup" element={<SetupPage />} />
-              <Route path="members" element={<MembersPage />} />
-              <Route path="budget" element={<BudgetPage />} />
-              <Route path="payments" element={<PaymentsPage />} />
-              <Route path="contributions" element={<ContributionsPage />} />
-              <Route path="compare" element={<ComparePage />} />
-              <Route path="vendors" element={<VendorsPage />} />
-              <Route path="guests" element={<GuestsPage />} />
-              <Route path="seating" element={<SeatingPage />} />
-              <Route path="gifts" element={<GiftsPage />} />
-              <Route path="tasks" element={<TasksPage />} />
-              <Route path="countdown" element={<CountdownPage />} />
-              <Route path="responsibilities" element={<ResponsibilitiesPage />} />
-              {/* Ticket 6.1: one route for all seventeen checklist modules.
+              <Route
+                path="/w/:weddingId"
+                element={
+                  <RequireAuth>
+                    <WeddingLayout />
+                  </RequireAuth>
+                }
+              >
+                <Route index element={<DashboardPage />} />
+                <Route path="setup" element={<SetupPage />} />
+                <Route path="members" element={<MembersPage />} />
+                <Route path="budget" element={<BudgetPage />} />
+                <Route path="payments" element={<PaymentsPage />} />
+                <Route path="contributions" element={<ContributionsPage />} />
+                <Route path="compare" element={<ComparePage />} />
+                <Route path="vendors" element={<VendorsPage />} />
+                <Route path="guests" element={<GuestsPage />} />
+                <Route path="seating" element={<SeatingPage />} />
+                <Route path="gifts" element={<GiftsPage />} />
+                <Route path="tasks" element={<TasksPage />} />
+                <Route path="countdown" element={<CountdownPage />} />
+                <Route path="responsibilities" element={<ResponsibilitiesPage />} />
+                {/* Ticket 6.1: one route for all seventeen checklist modules.
                   Seventeen <Route> entries would be seventeen places to forget
                   the eighteenth. */}
-              <Route path="m/:slug" element={<ChecklistModulePage />} />
-              <Route path="timeline" element={<TimelinePage />} />
-              <Route path="schedule" element={<VendorSchedulePage />} />
-              <Route path="contacts" element={<ContactSheetPage />} />
-              <Route path="risks" element={<RisksPage />} />
-              {/* Ticket 8.6. Inside the wedding shell so it has the wedding,
+                <Route path="m/:slug" element={<ChecklistModulePage />} />
+                <Route path="timeline" element={<TimelinePage />} />
+                <Route path="schedule" element={<VendorSchedulePage />} />
+                <Route path="contacts" element={<ContactSheetPage />} />
+                <Route path="risks" element={<RisksPage />} />
+                {/* Ticket 8.6. Inside the wedding shell so it has the wedding,
                   but it lays itself out for paper. */}
-              <Route path="pack" element={<PackPage />} />
-              <Route path="export" element={<ExportPage />} />
-              <Route path="*" element={<NotBuiltYet />} />
-            </Route>
+                <Route path="pack" element={<PackPage />} />
+                <Route path="export" element={<ExportPage />} />
+                <Route path="*" element={<NotBuiltYet />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }

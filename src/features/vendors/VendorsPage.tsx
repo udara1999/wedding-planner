@@ -242,7 +242,7 @@ export function VendorsPage() {
               />
             ))}
           </div>
-          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone-400">
+          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone-500">
             {columns
               .filter((c) => c.vendors.length > 0)
               .map((c) => (
@@ -307,7 +307,7 @@ export function VendorsPage() {
                 <span className="min-w-0 flex-1 truncate text-xs font-semibold tracking-wide text-stone-600 uppercase">
                   {column.label}
                 </span>
-                <span className="tabular shrink-0 text-xs text-stone-400">
+                <span className="tabular shrink-0 text-xs text-stone-500">
                   {column.vendors.length}
                 </span>
               </div>
@@ -326,7 +326,7 @@ export function VendorsPage() {
                   />
                 ))}
                 {column.vendors.length === 0 && (
-                  <div className="rounded-xl border border-dashed border-stone-200 px-3 py-8 text-center text-xs text-stone-400">
+                  <div className="rounded-xl border border-dashed border-stone-200 px-3 py-8 text-center text-xs text-stone-500">
                     Nothing at this stage
                   </div>
                 )}
@@ -339,7 +339,7 @@ export function VendorsPage() {
       {cancelled.length > 0 && (
         <Card className="mt-5">
           <CardBody className="pt-4">
-            <p className="mb-2 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">
+            <p className="mb-2 text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
               Cancelled
             </p>
             <div className="flex flex-wrap gap-2">
@@ -435,7 +435,7 @@ function VendorCard({
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-stone-900">{vendor.name}</p>
-            <p className="truncate text-xs text-stone-400">{vendor.category}</p>
+            <p className="truncate text-xs text-stone-500">{vendor.category}</p>
           </div>
           {vendor.contract_signed && (
             <FileCheck
@@ -451,7 +451,7 @@ function VendorCard({
         {price > 0 && (
           <div className="mt-3">
             <p className="tabular text-base leading-none font-semibold text-stone-900">
-              <span className="mr-1 text-[10px] font-normal text-stone-400">{currency}</span>
+              <span className="mr-1 text-[10px] font-normal text-stone-500">{currency}</span>
               {formatMoney(price, decimals)}
             </p>
             {paid > 0 && (
@@ -465,7 +465,7 @@ function VendorCard({
                     style={{ width: `${Math.round(progress * 100)}%` }}
                   />
                 </div>
-                <p className="tabular mt-1 text-[11px] text-stone-400">
+                <p className="tabular mt-1 text-[11px] text-stone-500">
                   {formatMoney(paid, decimals)} paid
                   {overpaid ? ' · over' : progress >= 1 ? ' · settled' : ''}
                 </p>
@@ -474,7 +474,7 @@ function VendorCard({
           </div>
         )}
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-stone-400">
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-stone-500">
           {vendor.phone ? (
             <span className="flex items-center gap-1">
               <Phone className="size-3" />

@@ -135,7 +135,7 @@ export function ComparisonGrid({
               <th
                 className={cn(
                   'sticky left-0 z-20 w-72 min-w-72 border-b border-stone-200 bg-white',
-                  'px-4 py-2.5 text-left text-[11px] font-semibold tracking-wider text-stone-400 uppercase',
+                  'px-4 py-2.5 text-left text-[11px] font-semibold tracking-wider text-stone-500 uppercase',
                 )}
               >
                 Question
@@ -222,7 +222,7 @@ function ChunkOfGroup({
           >
             <span className="block text-[13px] leading-snug text-stone-800">{q.question}</span>
             {q.why_it_matters && (
-              <span className="mt-0.5 flex items-start gap-1 text-[11px] leading-snug text-stone-400">
+              <span className="mt-0.5 flex items-start gap-1 text-[11px] leading-snug text-stone-500">
                 <HelpCircle className="mt-0.5 size-3 shrink-0" />
                 {q.why_it_matters}
               </span>
@@ -238,7 +238,7 @@ function ChunkOfGroup({
                 className="relative border-b border-l border-stone-100 p-0 group-hover/row:bg-stone-50/60"
               >
                 {saving.has(key) && (
-                  <Loader2 className="absolute top-1 right-1 size-3 animate-spin text-stone-400" />
+                  <Loader2 className="absolute top-1 right-1 size-3 animate-spin text-stone-500" />
                 )}
                 {!saving.has(key) && failed.has(key) && (
                   <span
@@ -270,7 +270,7 @@ function ChunkOfGroup({
                   }}
                   className={cn(
                     'h-full w-full resize-none bg-transparent px-3 py-2 text-[13px] leading-snug',
-                    'text-stone-800 placeholder:text-stone-300',
+                    'text-stone-800 placeholder:text-stone-500',
                     'focus:bg-white focus:ring-2 focus:ring-wine-500/25 focus:outline-none',
                     'disabled:cursor-not-allowed',
                   )}

@@ -71,7 +71,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
         </CardTitle>
         <div className="flex items-center gap-2">
           {active.length > 0 && (
-            <span className="tabular text-xs text-stone-400">
+            <span className="tabular text-xs text-stone-500">
               {active.length} of {rows.length} checks
             </span>
           )}
@@ -127,7 +127,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
                           {a.count}
                         </span>
                         <span className="min-w-0 flex-1 text-sm text-stone-800">{a.message}</span>
-                        <ChevronRight className="size-4 shrink-0 text-stone-300 transition-colors group-hover:text-wine-600" />
+                        <ChevronRight className="size-4 shrink-0 text-stone-500 transition-colors group-hover:text-wine-600" />
                       </Link>
                     </li>
                   ))}
@@ -141,7 +141,7 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
           <div className="mt-4 space-y-3 border-t border-stone-100 pt-4">
             {clear.length > 0 && (
               <div>
-                <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-stone-400 uppercase">
+                <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
                   Checked, nothing to report
                 </p>
                 <ul className="space-y-1">
@@ -159,16 +159,16 @@ export function AlertsPanel({ weddingId }: { weddingId: string }) {
                 like an alert nobody thought of. */}
             {waiting.length > 0 && (
               <div>
-                <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-stone-400 uppercase">
+                <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-stone-500 uppercase">
                   Starts closer to the day
                 </p>
                 <ul className="space-y-1">
                   {waiting.map((a) => (
-                    <li key={a.code} className="flex items-start gap-2 text-xs text-stone-400">
+                    <li key={a.code} className="flex items-start gap-2 text-xs text-stone-500">
                       <Clock className="mt-0.5 size-3.5 shrink-0" />
                       <span>
                         {a.message}
-                        <span className="ml-1 text-stone-300">
+                        <span className="ml-1 text-stone-500">
                           (
                           {a.gate === 'inside_14'
                             ? 'from 14 days out'

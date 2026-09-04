@@ -178,7 +178,7 @@ export function ResponsibilitiesPage() {
           >
             {onlyUnnamed ? 'Showing unnamed only' : 'Only unnamed'}
           </Button>
-          <span className="ml-auto text-xs text-stone-400">{visible.length} shown</span>
+          <span className="ml-auto text-xs text-stone-500">{visible.length} shown</span>
         </div>
 
         <CardBody className="px-0 pb-0">
@@ -209,7 +209,7 @@ export function ResponsibilitiesPage() {
           ) : (
             <div className="scroll-subtle overflow-x-auto">
               <table className="w-full min-w-5xl text-sm">
-                <thead className="text-left text-xs text-stone-400">
+                <thead className="text-left text-xs text-stone-500">
                   <tr>
                     <th className="px-4 py-2 font-medium">Activity</th>
                     <th className="w-40 px-2 py-2 font-medium">Person</th>
@@ -342,7 +342,7 @@ function RaciRow({
             type="button"
             aria-label={`Remove ${item.activity}`}
             onClick={onRemove}
-            className="focus-ring rounded p-1 text-stone-300 hover:text-red-600"
+            className="focus-ring rounded p-1 text-stone-500 hover:text-red-600"
           >
             <UserX className="size-3.5" />
           </button>

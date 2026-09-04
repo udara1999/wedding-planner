@@ -166,7 +166,7 @@ export function SearchableSelect({
           ) : (
             <span className="flex min-w-0 items-center gap-2">
               {shown.prefix && (
-                <span className="shrink-0 font-mono text-[11px] text-stone-400">
+                <span className="shrink-0 font-mono text-[11px] text-stone-500">
                   {shown.prefix}
                 </span>
               )}
@@ -174,15 +174,15 @@ export function SearchableSelect({
             </span>
           )
         ) : (
-          <span className="text-stone-400">{placeholder}</span>
+          <span className="text-stone-500">{placeholder}</span>
         )}
-        <ChevronsUpDown className="size-3.5 shrink-0 text-stone-400" />
+        <ChevronsUpDown className="size-3.5 shrink-0 text-stone-500" />
       </button>
 
       {open && (
         <div className="absolute z-30 mt-1 w-full overflow-hidden rounded-lg border border-stone-200 bg-white shadow-pop">
           <div className="relative border-b border-stone-100">
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-stone-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-stone-500" />
             <input
               ref={inputRef}
               value={query}
@@ -192,7 +192,7 @@ export function SearchableSelect({
               }}
               onKeyDown={onKeyDown}
               placeholder={searchPlaceholder}
-              className="h-9 w-full bg-transparent pr-3 pl-9 text-sm outline-none placeholder:text-stone-400"
+              className="h-9 w-full bg-transparent pr-3 pl-9 text-sm outline-none placeholder:text-stone-500"
             />
           </div>
 
@@ -206,7 +206,7 @@ export function SearchableSelect({
                   onClick={() => commit(null)}
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-stone-500 hover:bg-stone-50"
                 >
-                  <X className="size-3.5 shrink-0 text-stone-400" />
+                  <X className="size-3.5 shrink-0 text-stone-500" />
                   {emptyLabel}
                 </button>
               </li>
@@ -228,13 +228,13 @@ export function SearchableSelect({
                     )}
                   >
                     {showPrefixColumn && (
-                      <span className="w-14 shrink-0 font-mono text-[11px] text-stone-400">
+                      <span className="w-14 shrink-0 font-mono text-[11px] text-stone-500">
                         {option.prefix ?? '—'}
                       </span>
                     )}
                     <span className="min-w-0 flex-1 truncate text-stone-800">{option.label}</span>
                     {option.hint && (
-                      <span className="shrink-0 text-[11px] text-stone-400">{option.hint}</span>
+                      <span className="shrink-0 text-[11px] text-stone-500">{option.hint}</span>
                     )}
                     {isSelected && <Check className="size-3.5 shrink-0 text-wine-600" />}
                   </button>

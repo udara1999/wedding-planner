@@ -38,32 +38,32 @@ const nullableText = z.string().trim().max(200).optional().nullable();
  */
 const schema = z
   .object({
-  tradition: z.string().min(1, 'Pick a tradition'),
-  currency: z.string().trim().length(3, 'Use a 3-letter code, e.g. LKR'),
-  timezone: z.string().trim().min(1, 'A timezone is required for every schedule'),
-  total_budget_minor: z.string(),
-  contingency_pct: z.string(),
-  guest_buffer_pct: z.string(),
-  bride_name: nullableText,
-  groom_name: nullableText,
-  wedding_date: z.string().optional().nullable(),
-  ceremony_time: nullableText,
-  registration_time: nullableText,
-  reception_time: nullableText,
-  expected_finish: nullableText,
-  venue_name: nullableText,
-  venue_town: nullableText,
-  venue_district: nullableText,
-  ceremony_area: nullableText,
-  reception_area: nullableText,
-  venue_contact_name: nullableText,
-  venue_contact_phone: nullableText,
-  theme: nullableText,
-  colour_palette: nullableText,
-  coordinator_name: nullableText,
-  coordinator_phone: nullableText,
-  emergency_contact_name: nullableText,
-  emergency_contact_phone: nullableText,
+    tradition: z.string().min(1, 'Pick a tradition'),
+    currency: z.string().trim().length(3, 'Use a 3-letter code, e.g. LKR'),
+    timezone: z.string().trim().min(1, 'A timezone is required for every schedule'),
+    total_budget_minor: z.string(),
+    contingency_pct: z.string(),
+    guest_buffer_pct: z.string(),
+    bride_name: nullableText,
+    groom_name: nullableText,
+    wedding_date: z.string().optional().nullable(),
+    ceremony_time: nullableText,
+    registration_time: nullableText,
+    reception_time: nullableText,
+    expected_finish: nullableText,
+    venue_name: nullableText,
+    venue_town: nullableText,
+    venue_district: nullableText,
+    ceremony_area: nullableText,
+    reception_area: nullableText,
+    venue_contact_name: nullableText,
+    venue_contact_phone: nullableText,
+    theme: nullableText,
+    colour_palette: nullableText,
+    coordinator_name: nullableText,
+    coordinator_phone: nullableText,
+    emergency_contact_name: nullableText,
+    emergency_contact_phone: nullableText,
   })
   .superRefine((values, ctx) => {
     const decimals = currencyDecimals(values.currency);
@@ -126,13 +126,7 @@ export function SetupPage() {
     );
 
   async function onSubmit(values: FormValues) {
-    const {
-      total_budget_minor,
-      contingency_pct,
-      guest_buffer_pct,
-      currency,
-      ...rest
-    } = values;
+    const { total_budget_minor, contingency_pct, guest_buffer_pct, currency, ...rest } = values;
     const decimals = currencyDecimals(currency);
 
     // Blank text means "not set"; blank money means zero, because these three
@@ -163,161 +157,167 @@ export function SetupPage() {
         </div>
       )}
 
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-5"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <div className="lg:columns-2 lg:gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">
-        <Section title="The couple &amp; the day">
-          <Two>
-            <Field label="Bride's name">
-              <Input disabled={!canEdit} {...form.register('bride_name')} />
+          <Section title="The couple &amp; the day">
+            <Two>
+              <Field label="Bride's name">
+                <Input disabled={!canEdit} {...form.register('bride_name')} />
+              </Field>
+              <Field label="Groom's name">
+                <Input disabled={!canEdit} {...form.register('groom_name')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field
+                label="Wedding date"
+                hint="Changing this re-dates every task and countdown check, except any you moved yourself."
+              >
+                <Input type="date" disabled={!canEdit} {...form.register('wedding_date')} />
+              </Field>
+              <Field label="Ceremony / Poruwa time">
+                <Input type="time" disabled={!canEdit} {...form.register('ceremony_time')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field label="Registration (signing) time">
+                <Input type="time" disabled={!canEdit} {...form.register('registration_time')} />
+              </Field>
+              <Field label="Reception start">
+                <Input type="time" disabled={!canEdit} {...form.register('reception_time')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field label="Expected finish">
+                <Input type="time" disabled={!canEdit} {...form.register('expected_finish')} />
+              </Field>
+              <Field label="Days to go" hint="Derived from the wedding date, never stored.">
+                <Input readOnly disabled value={wedding.days_to_go ?? ''} aria-label="Days to go" />
+              </Field>
+            </Two>
+          </Section>
+          <Section title="Venue">
+            <Two>
+              <Field label="Venue name">
+                <Input disabled={!canEdit} {...form.register('venue_name')} />
+              </Field>
+              <Field label="Town">
+                <Input disabled={!canEdit} {...form.register('venue_town')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field label="District">
+                <Input disabled={!canEdit} {...form.register('venue_district')} />
+              </Field>
+              <Field label="Ceremony area">
+                <Input disabled={!canEdit} {...form.register('ceremony_area')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field label="Reception area">
+                <Input disabled={!canEdit} {...form.register('reception_area')} />
+              </Field>
+              <Field label="Venue contact">
+                <Input disabled={!canEdit} {...form.register('venue_contact_name')} />
+              </Field>
+            </Two>
+            <Field label="Venue phone">
+              <Input disabled={!canEdit} {...form.register('venue_contact_phone')} />
             </Field>
-            <Field label="Groom's name">
-              <Input disabled={!canEdit} {...form.register('groom_name')} />
+          </Section>
+          <Section title="Tradition &amp; locale">
+            <Field
+              label="Tradition"
+              error={form.formState.errors.tradition?.message}
+              hint="Which template the plan is seeded from."
+            >
+              <Select disabled={!canEdit} {...form.register('tradition')}>
+                {TRADITIONS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
-          </Two>
-          <Two>
-            <Field label="Wedding date" hint="Changing this re-dates every task and countdown check, except any you moved yourself.">
-              <Input type="date" disabled={!canEdit} {...form.register('wedding_date')} />
-            </Field>
-            <Field label="Ceremony / Poruwa time">
-              <Input type="time" disabled={!canEdit} {...form.register('ceremony_time')} />
-            </Field>
-          </Two>
-          <Two>
-            <Field label="Registration (signing) time">
-              <Input type="time" disabled={!canEdit} {...form.register('registration_time')} />
-            </Field>
-            <Field label="Reception start">
-              <Input type="time" disabled={!canEdit} {...form.register('reception_time')} />
-            </Field>
-          </Two>
-          <Two>
-            <Field label="Expected finish">
-              <Input type="time" disabled={!canEdit} {...form.register('expected_finish')} />
-            </Field>
-            <Field label="Days to go" hint="Derived from the wedding date, never stored.">
+            <Two>
+              <Field label="Currency" error={form.formState.errors.currency?.message}>
+                <Input maxLength={3} disabled={!canEdit} {...form.register('currency')} />
+              </Field>
+              <Field
+                label="Timezone"
+                error={form.formState.errors.timezone?.message}
+                hint="Every time on this page is read in this zone."
+              >
+                <Input disabled={!canEdit} {...form.register('timezone')} />
+              </Field>
+            </Two>
+          </Section>
+          <Section title="Budget control">
+            <Field
+              label="Total budget"
+              error={form.formState.errors.total_budget_minor?.message}
+              hint="The ceiling every forecast is measured against."
+            >
               <Input
-                readOnly
-                disabled
-                value={wedding.days_to_go ?? ''}
-                aria-label="Days to go"
+                inputMode="decimal"
+                placeholder="0.00"
+                disabled={!canEdit}
+                {...form.register('total_budget_minor')}
               />
             </Field>
-          </Two>
-        </Section>
-        <Section title="Venue">
-          <Two>
-            <Field label="Venue name">
-              <Input disabled={!canEdit} {...form.register('venue_name')} />
-            </Field>
-            <Field label="Town">
-              <Input disabled={!canEdit} {...form.register('venue_town')} />
-            </Field>
-          </Two>
-          <Two>
-            <Field label="District">
-              <Input disabled={!canEdit} {...form.register('venue_district')} />
-            </Field>
-            <Field label="Ceremony area">
-              <Input disabled={!canEdit} {...form.register('ceremony_area')} />
-            </Field>
-          </Two>
-          <Two>
-            <Field label="Reception area">
-              <Input disabled={!canEdit} {...form.register('reception_area')} />
-            </Field>
-            <Field label="Venue contact">
-              <Input disabled={!canEdit} {...form.register('venue_contact_name')} />
-            </Field>
-          </Two>
-          <Field label="Venue phone">
-            <Input disabled={!canEdit} {...form.register('venue_contact_phone')} />
-          </Field>
-        </Section>
-        <Section title="Tradition &amp; locale">
-          <Field
-            label="Tradition"
-            error={form.formState.errors.tradition?.message}
-            hint="Which template the plan is seeded from."
-          >
-            <Select disabled={!canEdit} {...form.register('tradition')}>
-              {TRADITIONS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Two>
-            <Field label="Currency" error={form.formState.errors.currency?.message}>
-              <Input maxLength={3} disabled={!canEdit} {...form.register('currency')} />
-            </Field>
-            <Field
-              label="Timezone"
-              error={form.formState.errors.timezone?.message}
-              hint="Every time on this page is read in this zone."
-            >
-              <Input disabled={!canEdit} {...form.register('timezone')} />
-            </Field>
-          </Two>
-        </Section>
-        <Section title="Budget control">
-          <Field
-            label="Total budget"
-            error={form.formState.errors.total_budget_minor?.message}
-            hint="The ceiling every forecast is measured against."
-          >
-            <Input inputMode="decimal"
-                placeholder="0.00" disabled={!canEdit} {...form.register('total_budget_minor')} />
-          </Field>
-          <Two>
-            <Field
-              label="Contingency %"
-              error={form.formState.errors.contingency_pct?.message}
-              hint="Held back for overruns. Max 50."
-            >
-              <Input inputMode="decimal"
-                placeholder="0" disabled={!canEdit} {...form.register('contingency_pct')} />
-            </Field>
-            <Field
-              label="Guest buffer %"
-              error={form.formState.errors.guest_buffer_pct?.message}
-              hint="Extra head count catered for. Max 50."
-            >
-              <Input inputMode="decimal"
-                placeholder="0" disabled={!canEdit} {...form.register('guest_buffer_pct')} />
-            </Field>
-          </Two>
-        </Section>
-        <Section title="Style &amp; key people">
-          <Two>
-            <Field label="Theme">
-              <Input disabled={!canEdit} {...form.register('theme')} />
-            </Field>
-            <Field label="Colour palette">
-              <Input disabled={!canEdit} {...form.register('colour_palette')} />
-            </Field>
-          </Two>
-          <Two>
-            <Field label="Coordinator">
-              <Input disabled={!canEdit} {...form.register('coordinator_name')} />
-            </Field>
-            <Field label="Coordinator phone">
-              <Input disabled={!canEdit} {...form.register('coordinator_phone')} />
-            </Field>
-          </Two>
-          <Two>
-            <Field label="Emergency contact">
-              <Input disabled={!canEdit} {...form.register('emergency_contact_name')} />
-            </Field>
-            <Field label="Emergency phone">
-              <Input disabled={!canEdit} {...form.register('emergency_contact_phone')} />
-            </Field>
-          </Two>
-        </Section>
-
+            <Two>
+              <Field
+                label="Contingency %"
+                error={form.formState.errors.contingency_pct?.message}
+                hint="Held back for overruns. Max 50."
+              >
+                <Input
+                  inputMode="decimal"
+                  placeholder="0"
+                  disabled={!canEdit}
+                  {...form.register('contingency_pct')}
+                />
+              </Field>
+              <Field
+                label="Guest buffer %"
+                error={form.formState.errors.guest_buffer_pct?.message}
+                hint="Extra head count catered for. Max 50."
+              >
+                <Input
+                  inputMode="decimal"
+                  placeholder="0"
+                  disabled={!canEdit}
+                  {...form.register('guest_buffer_pct')}
+                />
+              </Field>
+            </Two>
+          </Section>
+          <Section title="Style &amp; key people">
+            <Two>
+              <Field label="Theme">
+                <Input disabled={!canEdit} {...form.register('theme')} />
+              </Field>
+              <Field label="Colour palette">
+                <Input disabled={!canEdit} {...form.register('colour_palette')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field label="Coordinator">
+                <Input disabled={!canEdit} {...form.register('coordinator_name')} />
+              </Field>
+              <Field label="Coordinator phone">
+                <Input disabled={!canEdit} {...form.register('coordinator_phone')} />
+              </Field>
+            </Two>
+            <Two>
+              <Field label="Emergency contact">
+                <Input disabled={!canEdit} {...form.register('emergency_contact_name')} />
+              </Field>
+              <Field label="Emergency phone">
+                <Input disabled={!canEdit} {...form.register('emergency_contact_phone')} />
+              </Field>
+            </Two>
+          </Section>
         </div>
 
         {canEdit && (

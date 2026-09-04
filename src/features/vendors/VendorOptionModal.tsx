@@ -179,7 +179,7 @@ export function VendorOptionModal({
                         'size-5',
                         (option.rating ?? 0) >= n
                           ? 'fill-gold-400 text-gold-400'
-                          : 'text-stone-300 hover:text-stone-400',
+                          : 'text-stone-500 hover:text-stone-500',
                       )}
                     />
                   </button>

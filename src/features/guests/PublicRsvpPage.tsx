@@ -106,7 +106,7 @@ export function PublicRsvpPage() {
       {/* Keyed on the token so the form remounts with fresh initial state if
           the link ever changes, rather than being corrected by an effect. */}
       <RsvpForm key={token} token={token ?? null} household={household} onDone={setOutcome} />
-      <p className="mt-4 text-center text-xs text-stone-400">
+      <p className="mt-4 text-center text-xs text-stone-500">
         You can change your answer any time using this same link.
       </p>
     </Shell>
@@ -378,7 +378,7 @@ function Stepper({
     <div className="flex items-center justify-between">
       <div>
         <p className="text-sm font-medium text-stone-800">{label}</p>
-        <p className="text-xs text-stone-400">
+        <p className="text-xs text-stone-500">
           {max} invited{min > 0 && max > 0 ? ' · at least one of you' : ''}
         </p>
       </div>

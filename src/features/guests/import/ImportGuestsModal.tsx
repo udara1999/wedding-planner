@@ -150,7 +150,7 @@ export function ImportGuestsModal({
                       </option>
                     ))}
                   </Select>
-                  <p className="mt-1 truncate text-[11px] text-stone-400">
+                  <p className="mt-1 truncate text-[11px] text-stone-500">
                     e.g. {grid[1]?.[i] || '—'}
                   </p>
                 </div>
@@ -381,9 +381,9 @@ function Preview({ plan }: { plan: ImportPlan }) {
           <tbody className="divide-y divide-stone-100">
             {rows.map((row) => (
               <tr key={row.lineNumber} className={cn(row.action === 'error' && 'bg-red-50/40')}>
-                <td className="tabular px-3 py-2 text-stone-400">{row.lineNumber}</td>
+                <td className="tabular px-3 py-2 text-stone-500">{row.lineNumber}</td>
                 <td className="px-3 py-2 font-medium text-stone-800">
-                  {row.values.household_name || <span className="text-stone-400">—</span>}
+                  {row.values.household_name || <span className="text-stone-500">—</span>}
                 </td>
                 <td className="px-3 py-2">
                   <Badge tone={ACTION_TONE[row.action]}>{ACTION_LABEL[row.action]}</Badge>
@@ -395,7 +395,7 @@ function Preview({ plan }: { plan: ImportPlan }) {
                   {row.changes.length > 0 &&
                     row.changes.map((c) => (
                       <span key={c.label} className="mr-2 whitespace-nowrap">
-                        {c.label}: <span className="text-stone-400 line-through">{c.from}</span>{' '}
+                        {c.label}: <span className="text-stone-500 line-through">{c.from}</span>{' '}
                         {c.to}
                       </span>
                     ))}
@@ -404,7 +404,7 @@ function Preview({ plan }: { plan: ImportPlan }) {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-3 py-6 text-center text-stone-400">
+                <td colSpan={4} className="px-3 py-6 text-center text-stone-500">
                   No rows of that kind.
                 </td>
               </tr>

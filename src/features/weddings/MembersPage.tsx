@@ -67,10 +67,7 @@ export function MembersPage() {
 
   return (
     <Page width="default">
-      <PageHeader
-        title="People"
-        description="Who can see this wedding, and how much of it."
-      />
+      <PageHeader title="People" description="Who can see this wedding, and how much of it." />
 
       <Card className="mb-6">
         <CardHeader>
@@ -158,7 +155,7 @@ export function MembersPage() {
                 <li key={inv.id} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
                     <p className="truncate text-sm text-stone-800">{inv.email}</p>
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-stone-500">
                       {inv.side ? `${inv.role} · ${inv.side} side` : inv.role}
                     </p>
                   </div>
@@ -198,7 +195,7 @@ export function MembersPage() {
                 <li key={m.user_id} className="flex items-center justify-between py-2.5">
                   <div className="min-w-0">
                     <p className="truncate font-mono text-xs text-stone-600">{m.user_id}</p>
-                    {m.side && <p className="text-xs text-stone-400">{m.side} side</p>}
+                    {m.side && <p className="text-xs text-stone-500">{m.side} side</p>}
                   </div>
                   <div className="flex items-center gap-2">
                     {!m.accepted_at && <Badge tone="warn">pending</Badge>}

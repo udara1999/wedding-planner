@@ -67,7 +67,7 @@ export function LinePayments({
                   {p.stage ? p.stage.replace(/_/g, ' ') : 'payment'}
                   {p.method ? ` · ${p.method}` : ''}
                 </p>
-                <p className="text-[11px] text-stone-400">
+                <p className="text-[11px] text-stone-500">
                   {p.due_date ? `due ${p.due_date}` : 'no due date'}
                   {p.paid_on ? ` · paid ${p.paid_on}` : ''}
                 </p>

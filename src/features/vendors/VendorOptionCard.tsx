@@ -61,7 +61,7 @@ export function VendorOptionCard({
             <p className="truncate text-sm font-semibold tracking-tight text-stone-900">
               {option.vendor_name || option.label}
             </p>
-            <p className="truncate text-xs text-stone-400">
+            <p className="truncate text-xs text-stone-500">
               {option.vendor_name ? option.label : 'no vendor named yet'}
             </p>
           </div>
@@ -83,14 +83,14 @@ export function VendorOptionCard({
 
         {/* The comparison figure, given room to be read. */}
         <div className="rounded-xl bg-stone-50 px-3 py-2.5">
-          <p className="text-[11px] font-medium tracking-wide text-stone-400 uppercase">
+          <p className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">
             {option.negotiated_minor > 0 ? 'Negotiated' : 'Quoted'}
           </p>
           <p className="tabular mt-0.5 text-lg font-semibold text-stone-900">
-            <span className="mr-1 text-xs font-normal text-stone-400">{currency}</span>
+            <span className="mr-1 text-xs font-normal text-stone-500">{currency}</span>
             {effective > 0 ? formatMoney(effective, decimals) : '—'}
           </p>
-          <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-stone-400">
+          <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-stone-500">
             {negotiatedDown && (
               <span>
                 quoted{' '}
@@ -113,13 +113,13 @@ export function VendorOptionCard({
         <dl className="space-y-1.5 text-xs">
           {option.package && (
             <div className="flex gap-2">
-              <dt className="w-14 shrink-0 text-stone-400">Package</dt>
+              <dt className="w-14 shrink-0 text-stone-500">Package</dt>
               <dd className="min-w-0 flex-1 text-stone-700">{option.package}</dd>
             </div>
           )}
           {option.contact_name && (
             <div className="flex items-center gap-2">
-              <dt className="w-14 shrink-0 text-stone-400">
+              <dt className="w-14 shrink-0 text-stone-500">
                 <User className="inline size-3" /> Contact
               </dt>
               <dd className="min-w-0 flex-1 truncate text-stone-700">{option.contact_name}</dd>
@@ -127,7 +127,7 @@ export function VendorOptionCard({
           )}
           {option.phone && (
             <div className="flex items-center gap-2">
-              <dt className="w-14 shrink-0 text-stone-400">
+              <dt className="w-14 shrink-0 text-stone-500">
                 <Phone className="inline size-3" /> Phone
               </dt>
               <dd className="min-w-0 flex-1 truncate">
@@ -157,7 +157,7 @@ export function VendorOptionCard({
                     'size-4',
                     (option.rating ?? 0) >= n
                       ? 'fill-gold-400 text-gold-400'
-                      : 'text-stone-300 hover:text-stone-400',
+                      : 'text-stone-500 hover:text-stone-500',
                   )}
                 />
               </button>

@@ -6478,6 +6478,7 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string }
+      create_demo_wedding: { Args: never; Returns: string }
       create_wedding: {
         Args: {
           p_bride_name?: string

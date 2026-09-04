@@ -75,7 +75,7 @@ export function VendorPayments({
         </div>
       ) : rows.length === 0 ? (
         <p className="mt-3 flex items-center gap-2 rounded-xl border border-dashed border-stone-200 px-3 py-4 text-sm text-stone-500">
-          <CalendarClock className="size-4 shrink-0 text-stone-400" />
+          <CalendarClock className="size-4 shrink-0 text-stone-500" />
           Nothing has been paid to this vendor yet. Payments recorded against their budget lines
           appear here automatically.
         </p>
@@ -92,7 +92,7 @@ export function VendorPayments({
                     <p className="truncate text-sm font-medium text-stone-900">
                       {p.stage ? STAGE_LABEL[p.stage] : 'Payment'}
                     </p>
-                    <p className="mt-0.5 text-xs text-stone-400">
+                    <p className="mt-0.5 text-xs text-stone-500">
                       {p.paid_on
                         ? `paid ${p.paid_on}`
                         : p.due_date
@@ -102,7 +102,7 @@ export function VendorPayments({
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="tabular text-base font-semibold text-stone-900">
-                      <span className="mr-1 text-[11px] font-normal text-stone-400">
+                      <span className="mr-1 text-[11px] font-normal text-stone-500">
                         {currency}
                       </span>
                       {formatMoney(p.amount_paid_minor, decimals)}
@@ -110,14 +110,14 @@ export function VendorPayments({
                     {/* Only when it differs. "of 50,000" under "50,000" is
                         noise on every settled row. */}
                     {!settled && (
-                      <p className="tabular text-[11px] text-stone-400">
+                      <p className="tabular text-[11px] text-stone-500">
                         of {formatMoney(p.amount_due_minor, decimals)}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-stone-100 pt-2 text-[11px] text-stone-400">
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-stone-100 pt-2 text-[11px] text-stone-500">
                   <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
                   {p.method && <span>{p.method}</span>}
                   {p.reference && <span className="font-mono">{p.reference}</span>}
@@ -148,17 +148,17 @@ function Figure({
 }) {
   return (
     <div className="rounded-xl border border-stone-200 bg-white px-3 py-2">
-      <p className="text-[11px] font-medium tracking-wide text-stone-400 uppercase">{label}</p>
+      <p className="text-[11px] font-medium tracking-wide text-stone-500 uppercase">{label}</p>
       <p
         className={cn(
           'tabular mt-0.5 text-sm font-semibold',
           tone === 'warn' ? 'text-amber-700' : 'text-stone-900',
         )}
       >
-        {currency && <span className="mr-1 text-xs font-normal text-stone-400">{currency}</span>}
+        {currency && <span className="mr-1 text-xs font-normal text-stone-500">{currency}</span>}
         {value}
       </p>
-      {hint && <p className="text-[11px] text-stone-400">{hint}</p>}
+      {hint && <p className="text-[11px] text-stone-500">{hint}</p>}
     </div>
   );
 }

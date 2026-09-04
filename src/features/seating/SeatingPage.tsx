@@ -156,11 +156,11 @@ export function SeatingPage() {
         <Card className="lg:sticky lg:top-6 lg:self-start">
           <CardHeader className="flex items-baseline justify-between">
             <CardTitle>Still to seat</CardTitle>
-            <span className="tabular text-xs text-stone-400">{unseated.length}</span>
+            <span className="tabular text-xs text-stone-500">{unseated.length}</span>
           </CardHeader>
           <div className="border-b border-stone-100 px-4 pb-3">
             <div className="relative">
-              <Search className="absolute top-2.5 left-3 size-4 text-stone-400" />
+              <Search className="absolute top-2.5 left-3 size-4 text-stone-500" />
               <Input
                 className="pl-9"
                 placeholder="Find a household"
@@ -200,7 +200,7 @@ export function SeatingPage() {
                         <span className="block truncate text-sm text-stone-900">
                           {g.household_name}
                         </span>
-                        <span className="block truncate text-xs text-stone-400">
+                        <span className="block truncate text-xs text-stone-500">
                           {g.relationship ?? g.category ?? 'no relationship noted'}
                         </span>
                       </span>
@@ -363,7 +363,7 @@ function TableCard({
               if (next && next !== table.name) onRename(next);
             }}
           />
-          <p className="mt-0.5 text-xs text-stone-400">
+          <p className="mt-0.5 text-xs text-stone-500">
             {table.household_count} {table.household_count === 1 ? 'household' : 'households'} ·{' '}
             {table.seated_heads} of {table.capacity} seats
           </p>
@@ -384,7 +384,7 @@ function TableCard({
         )}
 
         {seated.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-stone-200 px-3 py-3 text-xs text-stone-400">
+          <p className="rounded-lg border border-dashed border-stone-200 px-3 py-3 text-xs text-stone-500">
             Nobody seated here yet.
           </p>
         ) : (
@@ -397,13 +397,13 @@ function TableCard({
                 <span className="min-w-0 flex-1 truncate text-sm text-stone-800">
                   {g.household_name}
                 </span>
-                <span className="tabular text-xs text-stone-400">{g.heads_to_seat}</span>
+                <span className="tabular text-xs text-stone-500">{g.heads_to_seat}</span>
                 {canEdit && (
                   <button
                     type="button"
                     aria-label={`Unseat ${g.household_name}`}
                     onClick={() => onUnseat(g.id)}
-                    className="focus-ring rounded text-stone-400 hover:text-red-600"
+                    className="focus-ring rounded text-stone-500 hover:text-red-600"
                   >
                     <X className="size-3.5" />
                   </button>
@@ -441,7 +441,7 @@ function TableCard({
               type="button"
               aria-label={`Delete ${table.name}`}
               onClick={onDelete}
-              className="focus-ring rounded-lg p-1.5 text-stone-400 hover:bg-red-50 hover:text-red-600"
+              className="focus-ring rounded-lg p-1.5 text-stone-500 hover:bg-red-50 hover:text-red-600"
             >
               <Trash2 className="size-3.5" />
             </button>

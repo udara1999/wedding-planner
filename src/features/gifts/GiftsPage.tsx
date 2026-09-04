@@ -152,7 +152,7 @@ export function GiftsPage() {
           <CardTitle>The ledger</CardTitle>
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <Search className="absolute top-2.5 left-3 size-4 text-stone-400" />
+              <Search className="absolute top-2.5 left-3 size-4 text-stone-500" />
               <Input
                 className="w-56 pl-9"
                 placeholder="Find a household"
@@ -197,7 +197,7 @@ export function GiftsPage() {
           ) : (
             <div className="scroll-subtle -mx-2 overflow-x-auto">
               <table className="w-full min-w-4xl text-sm">
-                <thead className="text-left text-xs text-stone-400">
+                <thead className="text-left text-xs text-stone-500">
                   <tr>
                     <th className="px-2 py-1.5 font-medium">Household</th>
                     <th className="w-32 px-2 py-1.5 text-right font-medium">Expected</th>
@@ -263,7 +263,7 @@ function GiftRow({
     <tr className={cn(shortfall && guest.gift_received_minor > 0 && 'bg-amber-50/40')}>
       <td className="px-2 py-1.5">
         <p className="truncate text-stone-900">{guest.household_name}</p>
-        <p className="truncate text-[11px] text-stone-400">
+        <p className="truncate text-[11px] text-stone-500">
           {guest.relationship ?? guest.category ?? '—'}
         </p>
         {problem && <p className="text-[11px] text-red-700">{problem}</p>}
@@ -292,7 +292,7 @@ function GiftRow({
       </td>
       <td className="px-2 py-1.5 text-right">
         {guest.expected_gift_minor === 0 && guest.gift_received_minor === 0 ? (
-          <span className="text-stone-300">—</span>
+          <span className="text-stone-500">—</span>
         ) : (
           <span
             className={cn(
@@ -301,7 +301,7 @@ function GiftRow({
                 ? 'text-amber-700'
                 : difference > 0
                   ? 'text-emerald-700'
-                  : 'text-stone-400',
+                  : 'text-stone-500',
             )}
           >
             {difference > 0 ? '+' : ''}
@@ -325,7 +325,7 @@ function GiftRow({
         {guest.gift_received_minor === 0 ? (
           // Nothing arrived, so there is nothing to thank anyone for. Offering
           // the tick would invite marking it and losing the follow-up list.
-          <span className="text-[11px] text-stone-300">nothing yet</span>
+          <span className="text-[11px] text-stone-500">nothing yet</span>
         ) : guest.thank_you_sent ? (
           <button
             type="button"

@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(200);
+select plan(212);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1605,6 +1605,114 @@ select is((select due_date from legal_requirements
             where wedding_id = (select v from w where k='a') and seq = 3),
           (select wedding_date - 90 from weddings where id = (select v from w where k='a')),
           'Moving the wedding re-dates the registration deadlines with it');
+
+-- =============================================================================
+-- Phase 7: v_alerts — 12 assertions
+-- =============================================================================
+-- The plan calls 7.1 "the product's daily hook" and warns that writing the 23
+-- warnings as client queries would be "the single worst decision available".
+-- Having put them in one view, the things worth proving are that all 23 are
+-- there, that they fire on real data, and that the four time-gated ones stay
+-- shut until their moment — because a gate that is wrong in the open direction
+-- produces noise on the one panel that only works if it is read every time.
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+select is((select count(*)::int from v_alerts
+            where wedding_id = (select v from w where k='a')),
+          23,
+          'All 23 workbook warnings are present for a wedding');
+
+select is((select count(distinct code)::int from v_alerts
+            where wedding_id = (select v from w where k='a')),
+          23,
+          'And each has its own code, so none was pasted twice');
+
+select is((select count(*)::int from v_alerts
+            where wedding_id = (select v from w where k='a')
+              and (severity is null or message is null or deep_link is null)),
+          0,
+          'Every alert has a severity, a message and somewhere to go');
+
+-- Tenancy, on a view that reads eleven tables. A leak here would be a leak of
+-- counts about someone else's wedding, which is still a leak.
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from v_alerts
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'A stranger sees no alerts for another wedding');
+
+select tests.login((select v from ids where k = 'alice'));
+
+-- ------------------------------------------------------------ it actually fires
+-- Earlier sections left this wedding with unconfirmed vendors, unreplied
+-- households and registration items to verify, so several alerts should
+-- already be live. A view that returns 23 rows of zero would pass every
+-- assertion above and be useless.
+select ok((select count(*)::int from v_alerts
+            where wedding_id = (select v from w where k='a') and active) > 0,
+          'Some alerts are actually firing on the fixture data');
+
+select ok((select count from v_alerts
+            where wedding_id = (select v from w where k='a')
+              and code = 'legal_to_verify') > 10,
+          'The registration warning counts the items still to verify');
+
+select is((select active from v_alerts
+            where wedding_id = (select v from w where k='a')
+              and code = 'vendor_no_contract'),
+          true,
+          'Vendors with no signed contract raise their warning');
+
+-- An overdue task is the workbook's first CRITICAL. Made true deliberately
+-- rather than relied on from earlier fixtures.
+insert into wedding_tasks (wedding_id, category, task, status, due_date)
+values ((select v from w where k='a'), 'ZZ Alerts', 'late thing', 'not_started',
+        current_date - 5);
+
+select is((select active from v_alerts
+            where wedding_id = (select v from w where k='a') and code = 'task_overdue'),
+          true,
+          'An overdue task raises the critical task warning');
+
+-- Finishing it must put the warning out. An alert that cannot go quiet is a
+-- permanent red mark, and people stop reading panels that are always red.
+update wedding_tasks set status = 'completed'
+ where wedding_id = (select v from w where k='a') and task = 'late thing';
+
+select is((select active from v_alerts
+            where wedding_id = (select v from w where k='a') and code = 'task_overdue'),
+          false,
+          'Finishing the task puts the warning out again');
+
+-- ---------------------------------------------------------------- 7.2 the gates
+-- The wedding is far off at this point in the suite, so the packing warning
+-- must be shut even with something unpacked against it.
+insert into procurement_items (wedding_id, name, needed_on_day, packed)
+values ((select v from w where k='a'), 'Bride''s emergency kit', true, false);
+
+select is((select gate_open from v_alerts
+            where wedding_id = (select v from w where k='a')
+              and code = 'procurement_unpacked'),
+          false,
+          'The packing warning stays shut while the wedding is far off');
+
+select is((select active from v_alerts
+            where wedding_id = (select v from w where k='a')
+              and code = 'procurement_unpacked'),
+          false,
+          'So it does not fire, even with something unpacked');
+
+-- Move the wedding to next week and the same row becomes urgent. This is the
+-- whole of 7.2 in one assertion.
+update weddings set wedding_date = current_date + 7
+ where id = (select v from w where k='a');
+
+select is((select active from v_alerts
+            where wedding_id = (select v from w where k='a')
+              and code = 'procurement_unpacked'),
+          true,
+          'Inside 14 days the same unpacked item becomes an active warning');
 
 select * from finish();
 rollback;

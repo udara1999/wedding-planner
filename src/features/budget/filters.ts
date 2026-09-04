@@ -22,18 +22,31 @@ export interface BudgetFilters {
   categoryId: string | 'all';
   applicability: Applicability | 'all';
   search: string;
+  /**
+   * Ticket 7.5. Lines forecast to come in above what was budgeted for them —
+   * the question the "budget lines are over" alert links here to ask.
+   */
+  overBudgetOnly: boolean;
 }
 
 export const EMPTY_FILTERS: BudgetFilters = {
   categoryId: 'all',
   applicability: 'all',
   search: '',
+  overBudgetOnly: false,
 };
 
 /** Every active filter must match. */
 export function matchesFilters(line: BudgetLineLike, filters: BudgetFilters): boolean {
   if (filters.categoryId !== 'all' && line.category_id !== filters.categoryId) return false;
   if (filters.applicability !== 'all' && line.applicability !== filters.applicability) return false;
+
+  // A not-applicable line forecasts zero, so it can never be over — including
+  // it would put struck-off rows in a list of problems.
+  if (filters.overBudgetOnly) {
+    if (line.applicability === 'not_applicable') return false;
+    if ((line.forecast_minor ?? 0) <= line.budgeted_minor) return false;
+  }
 
   const needle = filters.search.trim().toLowerCase();
   if (needle) {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Phone, Plus, Store } from 'lucide-react';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { Filter, Phone, Plus, Store } from 'lucide-react';
 import {
   useCreateVendor,
   useDeleteVendor,
@@ -47,6 +47,42 @@ const TONE: Record<VendorStatus, 'neutral' | 'good' | 'warn' | 'stop' | 'gold' |
   cancelled: 'stop',
 };
 
+/**
+ * The vendor questions the alerts panel asks, each keyed by the query
+ * parameter v_alerts uses for it.
+ */
+const FOCUSES: {
+  param: string;
+  value: string;
+  label: string;
+  matches: (v: VendorRow) => boolean;
+}[] = [
+  {
+    param: 'status',
+    value: 'researching',
+    label: 'not yet confirmed',
+    matches: (v) => v.status !== 'confirmed' && v.status !== 'cancelled',
+  },
+  {
+    param: 'contract',
+    value: 'missing',
+    label: 'with no signed contract',
+    matches: (v) => !v.contract_signed,
+  },
+  {
+    param: 'phone',
+    value: 'missing',
+    label: 'with no phone number',
+    matches: (v) => (v.phone ?? '').trim() === '',
+  },
+  {
+    param: 'arrival',
+    value: 'missing',
+    label: 'with no arrival time set',
+    matches: (v) => v.arrival_time === null,
+  },
+];
+
 export function VendorsPage() {
   const { wedding } = useOutletContext<{ wedding: MyWedding }>();
   const currency = wedding.currency ?? 'LKR';
@@ -61,13 +97,23 @@ export function VendorsPage() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // Ticket 7.5. Four of the 23 alerts are about vendors, and each asks a
+  // different question: not confirmed, no contract, no phone, no arrival time.
+  // This screen is a pipeline board rather than a list, so a deep link narrows
+  // what the board shows instead of setting a dropdown — and says so, because
+  // a board silently missing two thirds of its cards is alarming.
+  const [params, setParams] = useSearchParams();
+  const focus = FOCUSES.find((f) => params.get(f.param) === f.value) ?? null;
+
   const columns = useMemo(() => {
-    const rows = vendors.data ?? [];
+    const rows = (vendors.data ?? []).filter((v) => (focus ? focus.matches(v) : true));
     return PIPELINE.map((stage) => ({
       ...stage,
       vendors: rows.filter((v) => v.status === stage.status),
     }));
-  }, [vendors.data]);
+  }, [vendors.data, focus]);
+
+  const focusCount = columns.reduce((sum, c) => sum + c.vendors.length, 0);
 
   const cancelled = (vendors.data ?? []).filter((v) => v.status === 'cancelled');
   const selected = (vendors.data ?? []).find((v) => v.id === selectedId) ?? null;
@@ -118,6 +164,28 @@ export function VendorsPage() {
 
       <InlineError error={create.error ?? update.error ?? remove.error} />
 
+      {/* Says what it is showing and offers the way out. A board quietly
+          missing two thirds of its cards is worse than no filter at all. */}
+      {focus && (
+        <p className="mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-wine-50 px-4 py-2.5 text-sm text-wine-900">
+          <Filter className="size-4 shrink-0" />
+          <span className="flex-1">
+            Showing the {focusCount} {focusCount === 1 ? 'vendor' : 'vendors'} {focus.label}.
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const next = new URLSearchParams(params);
+              next.delete(focus.param);
+              setParams(next, { replace: true });
+            }}
+          >
+            Show all vendors
+          </Button>
+        </p>
+      )}
+
       {(vendors.data ?? []).length === 0 ? (
         <EmptyState
           icon={<Store className="size-5" />}
@@ -134,9 +202,7 @@ export function VendorsPage() {
                 <span className="text-[11px] font-semibold tracking-wider text-stone-500 uppercase">
                   {column.label}
                 </span>
-                <span className="tabular text-[11px] text-stone-400">
-                  {column.vendors.length}
-                </span>
+                <span className="tabular text-[11px] text-stone-400">{column.vendors.length}</span>
               </div>
 
               <div className="space-y-2">
@@ -243,17 +309,18 @@ function VendorCard({
   const price = lineCount > 0 ? forecast : vendor.negotiated_minor || vendor.quoted_minor;
   return (
     <Card className="p-3 transition-shadow hover:shadow-raised">
-      <button type="button" onClick={onOpen} className="focus-ring block w-full rounded-lg text-left">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="focus-ring block w-full rounded-lg text-left"
+      >
         <p className="truncate text-[13px] font-medium text-stone-900">{vendor.name}</p>
         <p className="truncate text-[11px] text-stone-400">{vendor.category}</p>
         {price > 0 && (
           <p className="tabular mt-1 text-xs text-stone-700">
             {formatMinorAsMajor(price, decimals)} {currency}
             {lineCount > 0 && paid > 0 && (
-              <span className="text-stone-400">
-                {' '}
-                · {formatMinorAsMajor(paid, decimals)} paid
-              </span>
+              <span className="text-stone-400"> · {formatMinorAsMajor(paid, decimals)} paid</span>
             )}
           </p>
         )}

@@ -22,6 +22,7 @@ import {
 } from './api';
 import { TASK_VIEWS, countByView, describeDue, matchesView, type TaskView } from './views';
 import { useOwnerOptions } from '../weddings/lookups';
+import { useFilterParam } from '../../lib/filterParam';
 import type { MyWedding, TaskStatus } from '../../types/db';
 import {
   Badge,
@@ -93,9 +94,10 @@ export function TasksPage() {
   const setStatus = useSetTaskStatus(wedding.id);
   const remove = useDeleteTask(wedding.id);
 
-  const [view, setView] = useState<TaskView>('open');
+  // Ticket 7.5. The view and the owner filter are what alerts link to.
+  const [view, setView] = useFilterParam<TaskView>('view', 'open');
   const [groupBy, setGroupBy] = useState<GroupBy>('area');
-  const [ownerFilter, setOwnerFilter] = useState<string>('all');
+  const [ownerFilter, setOwnerFilter] = useFilterParam<string>('owner', 'all');
   const [areaFilter, setAreaFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -125,7 +127,12 @@ export function TasksPage() {
     const needle = search.trim().toLowerCase();
     return rows.filter((t) => {
       if (!matchesView(t, view, today)) return false;
-      if (ownerFilter !== 'all' && (t.owner ?? '') !== ownerFilter) return false;
+      // 'nobody' is the alert's question: work with no owner gets done by
+      // whoever remembers, which is nobody.
+      if (ownerFilter === 'nobody' && (t.owner ?? '').trim() !== '') return false;
+      if (ownerFilter !== 'all' && ownerFilter !== 'nobody' && (t.owner ?? '') !== ownerFilter) {
+        return false;
+      }
       if (areaFilter !== 'all' && (t.category ?? '') !== areaFilter) return false;
       if (needle) {
         const hay = [t.task, t.category, t.owner, t.notes].filter(Boolean).join(' ').toLowerCase();
@@ -275,6 +282,7 @@ export function TasksPage() {
             onChange={(e) => setOwnerFilter(e.target.value)}
           >
             <option value="all">Anyone</option>
+            <option value="nobody">Nobody assigned</option>
             {ownerList.map((o) => (
               <option key={o} value={o}>
                 {o}

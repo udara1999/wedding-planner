@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Search, Sparkles, Wallet } from 'lucide-react';
+import { Plus, Search, Sparkles, TrendingUp, Wallet } from 'lucide-react';
 import {
   useBudgetByCategory,
   useBudgetCategories,
@@ -13,6 +13,7 @@ import {
 import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { BudgetLineForm } from './BudgetLineForm';
 import { EMPTY_FILTERS, matchesFilters, summarise, type BudgetFilters } from './filters';
+import { useFilterParam } from '../../lib/filterParam';
 import { useSeedWedding } from '../weddings/api';
 import { currencyDecimals, formatMinorAsMajor } from '../../lib/units';
 import type { Applicability, BudgetLineRow, MyWedding, PaymentStage } from '../../types/db';
@@ -50,6 +51,16 @@ export function BudgetPage() {
 
   const [filters, setFilters] = useState<BudgetFilters>(EMPTY_FILTERS);
 
+  // Ticket 7.5. Only this one filter comes from the URL — it is the one an
+  // alert links to, and the rest are set by hand on the page.
+  const [overParam, setOverParam] = useFilterParam<'0' | '1'>('over', '0', ['0', '1']);
+  // Memoised so it is a stable dependency below; a fresh object each render
+  // would defeat the memo it feeds.
+  const effectiveFilters = useMemo<BudgetFilters>(
+    () => ({ ...filters, overBudgetOnly: overParam === '1' }),
+    [filters, overParam],
+  );
+
   // The category rail sticks below the header, so it needs the header's real
   // height — which changes when the description wraps or the stat hints appear.
   // Measured rather than hardcoded so the two never drift apart.
@@ -68,8 +79,8 @@ export function BudgetPage() {
   const [creating, setCreating] = useState(false);
 
   const visible = useMemo(
-    () => (lines.data ?? []).filter((l) => matchesFilters(l, filters)),
-    [lines.data, filters],
+    () => (lines.data ?? []).filter((l) => matchesFilters(l, effectiveFilters)),
+    [lines.data, effectiveFilters],
   );
   const summary = useMemo(() => summarise(visible), [visible]);
   // Looked up fresh on every render, so an edit made elsewhere — or the refetch
@@ -184,6 +195,21 @@ export function BudgetPage() {
           />
         </div>
       </div>
+
+      {/* Ticket 7.5. Says what it is showing and offers the way out; a list
+          silently missing most of its rows is alarming rather than helpful. */}
+      {overParam === '1' && (
+        <p className="mt-5 flex flex-wrap items-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+          <TrendingUp className="size-4 shrink-0" />
+          <span className="flex-1">
+            Showing the {visible.length} {visible.length === 1 ? 'line' : 'lines'} forecast to come
+            in over what was budgeted for them.
+          </span>
+          <Button variant="secondary" size="sm" onClick={() => setOverParam('0')}>
+            Show every line
+          </Button>
+        </p>
+      )}
 
       <div className="grid items-start gap-5 pt-5 lg:grid-cols-[15rem_minmax(0,1fr)]">
         {/* Categories double as the filter, which removes a dropdown and puts

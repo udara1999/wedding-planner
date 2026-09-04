@@ -1,13 +1,21 @@
+import { useMemo } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import {
   ArrowRight,
   CalendarHeart,
   CreditCard,
   HandCoins,
+  Store,
   TrendingUp,
+  UsersRound,
   Wallet,
 } from 'lucide-react';
-import { useWeddingFinancials } from '../budget/api';
+import { useBudgetByCategory, useWeddingFinancials } from '../budget/api';
+import { useReadiness } from '../tasks/api';
+import { useGuests } from '../guests/api';
+import { countGuests } from '../guests/counts';
+import { useVendors } from '../vendors/vendorsApi';
+import { AlertsPanel } from '../alerts/AlertsPanel';
 import { currencyDecimals, formatMinorAsMajor, formatRateAsPercent } from '../../lib/units';
 import type { MyWedding } from '../../types/db';
 import {
@@ -25,16 +33,29 @@ import {
 } from '../../components/ui';
 
 /**
- * The money half is live from v_wedding_financials (ticket 2.8). Guests, tasks
- * and the Attention Required panel arrive with Phases 4, 5 and 7 — shown as
- * explicit "not built yet" tiles rather than dashes, so an empty number is
- * never mistaken for a real zero.
+ * Tickets 7.3, 7.4 and the home of 7.1's panel.
+ *
+ * The workbook's own instruction for this sheet is "read the ATTENTION
+ * REQUIRED panel at the bottom every time you open the workbook". At the
+ * bottom is where it went because a spreadsheet has nowhere else to put it.
+ * Here it goes first, because it is the only part of this screen that asks
+ * anything of you — the numbers below it are for reassurance and for
+ * arguments about money, and neither is urgent.
+ *
+ * 7.4 says "two charts, no more", and it is right to say so. Money by category
+ * answers "where is it going", readiness answers "are we going to make it",
+ * and a third chart on a dashboard is decoration that costs a scroll.
  */
 export function DashboardPage() {
   const { wedding } = useOutletContext<{ wedding: MyWedding }>();
   const currency = wedding.currency ?? 'LKR';
   const decimals = currencyDecimals(currency);
+
   const financials = useWeddingFinancials(wedding.id);
+  const categories = useBudgetByCategory(wedding.id);
+  const readiness = useReadiness(wedding.id);
+  const guests = useGuests(wedding.id);
+  const vendors = useVendors(wedding.id);
 
   const money = (minor: number | null | undefined) =>
     minor === null || minor === undefined ? '—' : formatMinorAsMajor(Number(minor), decimals);
@@ -45,6 +66,38 @@ export function DashboardPage() {
 
   const utilisation = f?.budget_utilisation != null ? Number(f.budget_utilisation) : null;
   const overBudget = (f?.remaining_against_budget_minor ?? 0) < 0;
+
+  const guestCounts = useMemo(() => countGuests(guests.data ?? []), [guests.data]);
+
+  const vendorCounts = useMemo(() => {
+    const rows = vendors.data ?? [];
+    return { total: rows.length, confirmed: rows.filter((v) => v.status === 'confirmed').length };
+  }, [vendors.data]);
+
+  const taskProgress = useMemo(() => {
+    let done = 0;
+    let relevant = 0;
+    for (const r of readiness.data ?? []) {
+      done += Number(r.completed ?? 0);
+      relevant += Number(r.task_count ?? 0) - Number(r.cancelled ?? 0);
+    }
+    return { done, relevant, ratio: relevant === 0 ? 0 : done / relevant };
+  }, [readiness.data]);
+
+  /** Biggest first: the top three categories are most of any wedding budget. */
+  const chartRows = useMemo(() => {
+    const rows = (categories.data ?? [])
+      .map((c) => ({
+        label: c.category_label ?? c.category_key ?? '—',
+        budgeted: Number(c.budgeted_minor ?? 0),
+        forecast: Number(c.forecast_minor ?? 0),
+        paid: Number(c.paid_minor ?? 0),
+      }))
+      .filter((c) => c.budgeted > 0 || c.forecast > 0)
+      .sort((a, b) => b.forecast - a.forecast);
+    const max = Math.max(1, ...rows.map((c) => Math.max(c.budgeted, c.forecast)));
+    return { rows, max };
+  }, [categories.data]);
 
   const date =
     wedding.wedding_date &&
@@ -74,15 +127,51 @@ export function DashboardPage() {
         }
       />
 
+      {/* First, because it is the only thing here that asks anything of you. */}
+      <AlertsPanel weddingId={wedding.id} />
+
+      {/* The counts everyone can see, whatever their role. */}
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat
+          label="Guests invited"
+          value={guestCounts.invited}
+          icon={<UsersRound className="size-3.5" />}
+          hint={`${guestCounts.attending} confirmed so far`}
+        />
+        <Stat
+          label="Replies in"
+          value={`${Math.round(guestCounts.responseRate * 100)}%`}
+          tone={guestCounts.responseRate >= 1 ? 'good' : undefined}
+          hint={`${guestCounts.pending} still to answer`}
+        />
+        <Stat
+          label="Tasks done"
+          value={`${Math.round(taskProgress.ratio * 100)}%`}
+          tone={taskProgress.ratio >= 1 ? 'good' : undefined}
+          hint={`${taskProgress.done} of ${taskProgress.relevant}`}
+        />
+        <Stat
+          label="Vendors confirmed"
+          value={`${vendorCounts.confirmed} of ${vendorCounts.total}`}
+          icon={<Store className="size-3.5" />}
+          tone={
+            vendorCounts.total > 0 && vendorCounts.confirmed === vendorCounts.total
+              ? 'good'
+              : undefined
+          }
+        />
+      </div>
+
       {financials.isLoading ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-xl" />
           ))}
         </div>
       ) : canSeeMoney ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {/* 7.3's six money figures, in the workbook's own order. */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Stat
               label={`Total budget (${currency})`}
               value={money(f.total_budget_minor)}
@@ -93,96 +182,150 @@ export function DashboardPage() {
               value={money(f.forecast_minor)}
               tone="accent"
               icon={<TrendingUp className="size-3.5" />}
-              hint={utilisation !== null ? `${formatRateAsPercent(utilisation)}% of budget` : undefined}
+              hint={
+                utilisation !== null ? `${formatRateAsPercent(utilisation)}% of budget` : undefined
+              }
             />
             <Stat
               label={`Paid so far (${currency})`}
               value={money(f.paid_minor)}
               icon={<CreditCard className="size-3.5" />}
-              hint={`${money(f.outstanding_minor)} still to pay`}
             />
+            <Stat label={`Still to pay (${currency})`} value={money(f.outstanding_minor)} />
             <Stat
               label={`${overBudget ? 'Over budget' : 'Left in budget'} (${currency})`}
               value={money(Math.abs(Number(f.remaining_against_budget_minor ?? 0)))}
               tone={overBudget ? 'bad' : 'good'}
             />
+            <Stat
+              label={`Net cost after gifts (${currency})`}
+              value={money(f.net_cost_after_gifts_minor)}
+              icon={<HandCoins className="size-3.5" />}
+              hint={`${money(f.shortfall_minor)} shortfall`}
+            />
           </div>
 
-          <Card className="mt-5">
-            <CardHeader>
-              <CardTitle>Budget used</CardTitle>
-              {utilisation !== null && (
-                <Badge tone={utilisation > 1 ? 'stop' : utilisation > 0.9 ? 'warn' : 'good'}>
-                  {formatRateAsPercent(utilisation)}%
-                </Badge>
-              )}
-            </CardHeader>
-            <CardBody>
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-stone-100">
-                <div
-                  className={cn(
-                    'h-full rounded-full transition-[width] duration-500',
-                    utilisation !== null && utilisation > 1
-                      ? 'bg-red-600'
-                      : utilisation !== null && utilisation > 0.9
-                        ? 'bg-amber-500'
-                        : 'bg-wine-600',
-                  )}
-                  // Capped at 100% so an overrun does not overflow the track;
-                  // the badge above carries the real figure.
-                  style={{ width: `${Math.min((utilisation ?? 0) * 100, 100)}%` }}
-                />
-              </div>
-              <div className="tabular mt-2 flex justify-between text-xs text-stone-500">
-                <span>{money(f.forecast_minor)} forecast</span>
-                <span>{money(f.total_budget_minor)} budget</span>
-              </div>
-            </CardBody>
-          </Card>
-
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
+            {/* Chart one: where the money is going. */}
             <Card>
-              <CardHeader>
-                <CardTitle>Where the money comes from</CardTitle>
+              <CardHeader className="flex-wrap">
+                <CardTitle>Where the money is going</CardTitle>
+                {utilisation !== null && (
+                  <Badge tone={utilisation > 1 ? 'stop' : utilisation > 0.9 ? 'warn' : 'good'}>
+                    {formatRateAsPercent(utilisation)}% of budget
+                  </Badge>
+                )}
                 <Link
-                  to="../contributions"
-                  className="focus-ring flex items-center gap-1 rounded text-xs text-wine-700 hover:text-wine-800"
+                  to="../budget"
+                  className="focus-ring ml-auto flex items-center gap-1 rounded text-xs text-wine-700 hover:text-wine-800"
                 >
-                  Contributions <ArrowRight className="size-3" />
+                  Budget <ArrowRight className="size-3" />
                 </Link>
               </CardHeader>
-              <CardBody className="space-y-2.5">
-                <Row
-                  icon={<HandCoins className="size-4 text-stone-400" />}
-                  label="Contributions agreed"
-                  value={money(f.contributions_agreed_minor)}
-                />
-                <Row label="Contributions received" value={money(f.contributions_received_minor)} />
-                <Row
-                  label="Net cost after contributions"
-                  value={money(f.net_cost_after_gifts_minor)}
-                  strong
-                />
-                <Row label="Shortfall still to fund" value={money(f.shortfall_minor)} strong />
-                <p className="pt-1 text-[11px] leading-relaxed text-stone-400">
-                  Cash gifts from guests join these figures in Phase 4. If you are family rather
-                  than the couple, these show your own pledge only.
-                </p>
+              <CardBody>
+                {chartRows.rows.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-stone-400">No budget lines yet.</p>
+                ) : (
+                  <ul className="scroll-subtle max-h-80 space-y-2.5 overflow-y-auto pr-1">
+                    {chartRows.rows.map((c) => (
+                      <li key={c.label}>
+                        <div className="flex items-baseline justify-between gap-2 text-xs">
+                          <span className="min-w-0 truncate text-stone-600">{c.label}</span>
+                          <span className="tabular shrink-0 text-stone-500">
+                            {formatMinorAsMajor(c.forecast, decimals)}
+                          </span>
+                        </div>
+                        {/* Budgeted as a faint track, forecast on top of it, and
+                            paid darker still. One bar carrying three numbers,
+                            because three bars per category is a wall. */}
+                        <div className="relative mt-1 h-2 w-full overflow-hidden rounded-full bg-stone-100">
+                          <div
+                            className="absolute inset-y-0 left-0 rounded-full bg-stone-200"
+                            style={{ width: `${(c.budgeted / chartRows.max) * 100}%` }}
+                          />
+                          <div
+                            className={cn(
+                              'absolute inset-y-0 left-0 rounded-full',
+                              c.forecast > c.budgeted ? 'bg-red-400' : 'bg-wine-300',
+                            )}
+                            style={{ width: `${(c.forecast / chartRows.max) * 100}%` }}
+                          />
+                          <div
+                            className="absolute inset-y-0 left-0 rounded-full bg-wine-700"
+                            style={{ width: `${(c.paid / chartRows.max) * 100}%` }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-3 flex flex-wrap gap-3 border-t border-stone-100 pt-2.5 text-[11px] text-stone-400">
+                  <Swatch className="bg-stone-200" label="budgeted" />
+                  <Swatch className="bg-wine-300" label="forecast" />
+                  <Swatch className="bg-wine-700" label="paid" />
+                  <Swatch className="bg-red-400" label="over its budget" />
+                </div>
               </CardBody>
             </Card>
 
+            {/* Chart two: are we going to make it. */}
             <Card>
               <CardHeader>
-                <CardTitle>Still to come</CardTitle>
+                <CardTitle>Readiness</CardTitle>
+                <Badge tone={taskProgress.ratio >= 1 ? 'good' : 'neutral'}>
+                  {Math.round(taskProgress.ratio * 100)}%
+                </Badge>
+                <Link
+                  to="../tasks"
+                  className="focus-ring ml-auto flex items-center gap-1 rounded text-xs text-wine-700 hover:text-wine-800"
+                >
+                  Tasks <ArrowRight className="size-3" />
+                </Link>
               </CardHeader>
-              <CardBody className="space-y-2.5">
-                <Row label="Guests confirmed" value="Phase 4" muted />
-                <Row label="Tasks complete" value="Phase 5" muted />
-                <Row label="Attention required" value="Phase 7" muted />
-                <p className="pt-1 text-[11px] leading-relaxed text-stone-400">
-                  These are shown as unbuilt rather than as zero, so an empty panel is never read
-                  as good news.
-                </p>
+              <CardBody>
+                {(readiness.data ?? []).length === 0 ? (
+                  <p className="py-6 text-center text-sm text-stone-400">No tasks yet.</p>
+                ) : (
+                  <ul className="scroll-subtle max-h-80 space-y-2.5 overflow-y-auto pr-1">
+                    {(readiness.data ?? [])
+                      // Least ready first: the point of this chart is finding
+                      // the area nobody has started.
+                      .slice()
+                      .sort((a, b) => Number(a.ratio ?? 0) - Number(b.ratio ?? 0))
+                      .map((r) => {
+                        const ratio = r.ratio === null ? null : Number(r.ratio);
+                        const late = Number(r.overdue ?? 0);
+                        return (
+                          <li key={r.area}>
+                            <div className="flex items-baseline justify-between gap-2 text-xs">
+                              <span className="min-w-0 truncate text-stone-600">{r.area}</span>
+                              <span className="flex shrink-0 items-center gap-1.5">
+                                {late > 0 && <Badge tone="stop">{late} late</Badge>}
+                                <span className="tabular text-stone-500">
+                                  {ratio === null ? '—' : `${Math.round(ratio * 100)}%`}
+                                </span>
+                              </span>
+                            </div>
+                            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-stone-100">
+                              <div
+                                className={cn(
+                                  'h-full rounded-full',
+                                  ratio === null
+                                    ? 'bg-stone-200'
+                                    : ratio >= 1
+                                      ? 'bg-emerald-500'
+                                      : late > 0
+                                        ? 'bg-amber-500'
+                                        : 'bg-wine-500',
+                                )}
+                                style={{ width: `${Math.round((ratio ?? 0) * 100)}%` }}
+                              />
+                            </div>
+                          </li>
+                        );
+                      })}
+                  </ul>
+                )}
               </CardBody>
             </Card>
           </div>
@@ -198,33 +341,11 @@ export function DashboardPage() {
   );
 }
 
-function Row({
-  label,
-  value,
-  icon,
-  strong,
-  muted,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-  strong?: boolean;
-  muted?: boolean;
-}) {
+function Swatch({ className, label }: { className: string; label: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-3">
-      <span className="flex items-center gap-2 text-sm text-stone-600">
-        {icon}
-        {label}
-      </span>
-      <span
-        className={cn(
-          'tabular text-sm',
-          muted ? 'text-stone-300' : strong ? 'font-semibold text-stone-900' : 'text-stone-800',
-        )}
-      >
-        {value}
-      </span>
-    </div>
+    <span className="flex items-center gap-1.5">
+      <span className={cn('inline-block size-2 rounded-full', className)} />
+      {label}
+    </span>
   );
 }

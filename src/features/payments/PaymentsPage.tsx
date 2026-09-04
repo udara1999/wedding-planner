@@ -16,6 +16,7 @@ import { BudgetLinePicker } from './BudgetLinePicker';
 import { ReceiptField } from './ReceiptField';
 import { STAGES, STATUS_LABEL, STATUS_TONE } from './status';
 import { useBudgetLines, usePayerOptions } from '../budget/api';
+import { useFilterParam } from '../../lib/filterParam';
 import { useVendors } from '../vendors/vendorsApi';
 import {
   currencyDecimals,
@@ -98,7 +99,10 @@ export function PaymentsPage() {
   const [lineId, setLineId] = useState<string | null>(null);
   const [vendorId, setVendorId] = useState<string | null>(null);
   const [lineError, setLineError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'all'>('all');
+  // Ticket 7.5: an alert links here already filtered, so the filter lives in
+  // the URL rather than in state — see lib/filterParam.ts for why syncing the
+  // two does not work.
+  const [statusFilter, setStatusFilter] = useFilterParam<PaymentStatus | 'all'>('status', 'all');
   const [stageFilter, setStageFilter] = useState<PaymentStage | 'all'>('all');
   const [search, setSearch] = useState('');
 
@@ -117,14 +121,12 @@ export function PaymentsPage() {
   // choice that would be silently overruled on save.
   const lineVendorId = (lines.data ?? []).find((l) => l.id === lineId)?.vendor_id ?? null;
 
-
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: BLANK });
   // Derived from the stored row rather than from form.watch, which the React
   // Compiler cannot memoise. It only ever matters for a value already saved:
   // one entered before this field was a list, or seeded by a tradition whose
   // lookups have since changed.
-  const editingPaidBy =
-    (payments.data ?? []).find((p) => p.id === editingId)?.paid_by ?? null;
+  const editingPaidBy = (payments.data ?? []).find((p) => p.id === editingId)?.paid_by ?? null;
   const paidByOrphan =
     editingPaidBy && !(payers.data ?? []).includes(editingPaidBy) ? editingPaidBy : null;
 

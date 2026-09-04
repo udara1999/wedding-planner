@@ -24,6 +24,7 @@ import {
 } from './api';
 import { countGuests } from './counts';
 import { groupGuests, type GroupMode } from './grouping';
+import { useFilterParam } from '../../lib/filterParam';
 import { currencyDecimals } from '../../lib/units';
 import { GuestDetail } from './GuestDetail';
 import { ImportGuestsModal } from './import/ImportGuestsModal';
@@ -75,8 +76,9 @@ export function GuestsPage() {
   const remove = useDeleteGuest(wedding.id);
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<RsvpStatus | 'all'>('all');
-  const [sideFilter, setSideFilter] = useState<WeddingSide | 'all'>('all');
+  // Ticket 7.5. Both live in the URL so an alert lands on the filtered list.
+  const [statusFilter, setStatusFilter] = useFilterParam<RsvpStatus | 'all'>('status', 'all');
+  const [sideFilter, setSideFilter] = useFilterParam<WeddingSide | 'all' | 'none'>('side', 'all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [groupMode, setGroupMode] = useState<GroupMode>('group');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -87,7 +89,10 @@ export function GuestsPage() {
     const needle = search.trim().toLowerCase();
     return (guests.data ?? []).filter((g) => {
       if (statusFilter !== 'all' && g.rsvp_status !== statusFilter) return false;
-      if (sideFilter !== 'all' && g.side !== sideFilter) return false;
+      // 'none' is its own question — households nobody has assigned a side
+      // to — and is what the alert links here for.
+      if (sideFilter === 'none' && g.side !== null) return false;
+      if (sideFilter !== 'all' && sideFilter !== 'none' && g.side !== sideFilter) return false;
       if (needle) {
         const hay = [g.household_name, g.relationship, g.category, g.phone, g.city]
           .filter(Boolean)
@@ -274,6 +279,7 @@ export function GuestsPage() {
               onChange={(e) => setSideFilter(e.target.value as WeddingSide | 'all')}
             >
               <option value="all">Both sides</option>
+              <option value="none">No side set</option>
               <option value="bride">Bride</option>
               <option value="groom">Groom</option>
               <option value="both">Shared</option>

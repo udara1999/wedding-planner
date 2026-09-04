@@ -59,6 +59,40 @@ describe('matchesFilters', () => {
   });
 });
 
+describe('matchesFilters — over budget only (7.5)', () => {
+  const over = { ...EMPTY_FILTERS, overBudgetOnly: true };
+
+  it('keeps a line forecast above what was budgeted', () => {
+    expect(matchesFilters(line({ budgeted_minor: 1000, forecast_minor: 1500 }), over)).toBe(true);
+  });
+
+  it('drops a line forecast at or under its budget', () => {
+    expect(matchesFilters(line({ budgeted_minor: 1000, forecast_minor: 1000 }), over)).toBe(false);
+    expect(matchesFilters(line({ budgeted_minor: 1000, forecast_minor: 500 }), over)).toBe(false);
+  });
+
+  it('drops a not-applicable line however it was budgeted', () => {
+    // A switched-off line forecasts zero, so it can never be over. Including
+    // it would put struck-off rows into a list of problems.
+    expect(
+      matchesFilters(
+        line({ budgeted_minor: 1000, forecast_minor: 5000, applicability: 'not_applicable' }),
+        over,
+      ),
+    ).toBe(false);
+  });
+
+  it('treats a null forecast as nothing rather than as over', () => {
+    expect(matchesFilters(line({ budgeted_minor: 1000, forecast_minor: null }), over)).toBe(false);
+  });
+
+  it('changes nothing when the flag is off', () => {
+    expect(matchesFilters(line({ budgeted_minor: 1000, forecast_minor: 500 }), EMPTY_FILTERS)).toBe(
+      true,
+    );
+  });
+});
+
 describe('summarise', () => {
   it('adds up what the server already computed', () => {
     const s = summarise([

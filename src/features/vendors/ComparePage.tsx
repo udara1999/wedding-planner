@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Star, Trash2 } from 'lucide-react';
+import { Plus, Star } from 'lucide-react';
 import {
   useCreateVendorOption,
   useDeleteVendorOption,
@@ -13,6 +13,7 @@ import {
   useVendorQuestions,
 } from './api';
 import { VendorOptionCard } from './VendorOptionCard';
+import { VendorOptionModal } from './VendorOptionModal';
 import { ComparisonGrid } from './ComparisonGrid';
 import { DecisionIndex } from './DecisionIndex';
 import { useWedding } from '../weddings/api';
@@ -68,6 +69,11 @@ export function ComparePage() {
   );
 
   const [chosen, setChosen] = useState<string | null>(null);
+
+  // The id, not the row: after a save the list refetches, and a stored row
+  // would leave the open modal showing what it looked like when it opened.
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   // Derived rather than set from an effect: defaulting in state would need a
   // render just to correct itself once the categories arrive.
   const categoryKey = chosen ?? cats[0]?.key ?? null;
@@ -105,6 +111,18 @@ export function ComparePage() {
   }
 
   const rows = options.data ?? [];
+  const editing = rows.find((o) => o.id === editingId) ?? null;
+
+  // Clicking the chosen option again un-chooses it, so a decision made by
+  // accident is not permanent. Shared by the tile and the modal rather than
+  // written out twice.
+  function choose(optionId: string) {
+    if (!categoryKey) return;
+    setDecision.mutate({
+      categoryKey,
+      optionId: decision?.chosen_option_id === optionId ? null : optionId,
+    });
+  }
 
   return (
     <Page width="wide">
@@ -203,7 +221,9 @@ export function ComparePage() {
           </div>
 
           <InlineError
-            error={create.error ?? update.error ?? remove.error ?? setDecision.error ?? record.error}
+            error={
+              create.error ?? update.error ?? remove.error ?? setDecision.error ?? record.error
+            }
           />
 
           {options.isLoading ? (
@@ -239,35 +259,39 @@ export function ComparePage() {
                   currency={currency}
                   decimals={decimals}
                   canEdit={canEdit}
-                  saving={update.isPending && update.variables?.id === option.id}
                   onSave={(patch) => update.mutate({ id: option.id, patch })}
-                  onRemove={() => remove.mutate(option.id)}
-                  removing={remove.isPending && remove.variables === option.id}
+                  onEdit={() => setEditingId(option.id)}
                   chosen={decision?.chosen_option_id === option.id}
                   recorded={Boolean(decision?.recorded_in_vendors)}
                   deciding={setDecision.isPending || record.isPending}
-                  onChoose={() =>
-                    categoryKey &&
-                    setDecision.mutate({
-                      categoryKey,
-                      // Clicking the chosen option again un-chooses it, so a
-                      // decision made by accident is not permanent.
-                      optionId: decision?.chosen_option_id === option.id ? null : option.id,
-                    })
-                  }
+                  onChoose={() => choose(option.id)}
                   onRecord={() => record.mutate(option.id)}
                 />
               ))}
             </div>
           )}
 
+          {editing && (
+            <VendorOptionModal
+              option={editing}
+              currency={currency}
+              decimals={decimals}
+              canEdit={canEdit}
+              saving={update.isPending && update.variables?.id === editing.id}
+              removing={remove.isPending && remove.variables === editing.id}
+              chosen={decision?.chosen_option_id === editing.id}
+              recorded={Boolean(decision?.recorded_in_vendors)}
+              deciding={setDecision.isPending || record.isPending}
+              onSave={(patch) => update.mutate({ id: editing.id, patch })}
+              onChoose={() => choose(editing.id)}
+              onRecord={() => record.mutate(editing.id)}
+              onRemove={() => remove.mutate(editing.id, { onSuccess: () => setEditingId(null) })}
+              onClose={() => setEditingId(null)}
+            />
+          )}
+
           {rows.length > 0 && (
             <>
-              <p className="flex items-center gap-1.5 text-xs text-stone-400">
-                <Trash2 className="size-3.5" />
-                Removing an option also removes its answers.
-              </p>
-
               <ComparisonGrid
                 weddingId={wedding.id}
                 options={rows}

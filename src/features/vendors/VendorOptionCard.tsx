@@ -1,37 +1,32 @@
-import { useEffect, useState } from 'react';
-import { Award, Check, Star, Store, Trash2 } from 'lucide-react';
+import { Award, Check, Pencil, Phone, Star, Store, User } from 'lucide-react';
 import type { VendorOptionInput } from './api';
-import { formatMinorForInput, parseMajorToMinor } from '../../lib/units';
+import { formatMinorAsMajor } from '../../lib/units';
 import type { VendorOptionRow } from '../../types/db';
-import { Badge, Button, Card, CardBody, Field, Input, cn } from '../../components/ui';
-
-const MONEY: { key: 'quoted_minor' | 'negotiated_minor' | 'deposit_minor'; label: string }[] = [
-  { key: 'quoted_minor', label: 'Quoted' },
-  { key: 'negotiated_minor', label: 'Negotiated' },
-  { key: 'deposit_minor', label: 'Deposit' },
-];
+import { Badge, Button, Card, CardBody, cn } from '../../components/ui';
 
 /**
- * One shortlisted option: the profile half of the comparison (05a's rows above
- * "QUESTIONS TO CONFIRM BEFORE YOU BOOK"). The questions themselves are rows
- * across these same options in the grid below.
+ * One shortlisted option, as something you can read at a glance.
  *
- * Saved explicitly, unlike the answer grid's autosave. These are a handful of
- * fields edited deliberately, not forty cells filled in while on the phone to a
- * vendor, and an explicit Save makes the money fields feel deliberate too.
+ * This was a full edit form — nine inputs, three of them money side by side —
+ * rendered at a third of the page width. Every field was legible only because
+ * it was empty. Three columns of comparison is the right layout for comparing;
+ * it is the wrong container for typing into.
+ *
+ * So the tile shows the figures and the form moved to a modal, which is what
+ * every other record in the app does. What stays here are the one-click
+ * judgements — met, rating, chosen — because those are made while looking
+ * across options rather than while filling anything in.
  */
 export function VendorOptionCard({
   option,
   currency,
   decimals,
   canEdit,
-  saving,
-  removing,
   chosen,
   recorded,
   deciding,
   onSave,
-  onRemove,
+  onEdit,
   onChoose,
   onRecord,
 }: {
@@ -39,80 +34,44 @@ export function VendorOptionCard({
   currency: string;
   decimals: number;
   canEdit: boolean;
-  saving: boolean;
-  removing: boolean;
   chosen: boolean;
   recorded: boolean;
   deciding: boolean;
   onSave: (patch: VendorOptionInput) => void;
-  onRemove: () => void;
+  onEdit: () => void;
   onChoose: () => void;
   onRecord: () => void;
 }) {
-  const blank = () => ({
-    label: option.label,
-    vendor_name: option.vendor_name ?? '',
-    contact_name: option.contact_name ?? '',
-    phone: option.phone ?? '',
-    package: option.package ?? '',
-    quoted_minor: formatMinorForInput(option.quoted_minor, decimals),
-    negotiated_minor: formatMinorForInput(option.negotiated_minor, decimals),
-    deposit_minor: formatMinorForInput(option.deposit_minor, decimals),
-  });
-
-  const [form, setForm] = useState(blank);
-  const [dirty, setDirty] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState(false);
-
-  // Re-sync when the row changes underneath, but never while there are unsaved
-  // edits — that would silently discard what someone is typing.
-  useEffect(() => {
-    if (!dirty) setForm(blank());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [option.id, option.updated_at]);
-
-  function set(key: keyof ReturnType<typeof blank>, value: string) {
-    setForm((f) => ({ ...f, [key]: value }));
-    setDirty(true);
-    setProblem(null);
-  }
-
-  function save() {
-    const patch: VendorOptionInput = {
-      label: form.label.trim() || option.label,
-      vendor_name: form.vendor_name.trim() || null,
-      contact_name: form.contact_name.trim() || null,
-      phone: form.phone.trim() || null,
-      package: form.package.trim() || null,
-    };
-    for (const { key, label } of MONEY) {
-      try {
-        patch[key] = parseMajorToMinor(form[key], decimals) ?? 0;
-      } catch (e) {
-        setProblem(`${label}: ${e instanceof Error ? e.message : 'not a number'}`);
-        return;
-      }
-    }
-    onSave(patch);
-    setDirty(false);
-  }
+  // What this option would actually cost. A negotiated price supersedes the
+  // quote, the same precedence the budget line uses, so the number on the tile
+  // is the one worth comparing across options.
+  const effective = option.negotiated_minor || option.quoted_minor;
+  const negotiatedDown = option.negotiated_minor > 0 && option.quoted_minor > 0;
 
   return (
     <Card
       className={cn(
-        'flex flex-col',
-        dirty && 'border-wine-200',
+        'flex flex-col transition-shadow hover:shadow-raised',
         chosen && 'border-wine-400 ring-1 ring-wine-200',
       )}
     >
-      <CardBody className="flex-1 space-y-3 pt-4">
-        {chosen && (
-          <div className="-mt-1 flex items-center gap-1.5">
-            <Badge tone="accent">
-              <Award className="size-3" />
-              chosen
-            </Badge>
+      <CardBody className="flex-1 space-y-4 pt-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold tracking-tight text-stone-900">
+              {option.vendor_name || option.label}
+            </p>
+            <p className="truncate text-xs text-stone-400">
+              {option.vendor_name ? option.label : 'no vendor named yet'}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            {chosen && (
+              <Badge tone="accent">
+                <Award className="size-3" />
+                chosen
+              </Badge>
+            )}
             {recorded && (
               <Badge tone="good">
                 <Store className="size-3" />
@@ -120,157 +79,138 @@ export function VendorOptionCard({
               </Badge>
             )}
           </div>
-        )}
+        </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            value={form.label}
-            disabled={!canEdit}
-            onChange={(e) => set('label', e.target.value)}
-            className="focus-ring min-w-0 flex-1 rounded-md bg-transparent text-sm font-semibold tracking-tight text-stone-900 outline-none"
-          />
+        {/* The comparison figure, given room to be read. */}
+        <div className="rounded-xl bg-stone-50 px-3 py-2.5">
+          <p className="text-[11px] font-medium tracking-wide text-stone-400 uppercase">
+            {option.negotiated_minor > 0 ? 'Negotiated' : 'Quoted'}
+          </p>
+          <p className="tabular mt-0.5 text-lg font-semibold text-stone-900">
+            <span className="mr-1 text-xs font-normal text-stone-400">{currency}</span>
+            {effective > 0 ? formatMinorAsMajor(effective, decimals) : '—'}
+          </p>
+          <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-stone-400">
+            {negotiatedDown && (
+              <span>
+                quoted{' '}
+                <span className="tabular line-through">
+                  {formatMinorAsMajor(option.quoted_minor, decimals)}
+                </span>
+              </span>
+            )}
+            {option.deposit_minor > 0 && (
+              <span>
+                deposit{' '}
+                <span className="tabular">
+                  {formatMinorAsMajor(option.deposit_minor, decimals)}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        <dl className="space-y-1.5 text-xs">
+          {option.package && (
+            <div className="flex gap-2">
+              <dt className="w-14 shrink-0 text-stone-400">Package</dt>
+              <dd className="min-w-0 flex-1 text-stone-700">{option.package}</dd>
+            </div>
+          )}
+          {option.contact_name && (
+            <div className="flex items-center gap-2">
+              <dt className="w-14 shrink-0 text-stone-400">
+                <User className="inline size-3" /> Contact
+              </dt>
+              <dd className="min-w-0 flex-1 truncate text-stone-700">{option.contact_name}</dd>
+            </div>
+          )}
+          {option.phone && (
+            <div className="flex items-center gap-2">
+              <dt className="w-14 shrink-0 text-stone-400">
+                <Phone className="inline size-3" /> Phone
+              </dt>
+              <dd className="min-w-0 flex-1 truncate">
+                <a href={`tel:${option.phone}`} className="text-wine-700 hover:underline">
+                  {option.phone}
+                </a>
+              </dd>
+            </div>
+          )}
+        </dl>
+
+        {/* One-click judgements. Made while looking across options, so they stay
+            on the tile rather than moving into the form. */}
+        <div className="flex items-center justify-between gap-2 border-t border-stone-100 pt-3">
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                disabled={!canEdit}
+                aria-label={`Rate ${n} out of 5`}
+                onClick={() => onSave({ rating: option.rating === n ? null : n })}
+                className="focus-ring rounded p-0.5"
+              >
+                <Star
+                  className={cn(
+                    'size-4',
+                    (option.rating ?? 0) >= n
+                      ? 'fill-gold-400 text-gold-400'
+                      : 'text-stone-300 hover:text-stone-400',
+                  )}
+                />
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             disabled={!canEdit}
             title={option.met_or_visited ? 'Met or visited' : 'Not met yet'}
             onClick={() => onSave({ met_or_visited: !option.met_or_visited })}
             className={cn(
-              'focus-ring flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium',
+              'focus-ring flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium',
               option.met_or_visited
                 ? 'bg-emerald-50 text-emerald-700'
                 : 'bg-stone-100 text-stone-500 hover:bg-stone-200',
             )}
           >
             <Check className="size-3" />
-            met
+            {option.met_or_visited ? 'met' : 'not met'}
           </button>
         </div>
-
-        <Field label="Vendor">
-          <Input
-            value={form.vendor_name}
-            disabled={!canEdit}
-            placeholder="Studio Lanka"
-            onChange={(e) => set('vendor_name', e.target.value)}
-          />
-        </Field>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Contact">
-            <Input
-              value={form.contact_name}
-              disabled={!canEdit}
-              onChange={(e) => set('contact_name', e.target.value)}
-            />
-          </Field>
-          <Field label="Phone">
-            <Input
-              value={form.phone}
-              disabled={!canEdit}
-              onChange={(e) => set('phone', e.target.value)}
-            />
-          </Field>
-        </div>
-
-        <Field label="Package">
-          <Input
-            value={form.package}
-            disabled={!canEdit}
-            onChange={(e) => set('package', e.target.value)}
-          />
-        </Field>
-
-        <div className="grid grid-cols-3 gap-2">
-          {MONEY.map(({ key, label }) => (
-            <Field key={key} label={`${label} (${currency})`}>
-              <Input
-                inputMode="decimal"
-                placeholder="0.00"
-                value={form[key]}
-                disabled={!canEdit}
-                onChange={(e) => set(key, e.target.value)}
-              />
-            </Field>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-0.5">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              disabled={!canEdit}
-              aria-label={`Rate ${n} out of 5`}
-              onClick={() => onSave({ rating: option.rating === n ? null : n })}
-              className="focus-ring rounded p-0.5"
-            >
-              <Star
-                className={cn(
-                  'size-4',
-                  (option.rating ?? 0) >= n
-                    ? 'fill-gold-400 text-gold-400'
-                    : 'text-stone-300 hover:text-stone-400',
-                )}
-              />
-            </button>
-          ))}
-        </div>
-
-        {problem && <p className="text-xs text-red-700">{problem}</p>}
       </CardBody>
 
       {canEdit && (
-        <div className="space-y-2 border-t border-stone-100 px-5 py-2.5">
-          {/* Ticket 3.6: choosing is reversible, recording is the one click
-              that creates the vendor row. */}
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant={chosen ? 'subtle' : 'secondary'}
-              className="flex-1"
-              disabled={deciding}
-              icon={<Award className="size-3.5" />}
-              onClick={onChoose}
-            >
-              {chosen ? 'Chosen' : 'Choose'}
-            </Button>
-            {chosen && !recorded && (
-              <Button
-                size="sm"
-                className="flex-1"
-                loading={deciding}
-                icon={<Store className="size-3.5" />}
-                onClick={onRecord}
-              >
-                Record as vendor
-              </Button>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between">
-          <Button size="sm" variant={dirty ? 'primary' : 'secondary'} loading={saving} onClick={save}>
-            {dirty ? 'Save' : 'Saved'}
+        <div className="flex items-center gap-2 border-t border-stone-100 px-5 py-3">
+          <Button
+            size="sm"
+            variant="secondary"
+            icon={<Pencil className="size-3.5" />}
+            onClick={onEdit}
+          >
+            Details
           </Button>
-          {confirming ? (
-            <span className="flex items-center gap-1.5">
-              <Button size="sm" variant="danger" loading={removing} onClick={onRemove}>
-                Remove
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
-                Keep
-              </Button>
-            </span>
-          ) : (
+          <Button
+            size="sm"
+            variant={chosen ? 'subtle' : 'secondary'}
+            className="flex-1"
+            disabled={deciding}
+            icon={<Award className="size-3.5" />}
+            onClick={onChoose}
+          >
+            {chosen ? 'Chosen' : 'Choose'}
+          </Button>
+          {chosen && !recorded && (
             <Button
               size="sm"
-              variant="ghost"
-              icon={<Trash2 className="size-3.5" />}
-              onClick={() => setConfirming(true)}
+              loading={deciding}
+              icon={<Store className="size-3.5" />}
+              onClick={onRecord}
             >
-              Remove
+              Record
             </Button>
           )}
-          </div>
         </div>
       )}
     </Card>

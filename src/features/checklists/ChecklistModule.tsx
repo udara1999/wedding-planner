@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Navigate, useOutletContext, useParams } from 'react-router-dom';
-import { ChevronDown, Plus, Search, Trash2 } from 'lucide-react';
+import { ChevronDown, PackagePlus, Plus, Search, Trash2 } from 'lucide-react';
 import {
   useChecklist,
   useCreateChecklistRow,
@@ -12,6 +12,8 @@ import { CateringSummary, CeremonySummary, JewellerySummary } from './summaries'
 import { ApplicabilitySwitch } from '../budget/ApplicabilitySwitch';
 import { useVendors } from '../vendors/vendorsApi';
 import { useOwnerOptions } from '../weddings/lookups';
+import { pendingTotal, useSeedWedding, useTemplatePending } from '../weddings/api';
+
 import {
   currencyDecimals,
   formatMoney,
@@ -102,6 +104,13 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   const rows = useMemo(() => rowsQuery.data ?? [], [rowsQuery.data]);
+
+  // Risk R4: content added to the template after this wedding was created has
+  // never reached it. Offered here as well as on Setup, because this is where
+  // somebody actually notices.
+  const pending = useTemplatePending(wedding.id);
+  const seed = useSeedWedding();
+  const pendingCount = pendingTotal(pending.data);
 
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -260,8 +269,26 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
                 }
                 description={
                   rows.length === 0
-                    ? `Add the first one, or seed the wedding to bring in the workbook’s list.`
+                    ? pendingCount > 0
+                      ? `The template has a list ready for this — ${pendingCount} items across the modules, waiting to be brought in.`
+                      : 'Add the first one to get started.'
                     : 'Widen the status filter or clear the search.'
+                }
+                /* The old copy said "seed the wedding to bring in the
+                   workbook's list" and offered no way to do it, which is the
+                   dead end that produced this report. */
+                action={
+                  rows.length === 0 && canEdit && pendingCount > 0 ? (
+                    <Button
+                      icon={<PackagePlus className="size-4" />}
+                      loading={seed.isPending}
+                      onClick={() =>
+                        seed.mutate(wedding.id, { onSuccess: () => void pending.refetch() })
+                      }
+                    >
+                      Bring in the template list
+                    </Button>
+                  ) : undefined
                 }
               />
             </div>

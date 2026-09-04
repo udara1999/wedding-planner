@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase, unwrap } from '../../lib/supabase';
+import type { Database } from '../../types/database.types';
 import type { MemberRole, MyWedding, WeddingRow, WeddingSide } from '../../types/db';
 
 export const weddingKeys = {
@@ -201,4 +202,39 @@ export function useCreateDemoWedding() {
       navigate(`/w/${weddingId}`);
     },
   });
+}
+
+export type TemplatePending = Database['public']['Views']['v_template_pending']['Row'];
+
+export const PENDING_SOURCES: { key: keyof TemplatePending; label: string }[] = [
+  { key: 'checklists', label: 'Checklist items' },
+  { key: 'tasks', label: 'Tasks' },
+  { key: 'countdown', label: 'Countdown checks' },
+  { key: 'timeline', label: 'Timeline events' },
+  { key: 'ceremony', label: 'Ceremony components' },
+  { key: 'legal', label: 'Registration requirements' },
+  { key: 'risks', label: 'Contingencies' },
+  { key: 'responsibilities', label: 'Responsibilities' },
+  { key: 'budget_lines', label: 'Budget lines' },
+];
+
+/** Risk R4. What this wedding has not got from the template yet. */
+export function useTemplatePending(weddingId: string) {
+  return useQuery({
+    queryKey: ['template-pending', weddingId] as const,
+    queryFn: async (): Promise<TemplatePending | null> => {
+      const res = await supabase
+        .from('v_template_pending')
+        .select('*')
+        .eq('wedding_id', weddingId)
+        .maybeSingle();
+      if (res.error) throw new Error(res.error.message);
+      return res.data;
+    },
+  });
+}
+
+export function pendingTotal(row: TemplatePending | null | undefined): number {
+  if (!row) return 0;
+  return PENDING_SOURCES.reduce((sum, s) => sum + Number(row[s.key] ?? 0), 0);
 }

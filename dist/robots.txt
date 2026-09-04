@@ -9,4 +9,4 @@ Disallow: /signin
 Disallow: /auth/
 Allow: /$
 
-Sitemap: http://localhost:5173/sitemap.xml
+Sitemap: https://weddinghub.udaraprabath.com/sitemap.xml

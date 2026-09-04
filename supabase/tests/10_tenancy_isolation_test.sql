@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(239);
+select plan(251);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1964,6 +1964,124 @@ select is((select payment_due from v_entitlement
             where wedding_id = (select v from rc where k='w')),
           false,
           'Once recorded as paid, nothing is owed');
+
+-- =============================================================================
+-- Ticket 1.3: checklist module content — 12 assertions
+-- =============================================================================
+-- The failure mode being guarded against is the one this project has already
+-- had: seed_wedding was fully tested, nothing called it, and every wedding came
+-- out empty until the user opened the app. So these count rows IN A WEDDING
+-- rather than the seeder's return value — the latter would keep passing if the
+-- call inside seed_wedding were removed.
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+create temporary table cl (k text primary key, v uuid);
+grant select, insert on cl to public;
+
+insert into cl
+select 'w', public.create_wedding('Content', 'Test', current_date + 200, 'LKR', 'Asia/Colombo');
+
+select lives_ok(
+  $q$ select public.seed_wedding((select v from cl where k='w')) $q$,
+  'A fresh wedding seeds without error');
+
+-- All fourteen modules, in one number. A mapping mistake in any of them moves
+-- this, which is what makes it worth asserting as a total as well as per module.
+select is((
+    select (select count(*) from attire_items        where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from jewellery_items     where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from beauty_appointments where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from decor_items         where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from menu_items          where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from cake_items          where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from transport_legs      where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from accommodations      where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from shot_list_items     where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from procurement_items   where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from wedding_party       where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from contacts            where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from closure_tasks       where wedding_id = (select v from cl where k='w'))
+         + (select count(*) from lessons             where wedding_id = (select v from cl where k='w'))
+  )::int,
+  414,
+  'seed_wedding fills all fourteen checklist modules — 414 rows in total');
+
+-- The big two, named individually because a truncated extraction would still
+-- look plausible in a total.
+select is((select count(*)::int from procurement_items
+            where wedding_id = (select v from cl where k='w')),
+          82,
+          'All 82 packing items arrive');
+
+select is((select count(*)::int from shot_list_items
+            where wedding_id = (select v from cl where k='w')),
+          62,
+          'All 62 photographs arrive');
+
+-- These two are the extraction bug that actually happened: the Transport sheet
+-- has an ACCOMMODATION register below the journeys, with its own header and
+-- different columns, and reading straight down filed five hotel rooms as
+-- transport legs.
+select is((select count(*)::int from transport_legs
+            where wedding_id = (select v from cl where k='w')),
+          18,
+          'Transport has the 18 journeys, and not the accommodation rows');
+
+select is((select count(*)::int from accommodations
+            where wedding_id = (select v from cl where k='w')),
+          12,
+          'Accommodation has its own rows, in its own table');
+
+-- Idempotence, as every other seeded table has. A second run must add nothing.
+select lives_ok(
+  $q$ select public.seed_wedding((select v from cl where k='w')) $q$,
+  'Seeding twice is allowed');
+
+select is((select count(*)::int from procurement_items
+            where wedding_id = (select v from cl where k='w')),
+          82,
+          'And adds nothing the second time');
+
+-- The privacy claim in the migration header, checked rather than asserted in a
+-- comment. The source workbook's contact sheet named real people; a template
+-- arriving with somebody else's family in it is both wrong and a small leak.
+select is((select count(*)::int from template.checklist_items
+            where name in ('Methuli', 'Udara')
+               or notes in ('Methuli', 'Udara')),
+          0,
+          'No personal names came across into the template');
+
+-- 1.7 now covers these two. A facial course six weeks out has to move with the
+-- date, and so does chasing a deposit the week after.
+select is((select on_date from beauty_appointments
+            where wedding_id = (select v from cl where k='w') and seq = 1),
+          (select wedding_date + (select offset_days from template.checklist_items
+                                   where locale = 'poruwa' and module = 'beauty' and seq = 1)
+             from weddings where id = (select v from cl where k='w')),
+          'A beauty appointment is dated from the wedding date');
+
+update weddings set wedding_date = wedding_date - 14
+ where id = (select v from cl where k='w');
+
+select is((select on_date from beauty_appointments
+            where wedding_id = (select v from cl where k='w') and seq = 1),
+          (select wedding_date + (select offset_days from template.checklist_items
+                                   where locale = 'poruwa' and module = 'beauty' and seq = 1)
+             from weddings where id = (select v from cl where k='w')),
+          'Moving the wedding moves the beauty appointments with it');
+
+-- And a date somebody set by hand survives the move, which is risk R9.
+update beauty_appointments set on_date = '2027-01-01', due_date_overridden = true
+ where wedding_id = (select v from cl where k='w') and seq = 2;
+
+update weddings set wedding_date = wedding_date - 7
+ where id = (select v from cl where k='w');
+
+select is((select on_date from beauty_appointments
+            where wedding_id = (select v from cl where k='w') and seq = 2),
+          '2027-01-01'::date,
+          'A hand-set appointment date is left alone when the wedding moves');
 
 select * from finish();
 rollback;

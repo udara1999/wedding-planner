@@ -55,7 +55,9 @@ export type Database = {
           notes: string | null
           owner: string | null
           room_type: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -76,7 +78,9 @@ export type Database = {
           notes?: string | null
           owner?: string | null
           room_type?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -97,7 +101,9 @@ export type Database = {
           notes?: string | null
           owner?: string | null
           room_type?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -205,7 +211,9 @@ export type Database = {
           notes: string | null
           owner: string | null
           paid_minor: number
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           subject: string | null
           updated_at: string
@@ -226,7 +234,9 @@ export type Database = {
           notes?: string | null
           owner?: string | null
           paid_minor?: number
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           subject?: string | null
           updated_at?: string
@@ -247,7 +257,9 @@ export type Database = {
           notes?: string | null
           owner?: string | null
           paid_minor?: number
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           subject?: string | null
           updated_at?: string
@@ -340,16 +352,20 @@ export type Database = {
           at_time: string | null
           cost_minor: number
           created_at: string
+          due_date_overridden: boolean
           duration_minutes: number | null
           id: string
           location: string | null
           name: string
           notes: string | null
+          offset_days: number | null
           on_date: string | null
           owner: string | null
           paid_minor: number
           provider: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           subject: string | null
           updated_at: string
@@ -361,16 +377,20 @@ export type Database = {
           at_time?: string | null
           cost_minor?: number
           created_at?: string
+          due_date_overridden?: boolean
           duration_minutes?: number | null
           id?: string
           location?: string | null
           name: string
           notes?: string | null
+          offset_days?: number | null
           on_date?: string | null
           owner?: string | null
           paid_minor?: number
           provider?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           subject?: string | null
           updated_at?: string
@@ -382,16 +402,20 @@ export type Database = {
           at_time?: string | null
           cost_minor?: number
           created_at?: string
+          due_date_overridden?: boolean
           duration_minutes?: number | null
           id?: string
           location?: string | null
           name?: string
           notes?: string | null
+          offset_days?: number | null
           on_date?: string | null
           owner?: string | null
           paid_minor?: number
           provider?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           subject?: string | null
           updated_at?: string
@@ -724,8 +748,10 @@ export type Database = {
           name: string
           notes: string | null
           owner: string | null
+          seq: number | null
           servings: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           tiers: number | null
           updated_at: string
@@ -742,8 +768,10 @@ export type Database = {
           name: string
           notes?: string | null
           owner?: string | null
+          seq?: number | null
           servings?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           tiers?: number | null
           updated_at?: string
@@ -760,8 +788,10 @@ export type Database = {
           name?: string
           notes?: string | null
           owner?: string | null
+          seq?: number | null
           servings?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           tiers?: number | null
           updated_at?: string
@@ -999,11 +1029,15 @@ export type Database = {
           cost_minor: number
           created_at: string
           done_on: string | null
+          due_date_overridden: boolean
           id: string
           name: string
           notes: string | null
+          offset_days: number | null
           owner: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           target_date: string | null
           updated_at: string
@@ -1017,11 +1051,15 @@ export type Database = {
           cost_minor?: number
           created_at?: string
           done_on?: string | null
+          due_date_overridden?: boolean
           id?: string
           name: string
           notes?: string | null
+          offset_days?: number | null
           owner?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           target_date?: string | null
           updated_at?: string
@@ -1035,11 +1073,15 @@ export type Database = {
           cost_minor?: number
           created_at?: string
           done_on?: string | null
+          due_date_overridden?: boolean
           id?: string
           name?: string
           notes?: string | null
+          offset_days?: number | null
           owner?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           target_date?: string | null
           updated_at?: string
@@ -1140,7 +1182,9 @@ export type Database = {
           owner: string | null
           phone: string | null
           role: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -1159,7 +1203,9 @@ export type Database = {
           owner?: string | null
           phone?: string | null
           role?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -1178,7 +1224,9 @@ export type Database = {
           owner?: string | null
           phone?: string | null
           role?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -1382,8 +1430,10 @@ export type Database = {
           owner: string | null
           qty: number | null
           remove_after: string | null
+          seq: number | null
           setup_by: string | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -1401,8 +1451,10 @@ export type Database = {
           owner?: string | null
           qty?: number | null
           remove_after?: string | null
+          seq?: number | null
           setup_by?: string | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -1420,8 +1472,10 @@ export type Database = {
           owner?: string | null
           qty?: number | null
           remove_after?: string | null
+          seq?: number | null
           setup_by?: string | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -1794,7 +1848,9 @@ export type Database = {
           ownership: Database["public"]["Enums"]["jewellery_ownership"]
           return_by: string | null
           returned_on: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           subject: string | null
           updated_at: string
@@ -1817,7 +1873,9 @@ export type Database = {
           ownership?: Database["public"]["Enums"]["jewellery_ownership"]
           return_by?: string | null
           returned_on?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           subject?: string | null
           updated_at?: string
@@ -1840,7 +1898,9 @@ export type Database = {
           ownership?: Database["public"]["Enums"]["jewellery_ownership"]
           return_by?: string | null
           returned_on?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           subject?: string | null
           updated_at?: string
@@ -2094,7 +2154,9 @@ export type Database = {
           name: string
           notes: string | null
           owner: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -2110,7 +2172,9 @@ export type Database = {
           name: string
           notes?: string | null
           owner?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -2126,7 +2190,9 @@ export type Database = {
           name?: string
           notes?: string | null
           owner?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -2226,7 +2292,9 @@ export type Database = {
           owner: string | null
           per_head: boolean
           qty: number | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -2244,7 +2312,9 @@ export type Database = {
           owner?: string | null
           per_head?: boolean
           qty?: number | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -2262,7 +2332,9 @@ export type Database = {
           owner?: string | null
           per_head?: boolean
           qty?: number | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -2665,7 +2737,9 @@ export type Database = {
           owner: string | null
           packed: boolean
           qty: number | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           stored_where: string | null
           updated_at: string
@@ -2690,7 +2764,9 @@ export type Database = {
           owner?: string | null
           packed?: boolean
           qty?: number | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           stored_where?: string | null
           updated_at?: string
@@ -2715,7 +2791,9 @@ export type Database = {
           owner?: string | null
           packed?: boolean
           qty?: number | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           stored_where?: string | null
           updated_at?: string
@@ -3283,7 +3361,9 @@ export type Database = {
           planned_at: string | null
           priority: string | null
           section: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -3303,7 +3383,9 @@ export type Database = {
           planned_at?: string | null
           priority?: string | null
           section?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -3323,7 +3405,9 @@ export type Database = {
           planned_at?: string | null
           priority?: string | null
           section?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -3567,7 +3651,9 @@ export type Database = {
           pickup_at: string | null
           pickup_from: string | null
           return_trip: boolean
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vehicle: string | null
@@ -3590,7 +3676,9 @@ export type Database = {
           pickup_at?: string | null
           pickup_from?: string | null
           return_trip?: boolean
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vehicle?: string | null
@@ -3613,7 +3701,9 @@ export type Database = {
           pickup_at?: string | null
           pickup_from?: string | null
           return_trip?: boolean
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vehicle?: string | null
@@ -4826,8 +4916,10 @@ export type Database = {
           phone: string | null
           role: string | null
           room_needed: boolean
+          seq: number | null
           side: Database["public"]["Enums"]["wedding_side"] | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           transport: string | null
           updated_at: string
@@ -4852,8 +4944,10 @@ export type Database = {
           phone?: string | null
           role?: string | null
           room_needed?: boolean
+          seq?: number | null
           side?: Database["public"]["Enums"]["wedding_side"] | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           transport?: string | null
           updated_at?: string
@@ -4878,8 +4972,10 @@ export type Database = {
           phone?: string | null
           role?: string | null
           room_needed?: boolean
+          seq?: number | null
           side?: Database["public"]["Enums"]["wedding_side"] | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           transport?: string | null
           updated_at?: string

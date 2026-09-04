@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Award, Check, Star, Store, Trash2 } from 'lucide-react';
 import type { VendorOptionInput } from './api';
-import { formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
+import { formatMinorForInput, parseMajorToMinor } from '../../lib/units';
 import type { VendorOptionRow } from '../../types/db';
 import { Badge, Button, Card, CardBody, Field, Input, cn } from '../../components/ui';
 
@@ -55,9 +55,9 @@ export function VendorOptionCard({
     contact_name: option.contact_name ?? '',
     phone: option.phone ?? '',
     package: option.package ?? '',
-    quoted_minor: formatMinorAsMajor(option.quoted_minor, decimals),
-    negotiated_minor: formatMinorAsMajor(option.negotiated_minor, decimals),
-    deposit_minor: formatMinorAsMajor(option.deposit_minor, decimals),
+    quoted_minor: formatMinorForInput(option.quoted_minor, decimals),
+    negotiated_minor: formatMinorForInput(option.negotiated_minor, decimals),
+    deposit_minor: formatMinorForInput(option.deposit_minor, decimals),
   });
 
   const [form, setForm] = useState(blank);
@@ -185,6 +185,7 @@ export function VendorOptionCard({
             <Field key={key} label={`${label} (${currency})`}>
               <Input
                 inputMode="decimal"
+                placeholder="0.00"
                 value={form[key]}
                 disabled={!canEdit}
                 onChange={(e) => set(key, e.target.value)}

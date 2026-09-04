@@ -9,7 +9,7 @@ import {
   type VendorInput,
 } from './vendorsApi';
 import { VendorBudgetLinks } from './VendorBudgetLinks';
-import { formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
+import { formatMinorForInput, parseMajorToMinor } from '../../lib/units';
 import type { VendorRow } from '../../types/db';
 import {
   Badge,
@@ -57,9 +57,9 @@ export function VendorDetail({
     phone: vendor.phone ?? '',
     email: vendor.email ?? '',
     package: vendor.package ?? '',
-    quoted_minor: formatMinorAsMajor(vendor.quoted_minor, decimals),
-    negotiated_minor: formatMinorAsMajor(vendor.negotiated_minor, decimals),
-    deposit_paid_minor: formatMinorAsMajor(vendor.deposit_paid_minor, decimals),
+    quoted_minor: formatMinorForInput(vendor.quoted_minor, decimals),
+    negotiated_minor: formatMinorForInput(vendor.negotiated_minor, decimals),
+    deposit_paid_minor: formatMinorForInput(vendor.deposit_paid_minor, decimals),
     arrival_time: vendor.arrival_time ?? '',
     finish_time: vendor.finish_time ?? '',
     key_deliverables: vendor.key_deliverables ?? '',
@@ -222,6 +222,7 @@ export function VendorDetail({
                 <Field key={key} label={`${label} (${currency})`}>
                   <Input
                     inputMode="decimal"
+                    placeholder="0.00"
                     value={form[key]}
                     disabled={!canEdit}
                     onChange={(e) => set(key, e.target.value)}

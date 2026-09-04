@@ -6,7 +6,12 @@ import { Trash2 } from 'lucide-react';
 import { useCreateBudgetLine, useDeleteBudgetLine, useUpdateBudgetLine } from './api';
 import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { LinePayments } from './LinePayments';
-import { currencyDecimals, formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
+import {
+  currencyDecimals,
+  formatMinorAsMajor,
+  formatMinorForInput,
+  parseMajorToMinor,
+} from '../../lib/units';
 import type { Applicability, BudgetCategoryRow, BudgetLineRow, TaskStatus } from '../../types/db';
 import { Button, Field, InlineError, Input, Select, Textarea } from '../../components/ui';
 
@@ -107,11 +112,11 @@ export function BudgetLineForm({
             payer: line.payer ?? '',
             status: line.status,
             notes: line.notes ?? '',
-            budgeted_minor: formatMinorAsMajor(line.budgeted_minor, decimals),
-            quoted_minor: formatMinorAsMajor(line.quoted_minor, decimals),
-            negotiated_minor: formatMinorAsMajor(line.negotiated_minor, decimals),
-            actual_minor: formatMinorAsMajor(line.actual_minor, decimals),
-            refundable_deposit_minor: formatMinorAsMajor(line.refundable_deposit_minor, decimals),
+            budgeted_minor: formatMinorForInput(line.budgeted_minor, decimals),
+            quoted_minor: formatMinorForInput(line.quoted_minor, decimals),
+            negotiated_minor: formatMinorForInput(line.negotiated_minor, decimals),
+            actual_minor: formatMinorForInput(line.actual_minor, decimals),
+            refundable_deposit_minor: formatMinorForInput(line.refundable_deposit_minor, decimals),
           }
         : { ...BLANK, category_id: categories[0]?.id ?? '' },
     );
@@ -229,7 +234,12 @@ export function BudgetLineForm({
             hint={hint}
             error={form.formState.errors[key]?.message}
           >
-            <Input inputMode="decimal" disabled={!canEdit} {...form.register(key)} />
+            <Input
+              inputMode="decimal"
+              placeholder="0.00"
+              disabled={!canEdit}
+              {...form.register(key)}
+            />
           </Field>
         ))}
       </div>

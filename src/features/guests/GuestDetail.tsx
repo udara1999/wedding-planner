@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { GuestInput, GuestRow, RsvpStatus } from './api';
 import type { WeddingSide } from '../../types/db';
+import { formatCountForInput } from '../../lib/units';
 import { Button, Field, Input, Section, Select, Textarea } from '../../components/ui';
 
 const STATUSES: { value: RsvpStatus; label: string }[] = [
@@ -30,11 +31,11 @@ export function GuestDetail({
     relationship: guest.relationship ?? '',
     category: guest.category ?? '',
     side: (guest.side ?? '') as WeddingSide | '',
-    adults_invited: String(guest.adults_invited),
-    children_invited: String(guest.children_invited),
+    adults_invited: formatCountForInput(guest.adults_invited),
+    children_invited: formatCountForInput(guest.children_invited),
     rsvp_status: guest.rsvp_status,
-    adults_attending: String(guest.adults_attending),
-    children_attending: String(guest.children_attending),
+    adults_attending: formatCountForInput(guest.adults_attending),
+    children_attending: formatCountForInput(guest.children_attending),
     phone: guest.phone ?? '',
     email: guest.email ?? '',
     city: guest.city ?? '',
@@ -167,6 +168,7 @@ export function GuestDetail({
               <Field label="Adults invited">
                 <Input
                   inputMode="numeric"
+                  placeholder="0"
                   value={form.adults_invited}
                   disabled={!canEdit}
                   onChange={(e) => set('adults_invited', e.target.value)}
@@ -175,6 +177,7 @@ export function GuestDetail({
               <Field label="Children invited">
                 <Input
                   inputMode="numeric"
+                  placeholder="0"
                   value={form.children_invited}
                   disabled={!canEdit}
                   onChange={(e) => set('children_invited', e.target.value)}
@@ -201,6 +204,7 @@ export function GuestDetail({
               <Field label="Adults attending">
                 <Input
                   inputMode="numeric"
+                  placeholder="0"
                   value={form.adults_attending}
                   disabled={!canEdit}
                   onChange={(e) => set('adults_attending', e.target.value)}
@@ -209,6 +213,7 @@ export function GuestDetail({
               <Field label="Children attending">
                 <Input
                   inputMode="numeric"
+                  placeholder="0"
                   value={form.children_attending}
                   disabled={!canEdit}
                   onChange={(e) => set('children_attending', e.target.value)}

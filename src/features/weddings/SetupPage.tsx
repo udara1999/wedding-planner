@@ -9,8 +9,8 @@ import type { MyWedding } from '../../types/db';
 import type { WeddingRow } from '../../types/db';
 import {
   currencyDecimals,
-  formatMinorAsMajor,
-  formatRateAsPercent,
+  formatMinorForInput,
+  formatRateForInput,
   parseMajorToMinor,
   parsePercentAsRate,
 } from '../../lib/units';
@@ -94,9 +94,9 @@ function toFormValues(row: WeddingRow): FormValues {
     tradition: row.tradition ?? 'poruwa',
     currency: row.currency ?? 'LKR',
     timezone: row.timezone ?? 'Asia/Colombo',
-    total_budget_minor: formatMinorAsMajor(row.total_budget_minor, decimals),
-    contingency_pct: formatRateAsPercent(row.contingency_pct),
-    guest_buffer_pct: formatRateAsPercent(row.guest_buffer_pct),
+    total_budget_minor: formatMinorForInput(row.total_budget_minor, decimals),
+    contingency_pct: formatRateForInput(row.contingency_pct),
+    guest_buffer_pct: formatRateForInput(row.guest_buffer_pct),
   };
 }
 

@@ -99,3 +99,30 @@ export function formatRateAsPercent(rate: number | null | undefined): string {
   const withDecimals = formatMinorAsMajor(scaled, 2); // '7.50'
   return withDecimals.replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
 }
+
+/* ==========================================================================
+   Values for an input field
+   ==========================================================================
+   These columns are NOT NULL with a default of zero, so "zero" and "nothing
+   entered yet" are the same state. Rendering that as "0.00" makes someone
+   clear the field before typing, every single time. An input shows nothing,
+   and a placeholder carries the format instead.
+   ========================================================================== */
+
+export function formatMinorForInput(
+  minor: number | null | undefined,
+  decimals: number,
+): string {
+  if (minor === null || minor === undefined || minor === 0) return '';
+  return formatMinorAsMajor(minor, decimals);
+}
+
+export function formatRateForInput(rate: number | null | undefined): string {
+  if (!rate) return '';
+  return formatRateAsPercent(rate);
+}
+
+export function formatCountForInput(value: number | null | undefined): string {
+  if (!value) return '';
+  return String(value);
+}

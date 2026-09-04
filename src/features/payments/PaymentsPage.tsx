@@ -15,7 +15,12 @@ import {
 import { BudgetLinePicker } from './BudgetLinePicker';
 import { ReceiptField } from './ReceiptField';
 import { useBudgetLines } from '../budget/api';
-import { currencyDecimals, formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
+import {
+  currencyDecimals,
+  formatMinorAsMajor,
+  formatMinorForInput,
+  parseMajorToMinor,
+} from '../../lib/units';
 import type { MyWedding, PaymentStage, PaymentStatus, PaymentView } from '../../types/db';
 import {
   Badge,
@@ -162,8 +167,8 @@ export function PaymentsPage() {
     setLineError(null);
     form.reset({
       stage: (p.stage ?? 'final_payment') as PaymentStage,
-      amount_due: formatMinorAsMajor(p.amount_due_minor, decimals),
-      amount_paid: formatMinorAsMajor(p.amount_paid_minor, decimals),
+      amount_due: formatMinorForInput(p.amount_due_minor, decimals),
+      amount_paid: formatMinorForInput(p.amount_paid_minor, decimals),
       due_date: p.due_date ?? '',
       paid_on: p.paid_on ?? '',
       method: p.method ?? '',
@@ -414,13 +419,23 @@ export function PaymentsPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label={`Amount due (${currency})`} error={form.formState.errors.amount_due?.message}>
-                  <Input inputMode="decimal" disabled={!canEdit} {...form.register('amount_due')} />
+                  <Input
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    disabled={!canEdit}
+                    {...form.register('amount_due')}
+                  />
                 </Field>
                 <Field label="Due date">
                   <Input type="date" disabled={!canEdit} {...form.register('due_date')} />
                 </Field>
                 <Field label={`Amount paid (${currency})`}>
-                  <Input inputMode="decimal" disabled={!canEdit} {...form.register('amount_paid')} />
+                  <Input
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    disabled={!canEdit}
+                    {...form.register('amount_paid')}
+                  />
                 </Field>
                 <Field label="Paid on">
                   <Input type="date" disabled={!canEdit} {...form.register('paid_on')} />

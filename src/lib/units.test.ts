@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   currencyDecimals,
+  formatCountForInput,
   formatMinorAsMajor,
+  formatMinorForInput,
   formatRateAsPercent,
+  formatRateForInput,
   parseMajorToMinor,
   parsePercentAsRate,
 } from './units';
@@ -118,5 +121,38 @@ describe('percent rates', () => {
   /** numeric(5,4) cannot hold more than four decimal places. */
   it('rounds to the four decimal places the column stores', () => {
     expect(parsePercentAsRate('7.12345')).toBe(0.0712);
+  });
+});
+
+describe('values shown in an input', () => {
+  /**
+   * A field pre-filled with "0.00" makes the user clear it before typing, every
+   * single time. Zero and absent mean the same thing to these columns — they
+   * are NOT NULL with a default of zero — so an input shows neither.
+   */
+  it('shows nothing for an amount of zero', () => {
+    expect(formatMinorForInput(0, 2)).toBe('');
+    expect(formatMinorForInput(null, 2)).toBe('');
+    expect(formatMinorForInput(undefined, 2)).toBe('');
+  });
+
+  it('still shows a real amount', () => {
+    expect(formatMinorForInput(123456, 2)).toBe('1234.56');
+  });
+
+  it('round-trips an emptied field back to zero', () => {
+    expect(parseMajorToMinor(formatMinorForInput(0, 2), 2) ?? 0).toBe(0);
+  });
+
+  it('shows nothing for a rate of zero', () => {
+    expect(formatRateForInput(0)).toBe('');
+    expect(formatRateForInput(null)).toBe('');
+    expect(formatRateForInput(0.07)).toBe('7');
+  });
+
+  it('shows nothing for a count of zero', () => {
+    expect(formatCountForInput(0)).toBe('');
+    expect(formatCountForInput(null)).toBe('');
+    expect(formatCountForInput(3)).toBe('3');
   });
 });

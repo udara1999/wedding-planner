@@ -12,7 +12,12 @@ import {
   type ContributionRow,
 } from './api';
 import { useAuth } from '../auth/AuthProvider';
-import { currencyDecimals, formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
+import {
+  currencyDecimals,
+  formatMinorAsMajor,
+  formatMinorForInput,
+  parseMajorToMinor,
+} from '../../lib/units';
 import type { MyWedding } from '../../types/db';
 import {
   Badge,
@@ -103,8 +108,8 @@ export function ContributionsPage() {
       relationship: c.relationship ?? '',
       purpose: c.purpose ?? '',
       agreed_on: c.agreed_on ?? '',
-      agreed: formatMinorAsMajor(c.agreed_minor, decimals),
-      received: formatMinorAsMajor(c.received_minor, decimals),
+      agreed: formatMinorForInput(c.agreed_minor, decimals),
+      received: formatMinorForInput(c.received_minor, decimals),
       last_received_on: c.last_received_on ?? '',
       notes: c.notes ?? '',
       mine: c.contributor_user_id !== null && c.contributor_user_id === user?.id,
@@ -276,13 +281,13 @@ export function ContributionsPage() {
                     label={`Agreed (${currency})`}
                     error={form.formState.errors.agreed?.message}
                   >
-                    <Input inputMode="decimal" {...form.register('agreed')} />
+                    <Input inputMode="decimal" placeholder="0.00" {...form.register('agreed')} />
                   </Field>
                   <Field label="Agreed on">
                     <Input type="date" {...form.register('agreed_on')} />
                   </Field>
                   <Field label={`Received (${currency})`}>
-                    <Input inputMode="decimal" {...form.register('received')} />
+                    <Input inputMode="decimal" placeholder="0.00" {...form.register('received')} />
                   </Field>
                   <Field label="Last received on">
                     <Input type="date" {...form.register('last_received_on')} />

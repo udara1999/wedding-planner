@@ -83,13 +83,7 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
         roles: COUPLE,
         icon: <ClipboardList className={ICON} />,
       },
-      {
-        to: 'guests',
-        label: 'Guests',
-        roles: ALL,
-        icon: <UsersRound className={ICON} />,
-        phase: '4',
-      },
+      { to: 'guests', label: 'Guests', roles: ALL, icon: <UsersRound className={ICON} /> },
       {
         to: 'seating',
         label: 'Seating',

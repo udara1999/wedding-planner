@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(120);
+select plan(128);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -876,6 +876,64 @@ select is((select budget_line_count::int from v_vendor_financials
                                    and name = 'Unlinked Cakes')),
           0,
           'A vendor with no budget lines is allowed, and reads as zero');
+
+-- =============================================================================
+-- 22. Guests: the household model and side-scoped reading (4.1, 4.3) — 8 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+insert into guests (wedding_id, household_name, side, adults_invited, children_invited)
+values ((select v from w where k='a'), 'Bride side household',  'bride', 4, 1),
+       ((select v from w where k='a'), 'Groom side household',  'groom', 3, 0),
+       ((select v from w where k='a'), 'Shared friends',        'both',  2, 0),
+       ((select v from w where k='a'), 'Side not decided',       null,   2, 2);
+
+select is((select total_invited from guests
+             where wedding_id = (select v from w where k='a')
+               and household_name = 'Bride side household'),
+          5,
+          'total_invited counts adults and children together');
+
+select is((select count(*)::int from guests
+             where wedding_id = (select v from w where k='a')), 4,
+          'The couple see every household, whichever side');
+
+-- Ticket 4.3, the assertion its AC names outright.
+select tests.login((select v from ids where k = 'brides_mum'));
+select is((select count(*)::int from guests
+             where wedding_id = (select v from w where k='a')
+               and household_name = 'Groom side household'), 0,
+          'The bride''s mother cannot read groom-side guests');
+
+select is((select count(*)::int from guests
+             where wedding_id = (select v from w where k='a')
+               and household_name = 'Bride side household'), 1,
+          'The bride''s mother can read her own side');
+
+-- 'both' and an undecided side are visible to either family: withholding them
+-- would hide shared friends from everyone.
+select is((select count(*)::int from guests
+             where wedding_id = (select v from w where k='a')
+               and household_name in ('Shared friends', 'Side not decided')), 2,
+          'Shared and undecided households are visible to either side');
+
+select tests.login((select v from ids where k = 'grooms_dad'));
+select is((select count(*)::int from guests
+             where wedding_id = (select v from w where k='a')
+               and household_name = 'Bride side household'), 0,
+          'And the groom''s father cannot read bride-side guests');
+
+-- A coordinator seats people, so they see the list — guests are not money.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from guests
+             where wedding_id = (select v from w where k='a')), 4,
+          'A coordinator sees the whole guest list, which they need for seating');
+
+-- Plan §4.5's flat rule, checked as a grant rather than trusted to policy.
+select tests.become_service_role();
+select is((select count(*)::int from information_schema.role_table_grants
+             where table_name = 'guests' and grantee = 'anon'), 0,
+          'anon has no grant of any kind on the guests table');
 
 select * from finish();
 rollback;

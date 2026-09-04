@@ -266,6 +266,190 @@ export type Database = {
           },
         ]
       }
+      guest_groups: {
+        Row: {
+          id: string
+          name: string
+          sort_order: number
+          wedding_id: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          sort_order?: number
+          wedding_id: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          sort_order?: number
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_groups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guest_groups_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          adults_attending: number
+          adults_invited: number
+          category: string | null
+          children_attending: number
+          children_invited: number
+          city: string | null
+          code: string | null
+          country: string | null
+          created_at: string
+          dietary: string | null
+          district: string | null
+          email: string | null
+          expected_gift_minor: number
+          gift_description: string | null
+          gift_received_minor: number
+          group_id: string | null
+          household_name: string
+          id: string
+          invitation_sent: boolean
+          invitation_sent_on: string | null
+          invitation_type: string | null
+          needs_room: boolean
+          needs_transport: boolean
+          notes: string | null
+          phone: string | null
+          relationship: string | null
+          rsvp_on: string | null
+          rsvp_status: Database["public"]["Enums"]["rsvp_status"]
+          rsvp_token: string
+          side: Database["public"]["Enums"]["wedding_side"] | null
+          table_id: string | null
+          thank_you_sent: boolean
+          total_attending: number | null
+          total_invited: number | null
+          transport_type: string | null
+          updated_at: string
+          vip: boolean
+          wedding_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          adults_attending?: number
+          adults_invited?: number
+          category?: string | null
+          children_attending?: number
+          children_invited?: number
+          city?: string | null
+          code?: string | null
+          country?: string | null
+          created_at?: string
+          dietary?: string | null
+          district?: string | null
+          email?: string | null
+          expected_gift_minor?: number
+          gift_description?: string | null
+          gift_received_minor?: number
+          group_id?: string | null
+          household_name: string
+          id?: string
+          invitation_sent?: boolean
+          invitation_sent_on?: string | null
+          invitation_type?: string | null
+          needs_room?: boolean
+          needs_transport?: boolean
+          notes?: string | null
+          phone?: string | null
+          relationship?: string | null
+          rsvp_on?: string | null
+          rsvp_status?: Database["public"]["Enums"]["rsvp_status"]
+          rsvp_token?: string
+          side?: Database["public"]["Enums"]["wedding_side"] | null
+          table_id?: string | null
+          thank_you_sent?: boolean
+          total_attending?: number | null
+          total_invited?: number | null
+          transport_type?: string | null
+          updated_at?: string
+          vip?: boolean
+          wedding_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          adults_attending?: number
+          adults_invited?: number
+          category?: string | null
+          children_attending?: number
+          children_invited?: number
+          city?: string | null
+          code?: string | null
+          country?: string | null
+          created_at?: string
+          dietary?: string | null
+          district?: string | null
+          email?: string | null
+          expected_gift_minor?: number
+          gift_description?: string | null
+          gift_received_minor?: number
+          group_id?: string | null
+          household_name?: string
+          id?: string
+          invitation_sent?: boolean
+          invitation_sent_on?: string | null
+          invitation_type?: string | null
+          needs_room?: boolean
+          needs_transport?: boolean
+          notes?: string | null
+          phone?: string | null
+          relationship?: string | null
+          rsvp_on?: string | null
+          rsvp_status?: Database["public"]["Enums"]["rsvp_status"]
+          rsvp_token?: string
+          side?: Database["public"]["Enums"]["wedding_side"] | null
+          table_id?: string | null
+          thank_you_sent?: boolean
+          total_attending?: number | null
+          total_invited?: number | null
+          transport_type?: string | null
+          updated_at?: string
+          vip?: boolean
+          wedding_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "guest_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "v_wedding_financials"
+            referencedColumns: ["wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_due_minor: number
@@ -1632,6 +1816,7 @@ export type Database = {
         | "due"
         | "due_soon"
         | "not_due"
+      rsvp_status: "pending" | "accepted" | "declined" | "maybe" | "no_response"
       task_priority: "critical" | "high" | "medium" | "low"
       task_status:
         | "not_started"
@@ -1799,6 +1984,7 @@ export const Constants = {
         "due_soon",
         "not_due",
       ],
+      rsvp_status: ["pending", "accepted", "declined", "maybe", "no_response"],
       task_priority: ["critical", "high", "medium", "low"],
       task_status: [
         "not_started",

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Check, Heart, Loader2, Minus, Plus, X } from 'lucide-react';
 import { useRsvpLookup, useRsvpSubmit, type RsvpHousehold } from './rsvpApi';
 import { useTurnstile } from './turnstile';
+import { useHead } from '../../lib/head';
 import { Button, Card, CardBody, Field, Input, Textarea, cn } from '../../components/ui';
 
 /**
@@ -18,6 +19,12 @@ import { Button, Card, CardBody, Field, Input, Textarea, cn } from '../../compon
  */
 export function PublicRsvpPage() {
   const { token } = useParams<{ token: string }>();
+
+  // Never indexed, and the title must not name the household either — a tab
+  // title ends up in browser history, in screenshots and in shared links.
+  // robots.txt disallows /rsvp/ for crawlers that do not run JavaScript; this
+  // is the layer for the one that does.
+  useHead({ title: 'Your invitation', exact: true, index: false });
   const lookup = useRsvpLookup(token ?? null);
   const [outcome, setOutcome] = useState<{ attending: boolean; people: number } | null>(null);
 

@@ -1,3 +1,4 @@
+import { useHead } from '../../lib/head';
 import { useState } from 'react';
 import { NavLink, Outlet, useParams, Link } from 'react-router-dom';
 import {
@@ -192,6 +193,10 @@ const GROUPS: { heading: string; items: NavItem[] }[] = [
 ];
 
 export function WeddingLayout() {
+  // One place for every authenticated screen. Each of these holds somebody's
+  // wedding — guest names, phone numbers, what they paid — and none of it
+  // belongs in a search index.
+  useHead({ index: false });
   const { weddingId } = useParams<{ weddingId: string }>();
   const { data, isLoading, error, refetch } = useMyWeddings();
   const { signOut } = useAuth();

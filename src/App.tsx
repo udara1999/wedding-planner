@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthProvider';
 import { SignInPage } from './features/auth/SignInPage';
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
 import { WeddingListPage } from './features/weddings/WeddingListPage';
+import { LandingPage } from './features/marketing/LandingPage';
 import { CreateWeddingPage } from './features/weddings/CreateWeddingPage';
 import { WeddingLayout } from './features/weddings/WeddingLayout';
 import { DashboardPage } from './features/weddings/DashboardPage';
@@ -60,6 +61,25 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   }
   if (!session) return <Navigate to="/signin" replace />;
   return <>{children}</>;
+}
+
+/**
+ * The public landing page for a visitor, the wedding list for a member.
+ *
+ * Deliberately not wrapped in RequireAuth: that redirect is what made the
+ * homepage unindexable. The session check happens here instead so a crawler
+ * gets real content and a signed-in user goes straight to their weddings.
+ */
+function RootRoute() {
+  const { session, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex min-h-full items-center justify-center">
+        <Spinner label="Checking your session" />
+      </div>
+    );
+  }
+  return session ? <WeddingListPage /> : <LandingPage />;
 }
 
 /** Landing point for the emailed sign-up confirmation link. */
@@ -136,14 +156,11 @@ export default function App() {
               <Route path="/auth/reset" element={<ResetPasswordPage />} />
               <Route path="/invite" element={<AcceptInvitePage />} />
 
-              <Route
-                path="/"
-                element={
-                  <RequireAuth>
-                    <WeddingListPage />
-                  </RequireAuth>
-                }
-              />
+              {/* `/` is the one public URL. It used to redirect an
+                  unauthenticated visitor to /signin, which left nothing to
+                  rank and nothing to share — a sign-in form is not a landing
+                  page. Signed in, it is still the wedding list. */}
+              <Route path="/" element={<RootRoute />} />
               <Route
                 path="/new"
                 element={

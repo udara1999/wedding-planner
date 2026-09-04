@@ -1,3 +1,4 @@
+import { useHead } from '../../lib/head';
 import { useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Navigate, useSearchParams } from 'react-router-dom';
@@ -27,6 +28,10 @@ import {
 type Mode = 'signin' | 'signup' | 'forgot';
 
 export function SignInPage() {
+  // Reachable without a session, so a crawler can fetch it. A sign-in form
+  // ranking for anything is a liability, not a win: it competes with the
+  // landing page for the same terms and answers no question.
+  useHead({ title: 'Sign in', index: false });
   const { session, loading } = useAuth();
   const [params] = useSearchParams();
   const [mode, setMode] = useState<Mode>('signin');

@@ -2,11 +2,57 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- ====================================================================
+         SEO
+         ====================================================================
+         Only one route in this app is public: this one. Everything else is
+         either behind sign-in or is a tokenised RSVP link, and robots.txt
+         (generated in vite.config.ts) forbids all of it.
+
+         These tags are static rather than set by React on mount because no
+         social scraper executes JavaScript — Facebook, WhatsApp, LinkedIn,
+         Slack and iMessage all read the raw HTML and stop. A title set in a
+         useEffect is invisible to every one of them.
+         ================================================================== -->
+    <title>Sri Lankan Wedding Planner — budget, guests, RSVPs and the day itself</title>
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      name="description"
+      content="Plan a Sri Lankan wedding in one place: a poruwa checklist, a budget that tracks quoted against actual, guest lists with RSVP links, vendor comparisons, and a day-of pack you can print and run without a signal."
     />
-    <title>Wedding Planner</title>
+    <link rel="canonical" href="%SITE_URL%/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <!-- Open Graph. og:url must be absolute or the preview resolves nothing. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sri Lankan Wedding Planner" />
+    <meta
+      property="og:title"
+      content="Sri Lankan Wedding Planner — budget, guests, RSVPs and the day itself"
+    />
+    <meta
+      property="og:description"
+      content="A poruwa checklist, a budget that tracks quoted against actual, RSVP links for every household, and a day-of pack that works with no signal."
+    />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/icons/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sri Lankan Wedding Planner" />
+    <meta property="og:locale" content="en_LK" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Sri Lankan Wedding Planner — budget, guests, RSVPs and the day itself"
+    />
+    <meta
+      name="twitter:description"
+      content="A poruwa checklist, a budget that tracks quoted against actual, RSVP links for every household, and a day-of pack that works with no signal."
+    />
+    <meta name="twitter:image" content="%SITE_URL%/icons/og-image.png" />
+
     <!-- Ticket 8.7. The manifest makes the app installable; the service
          worker in public/sw.js keeps the shell available with no signal. -->
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -17,9 +63,106 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Wedding" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+
+    <!-- Supabase is the only third party and every screen needs it, so the
+         connection is warmed rather than waited for. -->
+    <link rel="preconnect" href="https://ejrsxxxvlxdarmmfgsku.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://ejrsxxxvlxdarmmfgsku.supabase.co" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "%SITE_URL%/#website",
+            "url": "%SITE_URL%/",
+            "name": "Sri Lankan Wedding Planner",
+            "inLanguage": "en",
+            "description": "Plan a Sri Lankan wedding in one place: poruwa checklist, budget, guest list and RSVPs, vendors, and a printable day-of pack."
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "%SITE_URL%/#app",
+            "name": "Sri Lankan Wedding Planner",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Any modern browser; installable on iOS and Android",
+            "url": "%SITE_URL%/",
+            "inLanguage": "en",
+            "featureList": [
+              "Poruwa ceremony running order and registration checklist",
+              "Budget with quoted, negotiated and actual amounts per line",
+              "Payment schedule with due and overdue tracking",
+              "Household guest list with tokenised RSVP links",
+              "Seating plan with capacity checks",
+              "Vendor comparison across 227 questions",
+              "Printable day-of pack that works without a signal",
+              "Export everything to a spreadsheet"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "%SITE_URL%/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Does it cover a poruwa ceremony?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. It starts with the full poruwa running order — 24 components from the Hewisi drummers to the coconut being split — with durations that add up, and each one can be switched off if you are not having it. The registration checklist follows the Sri Lankan registrar's requirements, and every item is marked to confirm with your own registrar rather than stated as fact."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do guests reply?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Each household gets a private link with no login. They see who is invited, how many places are reserved, and answer on their phone. You can send it on WhatsApp with one tap. Replies update your headcount, your seating and the number you give the caterer."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What happens on the day if there is no signal?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "You print the day-of pack beforehand: the running order, when each vendor arrives, who to phone, the seating plan and what is in the bags. The app also installs to your phone and keeps a copy of the pack readable offline, but the printed version is the one to rely on."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I get my data out?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, in one click, as a spreadsheet with the same sheets a wedding workbook has — budget, payments, guests, timeline. It is built in your browser, so nothing is uploaded to produce it."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- The app replaces this on mount.
+
+         It exists because #root was empty, which means every crawler and share
+         scraper that does not run JavaScript saw a blank page. React wipes it
+         when it renders, so users never see it for more than a frame — and it
+         is deliberately just the hero, kept short so it stays in step with
+         src/features/marketing/LandingPage.tsx rather than drifting into a
+         second copy of the whole page. -->
+    <div id="root">
+      <main>
+        <h1>Plan a Sri Lankan wedding without twenty-seven spreadsheet tabs</h1>
+        <p>
+          A poruwa checklist that knows the running order, a budget that tracks what you were quoted
+          against what you actually paid, RSVP links for every household, and a day-of pack you can
+          print and hand to your coordinator.
+        </p>
+        <p><a href="/signin">Sign in or create an account</a></p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

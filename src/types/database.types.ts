@@ -701,7 +701,9 @@ export type Database = {
           name: string
           notes: string | null
           owner: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -720,7 +722,9 @@ export type Database = {
           name: string
           notes?: string | null
           owner?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -739,7 +743,9 @@ export type Database = {
           name?: string
           notes?: string | null
           owner?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -1566,13 +1572,17 @@ export type Database = {
           created_at: string
           document_held: boolean
           due_date: string | null
+          due_date_overridden: boolean
           id: string
           jurisdiction: string | null
           name: string
           notes: string | null
+          offset_days: number | null
           owner: string | null
           reference_url: string | null
+          seq: number | null
           sort_order: number
+          source_template_id: number | null
           status: Database["public"]["Enums"]["task_status"]
           updated_at: string
           vendor_id: string | null
@@ -1587,13 +1597,17 @@ export type Database = {
           created_at?: string
           document_held?: boolean
           due_date?: string | null
+          due_date_overridden?: boolean
           id?: string
           jurisdiction?: string | null
           name: string
           notes?: string | null
+          offset_days?: number | null
           owner?: string | null
           reference_url?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null
@@ -1608,13 +1622,17 @@ export type Database = {
           created_at?: string
           document_held?: boolean
           due_date?: string | null
+          due_date_overridden?: boolean
           id?: string
           jurisdiction?: string | null
           name?: string
           notes?: string | null
+          offset_days?: number | null
           owner?: string | null
           reference_url?: string | null
+          seq?: number | null
           sort_order?: number
+          source_template_id?: number | null
           status?: Database["public"]["Enums"]["task_status"]
           updated_at?: string
           vendor_id?: string | null

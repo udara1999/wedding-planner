@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(186);
+select plan(200);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -1474,6 +1474,137 @@ select is((select ratio from v_readiness
             where wedding_id = (select v from w where k='a') and area = 'ZZ Cancelled'),
           null,
           'An area with everything cancelled has no ratio rather than a zero');
+
+-- =============================================================================
+-- Phase 6: the checklist modules — 14 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- ---------------------------------------------------------- the shared shape
+-- Plan §2's shape, checked on the schema rather than trusted to the loop that
+-- built seventeen tables. If the loop ever gains a table that misses a column,
+-- ChecklistModule renders it and quietly cannot save that field.
+select is((select count(*)::int from information_schema.columns
+            where table_schema = 'public'
+              and table_name in ('attire_items','jewellery_items','beauty_appointments',
+                                 'ceremony_steps','legal_requirements','decor_items',
+                                 'menu_items','cake_items','transport_legs','accommodations',
+                                 'shot_list_items','procurement_items','wedding_party',
+                                 'closure_tasks','lessons','music_cues','contacts')
+              and column_name in ('id','wedding_id','applicability','name','owner',
+                                  'vendor_id','cost_minor','status','notes','sort_order')),
+          170,
+          'All seventeen module tables carry all ten shared columns');
+
+-- RLS on every one of them. Plan §7.1: never ship a table without a policy.
+select is((select count(*)::int from pg_tables
+            where schemaname = 'public'
+              and tablename in ('attire_items','jewellery_items','beauty_appointments',
+                                'ceremony_steps','legal_requirements','decor_items',
+                                'menu_items','cake_items','transport_legs','accommodations',
+                                'shot_list_items','procurement_items','wedding_party',
+                                'closure_tasks','lessons','music_cues','contacts')
+              and rowsecurity),
+          17,
+          'Row-level security is enabled on every module table');
+
+select is((select count(*)::int from pg_policies
+            where schemaname = 'public'
+              and tablename in ('attire_items','jewellery_items','beauty_appointments',
+                                'ceremony_steps','legal_requirements','decor_items',
+                                'menu_items','cake_items','transport_legs','accommodations',
+                                'shot_list_items','procurement_items','wedding_party',
+                                'closure_tasks','lessons','music_cues','contacts')),
+          34,
+          'And each has both a read and a write policy');
+
+-- A stranger cannot read one, checked on a real table rather than inferred
+-- from the policy text.
+insert into decor_items (wedding_id, name, area) values
+  ((select v from w where k='a'), 'Poruwa backdrop', 'Ballroom');
+
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from decor_items
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'A stranger cannot read another wedding''s decor list');
+
+-- The coordinator needs these on the day and gets read but not write.
+select tests.login((select v from ids where k = 'coordinator'));
+select is((select count(*)::int from decor_items
+            where wedding_id = (select v from w where k='a')),
+          1,
+          'A coordinator can read the decor list');
+select throws_ok(
+  $q$ insert into decor_items (wedding_id, name)
+      values ((select v from w where k='a'), 'Coordinator writes') $q$);
+
+-- ------------------------------------------------------------ 6.4 the fixture
+-- The workbook prints "Active minutes: 93" in its own header. That makes it a
+-- known-good number rather than one this code invented, so it is asserted the
+-- same way the 905,500 / 735,500 jewellery figure is in 2.9.
+select tests.login((select v from ids where k = 'alice'));
+
+select is((select count(*)::int from ceremony_steps
+            where wedding_id = (select v from w where k='a')),
+          24,
+          'Seeding brings in all 24 poruwa components');
+
+select is((select minutes from v_ceremony_length
+            where wedding_id = (select v from w where k='a')),
+          93::bigint,
+          'The required components total 93 minutes, as the sheet''s own header says');
+
+-- Switching one off must take its minutes with it. This is the whole point of
+-- the applicability column on a ceremony.
+update ceremony_steps set applicability = 'not_applicable'
+ where wedding_id = (select v from w where k='a')
+   and name = 'Family group photographs';
+
+select is((select minutes from v_ceremony_length
+            where wedding_id = (select v from w where k='a')),
+          73::bigint,
+          'Switching off the 20-minute photographs takes 20 minutes off the total');
+
+-- And a component with no duration is reported rather than silently treated
+-- as zero, or the total reads as authoritative when it is short.
+insert into ceremony_steps (wedding_id, name, sort_order)
+values ((select v from w where k='a'), 'Something we have not timed', 99);
+
+select is((select steps_without_duration from v_ceremony_length
+            where wedding_id = (select v from w where k='a')),
+          1::bigint,
+          'A component with no duration is counted as a hole in the total');
+
+-- ------------------------------------------------------------ 6.5 VERIFY
+select is((select count(*)::int from legal_requirements
+            where wedding_id = (select v from w where k='a')),
+          17,
+          'Seeding brings in all 17 registration requirements');
+
+-- Plan R10: legal content is never asserted as fact. Most of the checklist
+-- arrives needing confirmation with the registrar, and nothing in this app
+-- moves a row to 'verified' on its own.
+select ok((select count(*)::int from legal_requirements
+            where wedding_id = (select v from w where k='a')
+              and verify_status = 'to_verify') > 10,
+          'Most registration requirements arrive marked to verify, not verified');
+
+-- 1.7 covers the registrar deadlines too. Giving notice has a statutory
+-- waiting period behind it, so a stale date here is the one that cannot be
+-- recovered from.
+select is((select due_date from legal_requirements
+            where wedding_id = (select v from w where k='a') and seq = 3),
+          (select wedding_date - 90 from weddings where id = (select v from w where k='a')),
+          'Notice of marriage is dated 90 days before the wedding');
+
+update weddings set wedding_date = wedding_date + 30
+ where id = (select v from w where k='a');
+
+select is((select due_date from legal_requirements
+            where wedding_id = (select v from w where k='a') and seq = 3),
+          (select wedding_date - 90 from weddings where id = (select v from w where k='a')),
+          'Moving the wedding re-dates the registration deadlines with it');
 
 select * from finish();
 rollback;

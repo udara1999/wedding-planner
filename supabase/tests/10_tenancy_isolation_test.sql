@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(251);
+select plan(257);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -2082,6 +2082,56 @@ select is((select on_date from beauty_appointments
             where wedding_id = (select v from cl where k='w') and seq = 2),
           '2027-01-01'::date,
           'A hand-set appointment date is left alone when the wedding moves');
+
+-- =============================================================================
+-- The template schema is actually readable — 6 assertions
+-- =============================================================================
+-- The bug these exist for: nothing ever granted USAGE on schema `template`, so
+-- every `grant select on template.X to authenticated` was inert. It stayed
+-- invisible for nine phases because every reader until then was either a
+-- SECURITY DEFINER function or a view created WITHOUT security_invoker — both
+-- of which run with the owner's rights. The first security_invoker view over
+-- template content failed, the client read the failure as "nothing pending",
+-- and a card said "up to date" while fourteen screens sat empty.
+--
+-- So: assert the schema grant itself, not just that some query happens to
+-- work through a definer path.
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+select is(has_schema_privilege('authenticated', 'template', 'usage'),
+          true,
+          'authenticated has USAGE on schema template, without which every '
+          'table grant on it is inert');
+
+select is(has_table_privilege('authenticated', 'template.checklist_items', 'select'),
+          true,
+          'and can select the checklist content');
+
+select is(has_table_privilege('authenticated', 'template.tasks', 'select'),
+          true,
+          'and the task content, which had no explicit grant of its own');
+
+-- anon keeps nothing. The public RSVP surface is built on anon holding only
+-- what it needs, and reference content is not one of those things.
+select is(has_schema_privilege('anon', 'template', 'usage'),
+          false,
+          'anon has no access to the template schema');
+
+-- The end-to-end version: read it as a signed-in user, through the
+-- security_invoker view that was failing.
+select ok((select count(*)::int from v_template_pending
+            where wedding_id = (select v from w where k='a')) = 1,
+          'A member gets exactly one pending row for their own wedding');
+
+-- And the boundary still holds, which is why the view must stay
+-- security_invoker: dropping that to fix the read would evaluate the wedding
+-- tables' RLS as the view owner and hand every caller everybody else's counts.
+select tests.login((select v from ids where k = 'stranger'));
+select is((select count(*)::int from v_template_pending
+            where wedding_id = (select v from w where k='a')),
+          0,
+          'A stranger gets no pending row for a wedding that is not theirs');
 
 select * from finish();
 rollback;

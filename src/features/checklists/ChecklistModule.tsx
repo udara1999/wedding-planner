@@ -271,14 +271,16 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
                   rows.length === 0
                     ? pendingCount > 0
                       ? `The template has a list ready for this — ${pendingCount} items across the modules, waiting to be brought in.`
-                      : 'Add the first one to get started.'
+                      : canEdit
+                        ? 'Add the first one, or bring in the template list.'
+                        : 'Nothing here yet.'
                     : 'Widen the status filter or clear the search.'
                 }
                 /* The old copy said "seed the wedding to bring in the
                    workbook's list" and offered no way to do it, which is the
                    dead end that produced this report. */
                 action={
-                  rows.length === 0 && canEdit && pendingCount > 0 ? (
+                  rows.length === 0 && canEdit ? (
                     <Button
                       icon={<PackagePlus className="size-4" />}
                       loading={seed.isPending}
@@ -286,7 +288,9 @@ function ModuleBody({ config }: { config: ModuleConfig }) {
                         seed.mutate(wedding.id, { onSuccess: () => void pending.refetch() })
                       }
                     >
-                      Bring in the template list
+                      {pendingCount > 0
+                        ? `Bring in ${pendingCount} template items`
+                        : 'Bring in the template list'}
                     </Button>
                   ) : undefined
                 }

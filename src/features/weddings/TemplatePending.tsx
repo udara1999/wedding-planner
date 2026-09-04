@@ -45,11 +45,19 @@ export function TemplateUpdateCard({
 
   if (pending.isLoading) return null;
 
+  // The counting view failing must never read as "nothing to do". It did
+  // exactly that when authenticated lacked USAGE on schema template: the query
+  // errored, the count came out zero, and this card said "up to date" while
+  // fourteen modules sat empty.
+  const countUnknown = pending.isError;
+
   return (
     <Card className={cn(total > 0 && 'border-wine-300 ring-1 ring-wine-100')}>
       <CardHeader className="flex-wrap">
         <CardTitle>Template content</CardTitle>
-        {total > 0 ? (
+        {countUnknown ? (
+          <Badge tone="warn">count unavailable</Badge>
+        ) : total > 0 ? (
           <Badge tone="accent">{total} to add</Badge>
         ) : (
           <Badge tone="good">up to date</Badge>
@@ -62,7 +70,15 @@ export function TemplateUpdateCard({
       </CardHeader>
 
       <CardBody className="space-y-3">
-        {total === 0 ? (
+        {countUnknown ? (
+          <>
+            <p className="text-sm text-stone-600">
+              We could not work out what this wedding is missing. Adding template content is still
+              safe to try — it only ever inserts what is not already here.
+            </p>
+            <InlineError error={pending.error} />
+          </>
+        ) : total === 0 ? (
           <p className="text-sm text-stone-600">
             This wedding has everything the {row?.locale ?? 'poruwa'} template offers. Anything
             added to the template later will show up here.
@@ -92,14 +108,21 @@ export function TemplateUpdateCard({
           </>
         )}
 
-        {canEdit && total > 0 && (
+        {/* Always offered, never gated on the count. Re-seeding is idempotent,
+            so the worst case is that it adds nothing — whereas hiding the
+            button behind a number leaves somebody stuck the moment the number
+            is wrong, which is precisely what happened. */}
+        {canEdit && (
           <div className="flex flex-wrap items-center gap-3 border-t border-stone-100 pt-3">
             <Button
+              variant={total > 0 || countUnknown ? 'primary' : 'secondary'}
               icon={<RefreshCw className="size-4" />}
               loading={seed.isPending}
               onClick={() => seed.mutate(weddingId, { onSuccess: () => void pending.refetch() })}
             >
-              Add {total} {total === 1 ? 'item' : 'items'}
+              {total > 0
+                ? `Add ${total} ${total === 1 ? 'item' : 'items'}`
+                : 'Check for template content'}
             </Button>
             {seed.isSuccess && (
               <span className="text-sm text-emerald-700">
@@ -110,7 +133,7 @@ export function TemplateUpdateCard({
           </div>
         )}
 
-        {!canEdit && total > 0 && (
+        {!canEdit && (
           <p className="border-t border-stone-100 pt-3 text-xs text-stone-500">
             Only an owner can bring in new template content.
           </p>

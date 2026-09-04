@@ -107,6 +107,22 @@ describe('groupGuests by other modes', () => {
     expect(result.map((s) => s.label)).toEqual(["Bride's side", "Groom's side", 'Shared']);
   });
 
+  it('does not let a category swallow the ungrouped section', () => {
+    // The ungrouped households are collected separately rather than under a
+    // reserved key, so there is no string a person could type as a category
+    // that would put them in the wrong section.
+    const result = run(
+      [
+        guest({ household_name: 'typed', category: 'ungrouped' }),
+        guest({ household_name: 'genuinely without' }),
+      ],
+      'category',
+    );
+    expect(result.map((s) => s.label)).toEqual(['ungrouped', 'No category']);
+    expect(result[0].guests.map((g) => g.household_name)).toEqual(['typed']);
+    expect(result[1].guests.map((g) => g.household_name)).toEqual(['genuinely without']);
+  });
+
   it('returns one section for none, so the list renders the same way', () => {
     const result = run([guest({ household_name: 'A' }), guest({ household_name: 'B' })], 'none');
     expect(result).toHaveLength(1);

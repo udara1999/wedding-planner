@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
-import { HelpCircle } from 'lucide-react';
-import { useSaveVendorAnswer, useVendorAnswers, type VendorQuestion } from './api';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, HelpCircle, Loader2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useVendorAnswers, writeVendorAnswer, type VendorQuestion } from './api';
+import { createAutosaveQueue } from './autosave';
 import type { VendorOptionRow, VendorQuestionGroup } from '../../types/db';
 import { Card, Skeleton, cn } from '../../components/ui';
 
@@ -26,15 +28,18 @@ const GROUP_TONE: Record<VendorQuestionGroup, string> = {
 };
 
 /**
- * Ticket 3.4. Questions as rows, options as columns, grouped and ordered.
+ * Tickets 3.4 and 3.5. Questions as rows, options as columns, grouped and
+ * ordered, with every cell autosaved.
  *
  * The grid scrolls horizontally inside its own container rather than widening
  * the page — the app has no page-level horizontal scroll, and letting a wide
  * table create one would drag the sidebar sideways with it. The question column
  * is sticky so a row stays readable however far right you scroll.
  *
- * Cells save on blur. Ticket 3.5 replaces that with debounced autosave and the
- * flush-on-navigate guarantee its AC asks for.
+ * Cells autosave 600ms after typing stops, and anything still waiting is
+ * flushed when the component unmounts — which covers both navigating away and
+ * switching category. Closing the tab is handled separately, since React never
+ * sees it.
  */
 export function ComparisonGrid({
   weddingId,
@@ -51,7 +56,59 @@ export function ComparisonGrid({
 }) {
   const optionIds = useMemo(() => options.map((o) => o.id), [options]);
   const answers = useVendorAnswers(weddingId, optionIds);
-  const save = useSaveVendorAnswer(weddingId);
+  const qc = useQueryClient();
+
+  // 3.5. One queue for the whole grid, living across renders.
+  const [saving, setSaving] = useState<Set<string>>(new Set());
+  const [failed, setFailed] = useState<Set<string>>(new Set());
+  // Lazy initial state rather than a lazily-filled ref: the queue must be
+  // created exactly once, and reading a ref during render is the thing that
+  // makes that pattern fragile.
+  const [queue] = useState(() =>
+      createAutosaveQueue({
+        delay: 600,
+        save: async (key, value) => {
+          const [optionId, questionId] = key.split(':');
+          setSaving((s) => new Set(s).add(key));
+          try {
+            await writeVendorAnswer(weddingId, optionId, Number(questionId), value);
+            setFailed((f) => {
+              const next = new Set(f);
+              next.delete(key);
+              return next;
+            });
+          } finally {
+            setSaving((s) => {
+              const next = new Set(s);
+              next.delete(key);
+              return next;
+            });
+          }
+        },
+        onError: (_error, key) => setFailed((f) => new Set(f).add(key)),
+      }),
+  );
+
+  // The AC's "no lost keystrokes on navigation". Unmounting covers navigating
+  // away and switching category, both of which tear this component down.
+  useEffect(() => {
+    return () => {
+      void queue.flush().then(() => {
+        void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'answers'] });
+      });
+    };
+  }, [queue, qc, weddingId]);
+
+  // Closing the tab is the one exit React never sees.
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (!queue.hasPending()) return;
+      void queue.flush();
+      e.preventDefault();
+    }
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [queue]);
 
   const grouped = useMemo(() => {
     const byGroup = new Map<VendorQuestionGroup, VendorQuestion[]>();
@@ -105,8 +162,10 @@ export function ComparisonGrid({
                 columns={options.length + 1}
                 answers={answers.data}
                 canEdit={canEdit}
-                onSave={(optionId, questionId, answer) =>
-                  save.mutate({ optionId, questionId, answer })
+                saving={saving}
+                failed={failed}
+                onEdit={(optionId, questionId, answer) =>
+                  queue.set(`${optionId}:${questionId}`, answer)
                 }
               />
             ))}
@@ -124,7 +183,9 @@ function ChunkOfGroup({
   columns,
   answers,
   canEdit,
-  onSave,
+  saving,
+  failed,
+  onEdit,
 }: {
   group: VendorQuestionGroup;
   questions: VendorQuestion[];
@@ -132,7 +193,9 @@ function ChunkOfGroup({
   columns: number;
   answers: Map<string, { answer: string | null }> | undefined;
   canEdit: boolean;
-  onSave: (optionId: string, questionId: number, answer: string) => void;
+  saving: Set<string>;
+  failed: Set<string>;
+  onEdit: (optionId: string, questionId: number, answer: string) => void;
 }) {
   return (
     <>
@@ -172,8 +235,20 @@ function ChunkOfGroup({
             return (
               <td
                 key={o.id}
-                className="border-b border-l border-stone-100 p-0 group-hover/row:bg-stone-50/60"
+                className="relative border-b border-l border-stone-100 p-0 group-hover/row:bg-stone-50/60"
               >
+                {saving.has(key) && (
+                  <Loader2 className="absolute top-1 right-1 size-3 animate-spin text-stone-400" />
+                )}
+                {!saving.has(key) && failed.has(key) && (
+                  <span
+                    title="Could not save — it will retry when you edit the cell again"
+                    className="absolute top-1 right-1 size-1.5 rounded-full bg-red-500"
+                  />
+                )}
+                {!saving.has(key) && !failed.has(key) && value !== '' && (
+                  <Check className="absolute top-1 right-1 size-3 text-emerald-400 opacity-0 transition-opacity group-hover/row:opacity-100" />
+                )}
                 {/* Uncontrolled with a key: React re-mounts the cell when the
                     stored answer changes, so a server update lands, but typing
                     is never interrupted by a re-render mid-keystroke. */}
@@ -183,9 +258,14 @@ function ChunkOfGroup({
                   disabled={!canEdit}
                   rows={2}
                   placeholder="—"
+                  // Autosaved as you type; the blur is only a nudge for the
+                  // last keystroke before leaving the cell.
+                  onChange={(e) => {
+                    if (q.id !== null) onEdit(o.id, q.id, e.target.value);
+                  }}
                   onBlur={(e) => {
                     if (e.target.value !== value && q.id !== null) {
-                      onSave(o.id, q.id, e.target.value);
+                      onEdit(o.id, q.id, e.target.value);
                     }
                   }}
                   className={cn(

@@ -164,6 +164,35 @@ export function useVendorAnswers(weddingId: string, optionIds: string[]) {
   });
 }
 
+/**
+ * The plain write behind the mutation.
+ *
+ * Exported because the autosave queue flushes from a component that is
+ * unmounting, and a react-query mutation belonging to a gone component is the
+ * wrong thing to reach for at that moment.
+ */
+export async function writeVendorAnswer(
+  weddingId: string,
+  optionId: string,
+  questionId: number,
+  answer: string,
+): Promise<void> {
+  const res = await supabase
+    .from('vendor_answers')
+    .upsert(
+      {
+        wedding_id: weddingId,
+        option_id: optionId,
+        question_id: questionId,
+        answer: answer.trim() === '' ? null : answer,
+      },
+      { onConflict: 'option_id,question_id' },
+    )
+    .select('option_id');
+  const rows = unwrap(res);
+  if (rows.length === 0) throw new Error('That answer could not be saved.');
+}
+
 export function useSaveVendorAnswer(weddingId: string) {
   const qc = useQueryClient();
   return useMutation({

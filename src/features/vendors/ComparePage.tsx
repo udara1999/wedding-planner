@@ -5,12 +5,16 @@ import {
   useCreateVendorOption,
   useDeleteVendorOption,
   useUpdateVendorOption,
+  useRecordVendorFromOption,
+  useSetVendorDecision,
   useVendorCategories,
+  useVendorDecisions,
   useVendorOptions,
   useVendorQuestions,
 } from './api';
 import { VendorOptionCard } from './VendorOptionCard';
 import { ComparisonGrid } from './ComparisonGrid';
+import { DecisionIndex } from './DecisionIndex';
 import { useWedding } from '../weddings/api';
 import { currencyDecimals } from '../../lib/units';
 import type { MyWedding } from '../../types/db';
@@ -74,6 +78,14 @@ export function ComparePage() {
   const create = useCreateVendorOption(wedding.id, categoryKey);
   const update = useUpdateVendorOption(wedding.id, categoryKey);
   const remove = useDeleteVendorOption(wedding.id, categoryKey);
+  const decisions = useVendorDecisions(wedding.id);
+  const setDecision = useSetVendorDecision(wedding.id);
+  const record = useRecordVendorFromOption(wedding.id);
+
+  const decision = useMemo(
+    () => (decisions.data ?? []).find((d) => d.category_key === categoryKey) ?? null,
+    [decisions.data, categoryKey],
+  );
 
   if (categories.isLoading) {
     return (
@@ -117,6 +129,17 @@ export function ComparePage() {
           )
         }
       />
+
+      <div className="mb-5">
+        <DecisionIndex
+          weddingId={wedding.id}
+          categories={cats.map((c) => ({ key: c.key, label: c.label }))}
+          currency={currency}
+          decimals={decimals}
+          activeKey={categoryKey}
+          onPick={setChosen}
+        />
+      </div>
 
       <div className="grid items-start gap-5 lg:grid-cols-[15rem_minmax(0,1fr)]">
         <Card className="hidden lg:block">
@@ -179,7 +202,9 @@ export function ComparePage() {
             </Badge>
           </div>
 
-          <InlineError error={create.error ?? update.error ?? remove.error} />
+          <InlineError
+            error={create.error ?? update.error ?? remove.error ?? setDecision.error ?? record.error}
+          />
 
           {options.isLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -218,6 +243,19 @@ export function ComparePage() {
                   onSave={(patch) => update.mutate({ id: option.id, patch })}
                   onRemove={() => remove.mutate(option.id)}
                   removing={remove.isPending && remove.variables === option.id}
+                  chosen={decision?.chosen_option_id === option.id}
+                  recorded={Boolean(decision?.recorded_in_vendors)}
+                  deciding={setDecision.isPending || record.isPending}
+                  onChoose={() =>
+                    categoryKey &&
+                    setDecision.mutate({
+                      categoryKey,
+                      // Clicking the chosen option again un-chooses it, so a
+                      // decision made by accident is not permanent.
+                      optionId: decision?.chosen_option_id === option.id ? null : option.id,
+                    })
+                  }
+                  onRecord={() => record.mutate(option.id)}
                 />
               ))}
             </div>

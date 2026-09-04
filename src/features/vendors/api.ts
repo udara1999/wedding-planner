@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase, unwrap } from '../../lib/supabase';
-import type { Database, VendorAnswerRow, VendorOptionRow } from '../../types/db';
+import type {
+  Database,
+  VendorAnswerRow,
+  VendorDecisionView,
+  VendorOptionRow,
+} from '../../types/db';
 
 export type VendorCategory = Database['public']['Views']['v_vendor_categories']['Row'];
 export type VendorQuestion = Database['public']['Views']['v_vendor_questions']['Row'];
@@ -226,5 +231,74 @@ export function useSaveVendorAnswer(weddingId: string) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'answers'] });
     },
+  });
+}
+
+/** The 05a index: one row per category that has options. */
+export function useVendorDecisions(weddingId: string) {
+  return useQuery({
+    queryKey: ['vendors', weddingId, 'decisions'] as const,
+    queryFn: async (): Promise<VendorDecisionView[]> => {
+      const res = await supabase
+        .from('v_vendor_decisions')
+        .select('*')
+        .eq('wedding_id', weddingId);
+      return unwrap(res);
+    },
+  });
+}
+
+function useInvalidateDecisions(weddingId: string) {
+  const qc = useQueryClient();
+  return () => {
+    void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'decisions'] });
+    void qc.invalidateQueries({ queryKey: ['vendors', weddingId, 'list'] });
+  };
+}
+
+/** Choose an option without recording it as a vendor yet. */
+export function useSetVendorDecision(weddingId: string) {
+  const invalidate = useInvalidateDecisions(weddingId);
+  return useMutation({
+    mutationFn: async ({
+      categoryKey,
+      optionId,
+    }: {
+      categoryKey: string;
+      optionId: string | null;
+    }) => {
+      const res = await supabase
+        .from('vendor_decisions')
+        .upsert(
+          {
+            wedding_id: weddingId,
+            category_key: categoryKey,
+            chosen_option_id: optionId,
+            decided_on: optionId ? new Date().toISOString().slice(0, 10) : null,
+          },
+          { onConflict: 'wedding_id,category_key' },
+        )
+        .select('category_key');
+      const rows = unwrap(res);
+      if (rows.length === 0) throw new Error('That decision could not be saved.');
+      return rows[0];
+    },
+    onSuccess: invalidate,
+  });
+}
+
+/**
+ * Ticket 3.6's one click: creates the vendors row and points the decision at
+ * it, in one transaction on the server. Doing it as two calls from here would
+ * leave a half state whenever the second one failed.
+ */
+export function useRecordVendorFromOption(weddingId: string) {
+  const invalidate = useInvalidateDecisions(weddingId);
+  return useMutation({
+    mutationFn: async (optionId: string): Promise<string> => {
+      const res = await supabase.rpc('record_vendor_from_option', { p_option_id: optionId });
+      return unwrap(res) as string;
+    },
+    onSuccess: invalidate,
   });
 }

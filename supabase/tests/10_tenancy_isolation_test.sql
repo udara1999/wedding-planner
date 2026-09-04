@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(104);
+select plan(110);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -732,6 +732,56 @@ select is((select count(*)::int from information_schema.columns
                and (column_name like '%minor%' or column_name like '%quote%'
                     or column_name like '%deposit%')), 0,
           'The ops view exposes no money column at all');
+
+-- =============================================================================
+-- 19. Vendor decision write-back (3.6) — 6 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+insert into vendor_options (wedding_id, category_key, label, vendor_name, phone,
+                            quoted_minor, negotiated_minor, deposit_minor, rating)
+values ((select v from w where k='a'), 'photographer', 'Option A', 'Studio Lanka',
+        '077 111 2222', 500000, 450000, 100000, 4);
+
+select lives_ok(
+  $q$ select public.record_vendor_from_option(
+        (select id from vendor_options
+          where wedding_id = (select v from w where k='a')
+            and category_key = 'photographer')) $q$,
+  'An owner can record a chosen option as a vendor');
+
+select is((select count(*)::int from vendors
+             where wedding_id = (select v from w where k='a')
+               and name = 'Studio Lanka'), 1,
+          'The vendor row is created from the option');
+
+select is((select negotiated_minor from vendors
+             where wedding_id = (select v from w where k='a')
+               and name = 'Studio Lanka'),
+          450000::bigint,
+          'The negotiated price carries across');
+
+-- A decision is not a signed contract.
+select is((select status::text from vendors
+             where wedding_id = (select v from w where k='a')
+               and name = 'Studio Lanka'),
+          'tentatively_booked',
+          'A recorded vendor starts as tentatively booked, not confirmed');
+
+select is((select count(*)::int from vendor_decisions
+             where wedding_id = (select v from w where k='a')
+               and category_key = 'photographer'
+               and recorded_vendor_id is not null), 1,
+          'The decision points at the vendor it created');
+
+-- The guard is written `is not true` for the reason the earlier NULL bug
+-- taught: a coordinator is not a member of wedding B at all.
+select tests.login((select v from ids where k = 'coordinator'));
+select throws_ok(
+  $q$ select public.record_vendor_from_option(
+        (select id from vendor_options
+          where wedding_id = (select v from w where k='a')
+            and category_key = 'photographer')) $q$);
 
 select * from finish();
 rollback;

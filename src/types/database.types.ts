@@ -1532,6 +1532,10 @@ export type Database = {
           wedding_date: string
         }[]
       }
+      record_vendor_from_option: {
+        Args: { p_option_id: string }
+        Returns: string
+      }
       seed_wedding: {
         Args: { p_locale?: string; p_wedding_id: string }
         Returns: number

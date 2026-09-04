@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Check, Star, Trash2 } from 'lucide-react';
+import { Award, Check, Star, Store, Trash2 } from 'lucide-react';
 import type { VendorOptionInput } from './api';
 import { formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
 import type { VendorOptionRow } from '../../types/db';
-import { Button, Card, CardBody, Field, Input, cn } from '../../components/ui';
+import { Badge, Button, Card, CardBody, Field, Input, cn } from '../../components/ui';
 
 const MONEY: { key: 'quoted_minor' | 'negotiated_minor' | 'deposit_minor'; label: string }[] = [
   { key: 'quoted_minor', label: 'Quoted' },
@@ -13,11 +13,12 @@ const MONEY: { key: 'quoted_minor' | 'negotiated_minor' | 'deposit_minor'; label
 
 /**
  * One shortlisted option: the profile half of the comparison (05a's rows above
- * "QUESTIONS TO CONFIRM BEFORE YOU BOOK"). The questions themselves become rows
- * across these same options in 3.4.
+ * "QUESTIONS TO CONFIRM BEFORE YOU BOOK"). The questions themselves are rows
+ * across these same options in the grid below.
  *
- * Saved explicitly rather than per keystroke — 3.5 introduces autosave, and
- * doing it here first would mean two different save behaviours on one screen.
+ * Saved explicitly, unlike the answer grid's autosave. These are a handful of
+ * fields edited deliberately, not forty cells filled in while on the phone to a
+ * vendor, and an explicit Save makes the money fields feel deliberate too.
  */
 export function VendorOptionCard({
   option,
@@ -26,8 +27,13 @@ export function VendorOptionCard({
   canEdit,
   saving,
   removing,
+  chosen,
+  recorded,
+  deciding,
   onSave,
   onRemove,
+  onChoose,
+  onRecord,
 }: {
   option: VendorOptionRow;
   currency: string;
@@ -35,8 +41,13 @@ export function VendorOptionCard({
   canEdit: boolean;
   saving: boolean;
   removing: boolean;
+  chosen: boolean;
+  recorded: boolean;
+  deciding: boolean;
   onSave: (patch: VendorOptionInput) => void;
   onRemove: () => void;
+  onChoose: () => void;
+  onRecord: () => void;
 }) {
   const blank = () => ({
     label: option.label,
@@ -88,8 +99,29 @@ export function VendorOptionCard({
   }
 
   return (
-    <Card className={cn('flex flex-col', dirty && 'border-wine-200')}>
+    <Card
+      className={cn(
+        'flex flex-col',
+        dirty && 'border-wine-200',
+        chosen && 'border-wine-400 ring-1 ring-wine-200',
+      )}
+    >
       <CardBody className="flex-1 space-y-3 pt-4">
+        {chosen && (
+          <div className="-mt-1 flex items-center gap-1.5">
+            <Badge tone="accent">
+              <Award className="size-3" />
+              chosen
+            </Badge>
+            {recorded && (
+              <Badge tone="good">
+                <Store className="size-3" />
+                in vendors
+              </Badge>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center gap-2">
           <input
             value={form.label}
@@ -187,7 +219,34 @@ export function VendorOptionCard({
       </CardBody>
 
       {canEdit && (
-        <div className="flex items-center justify-between border-t border-stone-100 px-5 py-2.5">
+        <div className="space-y-2 border-t border-stone-100 px-5 py-2.5">
+          {/* Ticket 3.6: choosing is reversible, recording is the one click
+              that creates the vendor row. */}
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant={chosen ? 'subtle' : 'secondary'}
+              className="flex-1"
+              disabled={deciding}
+              icon={<Award className="size-3.5" />}
+              onClick={onChoose}
+            >
+              {chosen ? 'Chosen' : 'Choose'}
+            </Button>
+            {chosen && !recorded && (
+              <Button
+                size="sm"
+                className="flex-1"
+                loading={deciding}
+                icon={<Store className="size-3.5" />}
+                onClick={onRecord}
+              >
+                Record as vendor
+              </Button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between">
           <Button size="sm" variant={dirty ? 'primary' : 'secondary'} loading={saving} onClick={save}>
             {dirty ? 'Save' : 'Saved'}
           </Button>
@@ -210,6 +269,7 @@ export function VendorOptionCard({
               Remove
             </Button>
           )}
+          </div>
         </div>
       )}
     </Card>

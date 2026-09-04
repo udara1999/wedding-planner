@@ -53,13 +53,36 @@ export function Photo({
   src,
   alt,
   className = '',
+  priority = false,
+  width,
+  height,
 }: {
   src?: string;
   alt: string;
   className?: string;
+  /** Set on the hero. See below — this is the page's LCP element. */
+  priority?: boolean;
+  width?: number;
+  height?: number;
 }) {
   if (src) {
-    return <img src={src} alt={alt} loading="lazy" className={`size-full object-cover ${className}`} />;
+    return (
+      <img
+        src={src}
+        alt={alt}
+        // The hero photograph is the largest thing above the fold, which makes
+        // it the Largest Contentful Paint. Lazy-loading it would defer the
+        // request until layout, delaying the one paint the score is measured
+        // on; everything further down the page wants the opposite.
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : undefined}
+        // Intrinsic size, so the browser can reserve the box before the bytes
+        // arrive even though the frame's aspect ratio already fixes it.
+        width={width}
+        height={height}
+        className={`size-full object-cover ${className}`}
+      />
+    );
   }
 
   return (

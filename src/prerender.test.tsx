@@ -75,6 +75,26 @@ describe('landing page prerender', () => {
     expect(renderedText().length).toBeGreaterThan(4000);
   });
 
+  it('ships the hero photograph eagerly, because it is the LCP element', () => {
+    const markup = render();
+    const hero = markup.match(/<img[^>]*hero\.webp[^>]*>/)?.[0];
+    expect(hero, 'the hero photograph is no longer in the prerendered markup').toBeDefined();
+
+    // Lazy-loading the largest thing above the fold defers the request until
+    // layout and pushes out the one paint the score is measured on. Easy to
+    // reintroduce by copying the roles photo's props.
+    expect(hero).toContain('loading="eager"');
+    // React emits this one camelCased; HTML attribute names are
+    // case-insensitive, so the browser reads it either way.
+    expect(hero).toMatch(/fetchpriority="high"/i);
+    // Alt text, not decoration: this photograph is the page's subject.
+    expect(hero).toMatch(/alt="[^"]{20,}"/);
+
+    // The one further down the page should be the other way round.
+    const lazy = markup.match(/<img[^>]*loading="lazy"[^>]*>/g) ?? [];
+    for (const image of lazy) expect(image).not.toContain('hero.webp');
+  });
+
   it('states the template figures the migrations actually seed', () => {
     const text = renderedText();
     // Checked against supabase/migrations: these are what template/ seeds, and

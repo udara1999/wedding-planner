@@ -282,7 +282,16 @@ function Hero() {
 
         <div data-reveal data-reveal-delay="140" className="relative">
           <div className="relative aspect-4/5 overflow-hidden rounded-3xl shadow-[0_4px_8px_-2px_rgb(28_25_23/0.08),0_30px_60px_-20px_rgb(28_25_23/0.3)]">
-            <Photo alt="A poruwa ceremony" />
+            {/* 660x660, so the 4:5 frame crops the sides. A wider source
+                would render more crisply on a dense display — see the note in
+                public/hero.webp's commit. */}
+            <Photo
+              src="/hero.webp"
+              alt="A newly married couple leaving their ceremony as guests throw confetti"
+              width={660}
+              height={660}
+              priority
+            />
           </div>
           <HeroChips />
         </div>

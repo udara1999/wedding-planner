@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -112,6 +113,9 @@ export function PaymentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [lineId, setLineId] = useState<string | null>(null);
   const [lineError, setLineError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'all'>('all');
+  const [stageFilter, setStageFilter] = useState<PaymentStage | 'all'>('all');
+  const [search, setSearch] = useState('');
 
   const pickable = useMemo(
     () => (lines.data ?? []).map((l) => ({ id: l.id, code: l.code, name: l.name })),
@@ -120,15 +124,34 @@ export function PaymentsPage() {
 
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: BLANK });
 
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return (payments.data ?? []).filter((p) => {
+      if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+      if (stageFilter !== 'all' && p.stage !== stageFilter) return false;
+      if (needle) {
+        const line = pickable.find((l) => l.id === p.budget_line_id);
+        const haystack = [line?.code, line?.name, p.reference, p.method, p.paid_by]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        if (!haystack.includes(needle)) return false;
+      }
+      return true;
+    });
+  }, [payments.data, statusFilter, stageFilter, search, pickable]);
+
+  // Totals follow what is on screen, so filtering answers "how much is
+  // overdue" rather than always restating the whole plan.
   const totals = useMemo(() => {
     let due = 0;
     let paid = 0;
-    for (const p of payments.data ?? []) {
+    for (const p of filtered) {
       due += p.amount_due_minor ?? 0;
       paid += p.amount_paid_minor ?? 0;
     }
     return { due, paid, outstanding: Math.max(due - paid, 0) };
-  }, [payments.data]);
+  }, [filtered]);
 
   const editingReceiptPath =
     (payments.data ?? []).find((p) => p.id === editingId)?.receipt_path ?? null;
@@ -234,18 +257,77 @@ export function PaymentsPage() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {(payments.data ?? []).length} {(payments.data ?? []).length === 1 ? 'payment' : 'payments'}
+              {filtered.length} of {(payments.data ?? []).length}{' '}
+              {(payments.data ?? []).length === 1 ? 'payment' : 'payments'}
             </CardTitle>
+            {(statusFilter !== 'all' || stageFilter !== 'all' || search) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setStatusFilter('all');
+                  setStageFilter('all');
+                  setSearch('');
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
           </CardHeader>
-          <CardBody>
-            {(payments.data ?? []).length === 0 ? (
+
+          <div className="flex flex-wrap items-center gap-2 border-y border-stone-100 px-4 py-3">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" />
+              <Input
+                className="pl-9"
+                placeholder="Search a line, reference or method"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Select
+              className="w-36"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as PaymentStatus | 'all')}
+            >
+              <option value="all">Any status</option>
+              {(Object.keys(STATUS_LABEL) as PaymentStatus[]).map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_LABEL[s]}
+                </option>
+              ))}
+            </Select>
+            <Select
+              className="w-44"
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.target.value as PaymentStage | 'all')}
+            >
+              <option value="all">Any stage</option>
+              {STAGES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <CardBody className="pt-4">
+            {filtered.length === 0 ? (
               <EmptyState
-                title="No payments yet"
-                description="Record a deposit or instalment and it will show up here with its own status."
+                title={
+                  (payments.data ?? []).length === 0
+                    ? 'No payments yet'
+                    : 'Nothing matches those filters'
+                }
+                description={
+                  (payments.data ?? []).length === 0
+                    ? 'Record a deposit or instalment and it will show up here with its own status.'
+                    : 'Widen the status, stage or search and the payments will come back.'
+                }
               />
             ) : (
               <ul className="divide-y divide-stone-100">
-                {(payments.data ?? []).map((p) => {
+                {filtered.map((p) => {
                   const line = pickable.find((l) => l.id === p.budget_line_id);
                   const status = (p.status ?? 'not_due') as PaymentStatus;
                   return (
@@ -312,6 +394,7 @@ export function PaymentsPage() {
                   lines={pickable}
                   value={lineId}
                   disabled={!canEdit}
+                  invalid={Boolean(lineError)}
                   onChange={(id) => {
                     setLineId(id);
                     if (id) setLineError(null);

@@ -13,7 +13,7 @@
 
 begin;
 create extension if not exists pgtap;
-select plan(94);
+select plan(98);
 
 -- ---------------------------------------------------------------- fixtures
 select tests.become_service_role();
@@ -652,6 +652,42 @@ select tests.login((select v from ids where k = 'coordinator'));
 select is((select count(*)::int from v_wedding_financials
              where wedding_id = (select v from w where k='a')), 0,
           'A coordinator gets no financial summary at all');
+
+-- =============================================================================
+-- 17. Overpayment is stated, not swallowed — 4 assertions
+-- =============================================================================
+select tests.login((select v from ids where k = 'alice'));
+
+-- BG083 forecasts 43,000.00 (4300000 minor) from its template budget. Pay more
+-- than that against it.
+update budget_lines set budgeted_minor = 1000, quoted_minor = 0,
+                        negotiated_minor = 0, actual_minor = 0
+ where wedding_id = (select v from w where k='a') and code = 'BG083';
+
+insert into payments (wedding_id, budget_line_id, code, stage,
+                      amount_due_minor, amount_paid_minor)
+select (select v from w where k='a'), bl.id, 'PY-OVERPAY', 'final_payment', 1000, 2500
+  from budget_lines bl
+ where bl.wedding_id = (select v from w where k='a') and bl.code = 'BG083';
+
+select is((select outstanding_minor::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a') and code = 'BG083'),
+          0::bigint,
+          'Outstanding is floored at zero when a line has been overpaid');
+
+select is((select overpaid_minor::bigint from v_budget_lines
+             where wedding_id = (select v from w where k='a') and code = 'BG083'),
+          1500::bigint,
+          'The amount paid beyond the forecast is reported as overpaid');
+
+select ok((select overpaid_minor from v_budget_by_category
+             where wedding_id = (select v from w where k='a')
+               and category_key = 'jewellery') >= 1500,
+          'Overpayment rolls up to the category');
+
+select ok((select overpaid_minor from v_wedding_financials
+             where wedding_id = (select v from w where k='a')) >= 1500,
+          'Overpayment reaches the wedding financials');
 
 select * from finish();
 rollback;

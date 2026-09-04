@@ -91,8 +91,10 @@ export function useUpdateBudgetLine(weddingId: string) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
       // forecast_minor is generated, so the category totals move with any
-      // amount or applicability change.
+      // amount or applicability change — and so does whether a line now counts
+      // as overpaid.
       void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
+      void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-totals'] });
     },
   });
 }
@@ -188,6 +190,64 @@ export function useWeddingFinancials(weddingId: string) {
         .maybeSingle();
       if (res.error) throw new Error(res.error.message);
       return res.data;
+    },
+  });
+}
+
+export interface LineTotals {
+  paidMinor: number;
+  outstandingMinor: number;
+  overpaidMinor: number;
+}
+
+/**
+ * Payment totals per line, from v_budget_lines.
+ *
+ * Kept separate from useBudgetLines rather than switching that query to the
+ * view: every column of a view is nullable in the generated types, and the
+ * forms want the table's non-null guarantees. Joined by id at the call site.
+ */
+export function useBudgetLineTotals(weddingId: string) {
+  return useQuery({
+    queryKey: ['budget', weddingId, 'line-totals'] as const,
+    queryFn: async (): Promise<Map<string, LineTotals>> => {
+      const res = await supabase
+        .from('v_budget_lines')
+        .select('id, paid_minor, outstanding_minor, overpaid_minor')
+        .eq('wedding_id', weddingId);
+      const rows = unwrap(res);
+      return new Map(
+        rows.map((r) => [
+          r.id as string,
+          {
+            paidMinor: Number(r.paid_minor ?? 0),
+            outstandingMinor: Number(r.outstanding_minor ?? 0),
+            overpaidMinor: Number(r.overpaid_minor ?? 0),
+          },
+        ]),
+      );
+    },
+  });
+}
+
+/**
+ * The payments recorded against one budget line, newest due date first.
+ *
+ * Queried here rather than reusing the payments feature's hook so that
+ * `budget` does not import from `payments`, which already imports from
+ * `budget` — a module cycle that works until it suddenly does not.
+ */
+export function usePaymentsForLine(weddingId: string, budgetLineId: string | null) {
+  return useQuery({
+    queryKey: ['budget', weddingId, 'line-payments', budgetLineId] as const,
+    enabled: Boolean(budgetLineId),
+    queryFn: async () => {
+      const res = await supabase
+        .from('v_payments')
+        .select('*')
+        .eq('budget_line_id', budgetLineId!)
+        .order('due_date', { ascending: true, nullsFirst: false });
+      return unwrap(res);
     },
   });
 }

@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Plus, Search, Sparkles, Wallet } from 'lucide-react';
 import {
   useBudgetByCategory,
   useBudgetCategories,
   useBudgetLines,
+  useBudgetLineTotals,
   usePayerOptions,
   useUpdateBudgetLine,
+  type LineTotals,
 } from './api';
 import { ApplicabilitySwitch } from './ApplicabilitySwitch';
 import { BudgetLineForm } from './BudgetLineForm';
@@ -42,10 +44,26 @@ export function BudgetPage() {
   const lines = useBudgetLines(wedding.id);
   const byCategory = useBudgetByCategory(wedding.id);
   const payers = usePayerOptions(wedding.id);
+  const totals = useBudgetLineTotals(wedding.id);
   const update = useUpdateBudgetLine(wedding.id);
   const seed = useSeedWedding();
 
   const [filters, setFilters] = useState<BudgetFilters>(EMPTY_FILTERS);
+
+  // The category rail sticks below the header, so it needs the header's real
+  // height — which changes when the description wraps or the stat hints appear.
+  // Measured rather than hardcoded so the two never drift apart.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  useLayoutEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const measure = () => setHeaderHeight(el.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   const [editing, setEditing] = useState<BudgetLineRow | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -118,19 +136,24 @@ export function BudgetPage() {
 
   return (
     <Page width="wide">
-      <PageHeader
-        title="Budget"
-        description="Forecast is worked out by the database — actual, else negotiated, else quoted, else budgeted. A line marked not applicable forecasts nothing but keeps its budget."
-        actions={
-          canEdit && (
-            <Button icon={<Plus className="size-4" />} onClick={() => setCreating(true)}>
-              Add line
-            </Button>
-          )
-        }
-      />
+      <div
+        ref={headerRef}
+        className="sticky top-0 z-20 -mx-5 border-b border-stone-200/70 bg-ivory/95 px-5 pt-1 pb-4 backdrop-blur sm:-mx-8 sm:px-8"
+      >
+        <PageHeader
+          className="mb-4"
+          title="Budget"
+          description="Forecast is worked out by the database — actual, else negotiated, else quoted, else budgeted. A line marked not applicable forecasts nothing but keeps its budget."
+          actions={
+            canEdit && (
+              <Button icon={<Plus className="size-4" />} onClick={() => setCreating(true)}>
+                Add line
+              </Button>
+            )
+          }
+        />
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
         <Stat
           label={`Budgeted (${currency})`}
           value={money(summary.budgetedMinor)}
@@ -153,12 +176,16 @@ export function BudgetPage() {
           tone={summary.varianceMinor > 0 ? 'bad' : summary.varianceMinor < 0 ? 'good' : 'flat'}
           hint={summary.varianceMinor > 0 ? 'Forecast is over budget' : 'Forecast is within budget'}
         />
+        </div>
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[15rem_minmax(0,1fr)]">
+      <div className="grid items-start gap-5 pt-5 lg:grid-cols-[15rem_minmax(0,1fr)]">
         {/* Categories double as the filter, which removes a dropdown and puts
             the money where it can be scanned. */}
-        <Card className="hidden lg:block">
+        <Card
+          className="scroll-subtle hidden lg:sticky lg:block lg:overflow-y-auto"
+          style={{ top: headerHeight + 12, maxHeight: `calc(100dvh - ${headerHeight + 36}px)` }}
+        >
           <CardBody className="pt-4">
             <button
               type="button"
@@ -273,6 +300,7 @@ export function BudgetPage() {
                     currency={currency}
                     decimals={decimals}
                     canEdit={canEdit}
+                    totals={totals.data?.get(line.id)}
                     pending={update.isPending && update.variables?.id === line.id}
                     onSelect={() => setEditing(line)}
                     onApplicability={(applicability) =>
@@ -329,6 +357,7 @@ function BudgetRow({
   decimals,
   canEdit,
   pending,
+  totals,
   onSelect,
   onApplicability,
 }: {
@@ -337,6 +366,7 @@ function BudgetRow({
   decimals: number;
   canEdit: boolean;
   pending: boolean;
+  totals?: LineTotals;
   onSelect: () => void;
   onApplicability: (next: Applicability) => void;
 }) {
@@ -359,6 +389,20 @@ function BudgetRow({
           {line.code && <span className="font-mono text-[11px]">{line.code}</span>}
           {line.payer && <span>· {line.payer}</span>}
           {line.status === 'completed' && <Badge tone="good">done</Badge>}
+          {/* Overpaying used to be invisible: outstanding floors at zero, so the
+              excess showed up nowhere at all. */}
+          {totals && totals.overpaidMinor > 0 && (
+            <Badge tone="stop">
+              overpaid by {formatMinorAsMajor(totals.overpaidMinor, decimals)}
+            </Badge>
+          )}
+          {totals && totals.paidMinor > 0 && totals.overpaidMinor === 0 && (
+            <Badge tone={totals.outstandingMinor === 0 ? 'good' : 'neutral'}>
+              {totals.outstandingMinor === 0
+                ? 'settled'
+                : `${formatMinorAsMajor(totals.paidMinor, decimals)} paid`}
+            </Badge>
+          )}
         </p>
       </button>
 

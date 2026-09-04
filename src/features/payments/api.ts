@@ -71,6 +71,10 @@ function useInvalidateMoney(weddingId: string) {
     void qc.invalidateQueries({ queryKey: paymentKeys.list(weddingId) });
     void qc.invalidateQueries({ queryKey: budgetKeys.lines(weddingId) });
     void qc.invalidateQueries({ queryKey: budgetKeys.byCategory(weddingId) });
+    // Paid, outstanding and overpaid per line all move with a payment.
+    void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-totals'] });
+    void qc.invalidateQueries({ queryKey: ['budget', weddingId, 'line-payments'] });
+    void qc.invalidateQueries({ queryKey: ['financials', weddingId] });
   };
 }
 

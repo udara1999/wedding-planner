@@ -165,8 +165,9 @@ export function SetupPage() {
 
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="grid items-start gap-5 lg:grid-cols-2"
+        className="space-y-5"
       >
+        <div className="lg:columns-2 lg:gap-5 [&>*]:mb-5 [&>*]:break-inside-avoid">
         <Section title="The couple &amp; the day">
           <Two>
             <Field label="Bride's name">
@@ -314,8 +315,10 @@ export function SetupPage() {
           </Two>
         </Section>
 
+        </div>
+
         {canEdit && (
-          <div className="flex items-center gap-3 lg:col-span-2">
+          <div className="flex items-center gap-3">
             <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
               {update.isPending ? 'Saving…' : 'Save changes'}
             </Button>

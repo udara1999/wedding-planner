@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Trash2 } from 'lucide-react';
 import { useCreateBudgetLine, useDeleteBudgetLine, useUpdateBudgetLine } from './api';
 import { ApplicabilitySwitch } from './ApplicabilitySwitch';
+import { LinePayments } from './LinePayments';
 import { currencyDecimals, formatMinorAsMajor, parseMajorToMinor } from '../../lib/units';
 import type { Applicability, BudgetCategoryRow, BudgetLineRow, TaskStatus } from '../../types/db';
 import { Button, Field, InlineError, Input, Select, Textarea } from '../../components/ui';
@@ -242,6 +243,19 @@ export function BudgetLineForm({
           {applicability === 'not_applicable'
             ? ' — zero while this line is not applicable.'
             : ' — actual, else negotiated, else quoted, else budgeted. Worked out by the database.'}
+        </div>
+      )}
+
+      {line && (
+        <div>
+          <p className="mb-1.5 text-[13px] font-medium text-stone-700">Payments against this line</p>
+          <LinePayments
+            weddingId={weddingId}
+            budgetLineId={line.id}
+            forecastMinor={line.forecast_minor}
+            currency={currency}
+            decimals={decimals}
+          />
         </div>
       )}
 

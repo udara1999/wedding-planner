@@ -772,6 +772,8 @@ export type Database = {
           line_count: number | null
           not_applicable_count: number | null
           outstanding_minor: number | null
+          overpaid_count: number | null
+          overpaid_minor: number | null
           paid_minor: number | null
           sort_order: number | null
           variance_minor: number | null
@@ -808,6 +810,7 @@ export type Database = {
           negotiated_minor: number | null
           notes: string | null
           outstanding_minor: number | null
+          overpaid_minor: number | null
           paid_minor: number | null
           payer: string | null
           quoted_minor: number | null
@@ -971,6 +974,7 @@ export type Database = {
           negotiated_minor: number | null
           net_cost_after_gifts_minor: number | null
           outstanding_minor: number | null
+          overpaid_minor: number | null
           paid_minor: number | null
           quoted_minor: number | null
           refundable_deposits_minor: number | null
